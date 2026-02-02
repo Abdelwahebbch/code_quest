@@ -1,16 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/views/auth/login_screen.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
+import '../../services/appwrite_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AppwriteService>(context);
+    final user = authService.user;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Profile"),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await authService.logout();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (context) => const LoginScreen()),
+                    (route) => false);
+              }
+            },
+          )
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -22,9 +42,13 @@ class ProfileScreen extends StatelessWidget {
               child: Icon(Icons.person, size: 60, color: Colors.white),
             ),
             const SizedBox(height: 16),
-            const Text(
-              "DevExplorer",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              user?.name ?? "Guest",
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              user?.email ?? "",
+              style: const TextStyle(color: Colors.grey),
             ),
             const Text(
               "Level 4 Software Engineer",
@@ -60,7 +84,8 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildStatItem(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(value,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
       ],
     );
@@ -99,14 +124,19 @@ class ProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: (badges[index]['color'] as Color).withOpacity(0.1),
+                color: (badges[index]['color'] as Color).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
-                border: Border.all(color: (badges[index]['color'] as Color).withOpacity(0.5)),
+                border: Border.all(
+                    color: (badges[index]['color'] as Color)
+                        .withValues(alpha: 0.5)),
               ),
-              child: Icon(badges[index]['icon'] as IconData, color: badges[index]['color'] as Color, size: 24),
+              child: Icon(badges[index]['icon'] as IconData,
+                  color: badges[index]['color'] as Color, size: 24),
             ),
             const SizedBox(height: 4),
-            Text(badges[index]['name'] as String, style: const TextStyle(fontSize: 8), textAlign: TextAlign.center),
+            Text(badges[index]['name'] as String,
+                style: const TextStyle(fontSize: 8),
+                textAlign: TextAlign.center),
           ],
         );
       },
@@ -146,7 +176,8 @@ class ProfileScreen extends StatelessWidget {
           LinearProgressIndicator(
             value: progress,
             backgroundColor: Colors.white10,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
           ),
         ],
       ),
