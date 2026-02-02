@@ -8,7 +8,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="appwrite-callback-6971d6ab00372b8101e8" />
+                <data android:scheme="appwrite-callback-697295e70021593c3438" />
             </intent-filter>
         </activity>
         <activity

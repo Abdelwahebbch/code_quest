@@ -1,4 +1,4 @@
-name: ai_tutor_frontend
+name: pfe_test
 description: A gamified AI tutor for software engineering.
 version: 1.0.0+1
 
@@ -10,6 +10,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   provider: ^6.1.5+1
+  appwrite: 17.0.0
   # http: ^1.1.0
 
 dev_dependencies:
