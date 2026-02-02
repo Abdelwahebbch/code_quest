@@ -10,9 +10,12 @@ class HelpCenterScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildFaqItem("How do I earn points?", "You earn points by completing missions and challenges. The harder the mission, the more points you get!"),
-          _buildFaqItem("What are badges?", "Badges are special achievements you unlock by reaching specific milestones in your learning journey."),
-          _buildFaqItem("How does the AI Tutor work?", "The AI Tutor uses advanced language models to provide hints and explanations tailored to your current mission."),
+          _buildFaqItem("How do I earn points?",
+              "You earn points by completing missions and challenges. The harder the mission, the more points you get!"),
+          _buildFaqItem("What are badges?",
+              "Badges are special achievements you unlock by reaching specific milestones in your learning journey."),
+          _buildFaqItem("How does the AI Tutor work?",
+              "The AI Tutor uses advanced language models to provide hints and explanations tailored to your current mission."),
         ],
       ),
     );
@@ -20,8 +23,11 @@ class HelpCenterScreen extends StatelessWidget {
 
   Widget _buildFaqItem(String question, String answer) {
     return ExpansionTile(
-      title: Text(question, style: const TextStyle(fontWeight: FontWeight.bold)),
-      children: [Padding(padding: const EdgeInsets.all(16), child: Text(answer))],
+      title:
+          Text(question, style: const TextStyle(fontWeight: FontWeight.bold)),
+      children: [
+        Padding(padding: const EdgeInsets.all(16), child: Text(answer))
+      ],
     );
   }
 }
@@ -34,7 +40,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Privacy Policy")),
       body: const SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24),
         child: Text(
           "Your privacy is important to us. This policy explains how we collect, use, and protect your data...\n\n"
           "1. Data Collection: We collect information you provide during signup and your learning progress.\n\n"

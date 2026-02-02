@@ -16,7 +16,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   final List<Map<String, dynamic>> languages = [
     {'name': 'Python', 'icon': Icons.code, 'color': Colors.blue},
     {'name': 'JavaScript', 'icon': Icons.javascript, 'color': Colors.yellow},
-    {'name': 'Dart', 'icon': Icons.computer, 'color': Colors.cyan},
+    {'name': 'Dart', 'icon': Icons.add, 'color': Colors.cyan},
     {'name': 'Java', 'icon': Icons.coffee, 'color': Colors.orange},
     {'name': 'C++', 'icon': Icons.terminal, 'color': Colors.blueAccent},
   ];
@@ -32,12 +32,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
             children: [
               const SizedBox(height: 40),
               Text(
-                "Choose your path",
+                "Let's begin !",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 8),
               const Text(
-                "Select the language you want to master first.",
+                "Select the language you familiar with",
                 style: TextStyle(color: Colors.grey),
               ),
               const SizedBox(height: 32),
@@ -66,9 +66,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                               : AppTheme.cardColor,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: isSelected
-                                ? Colors.white
-                                : Colors.transparent,
+                            color:
+                                isSelected ? Colors.white : Colors.transparent,
                             width: 2,
                           ),
                         ),
@@ -85,9 +84,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                               lang['name'],
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: isSelected
-                                    ? Colors.white
-                                    : Colors.white70,
+                                color:
+                                    isSelected ? Colors.white : Colors.white70,
                               ),
                             ),
                           ],
@@ -107,8 +105,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const DashboardScreen(),
-                            ),
+                                builder: (context) => const DashboardScreen()),
                           );
                         },
                   style: ElevatedButton.styleFrom(

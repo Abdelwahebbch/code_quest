@@ -37,8 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const EditProfileScreen(),
-                ),
+                    builder: (context) => const EditProfileScreen()),
               );
             },
           ),
@@ -54,13 +53,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text("Push Notifications"),
             subtitle: const Text("Get mission reminders"),
             value: _notificationsEnabled,
-            activeColor: AppTheme.primaryColor,
+            activeThumbColor: AppTheme.primaryColor,
             onChanged: (val) => setState(() => _notificationsEnabled = val),
           ),
           SwitchListTile(
             title: const Text("Dark Mode"),
             value: isDark,
-            activeColor: AppTheme.primaryColor,
+            activeThumbColor: AppTheme.primaryColor,
             onChanged: (val) => themeManager.toggleTheme(val),
           ),
           ListTile(
@@ -76,11 +75,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: "Help Center",
             onTap: () {
               Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HelpCenterScreen(),
-                ),
-              );
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const HelpCenterScreen()));
             },
           ),
           _buildSettingTile(
@@ -88,11 +85,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: "Privacy Policy",
             onTap: () {
               Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PrivacyPolicyScreen(),
-                ),
-              );
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const PrivacyPolicyScreen()));
             },
           ),
           const SizedBox(height: 40),
@@ -104,16 +99,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.withOpacity(0.8),
-            ),
+                backgroundColor: Colors.red.withValues(alpha: 0.8)),
             child: const Text("LOGOUT"),
           ),
           const SizedBox(height: 20),
           const Center(
-            child: Text(
-              "Version 1.0.0",
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ),
+            child: Text("Version 1.0.0",
+                style: TextStyle(color: Colors.grey, fontSize: 12)),
           ),
         ],
       ),
@@ -126,20 +118,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Text(
         title,
         style: const TextStyle(
-          color: AppTheme.accentColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
+            color: AppTheme.accentColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 12),
       ),
     );
   }
 
-  Widget _buildSettingTile({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildSettingTile(
+      {required IconData icon,
+      required String title,
+      String? subtitle,
+      required VoidCallback onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.white70),
       title: Text(title),
@@ -158,15 +148,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: ['Beginner', 'Intermediate', 'Advanced']
-            .map(
-              (level) => ListTile(
-                title: Text(level),
-                onTap: () {
-                  setState(() => _selectedDifficulty = level);
-                  Navigator.pop(context);
-                },
-              ),
-            )
+            .map((level) => ListTile(
+                  title: Text(level),
+                  onTap: () {
+                    setState(() => _selectedDifficulty = level);
+                    Navigator.pop(context);
+                  },
+                ))
             .toList(),
       ),
     );

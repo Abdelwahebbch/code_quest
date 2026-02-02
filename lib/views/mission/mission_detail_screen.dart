@@ -43,9 +43,14 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("MISSION OBJECTIVE", style: TextStyle(color: AppTheme.accentColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                  const Text("MISSION OBJECTIVE",
+                      style: TextStyle(
+                          color: AppTheme.accentColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12)),
                   const SizedBox(height: 8),
-                  Text(widget.mission.description, style: const TextStyle(fontSize: 16)),
+                  Text(widget.mission.description,
+                      style: const TextStyle(fontSize: 16)),
                 ],
               ),
             ),
@@ -62,7 +67,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               child: TextField(
                 controller: _codeController,
                 maxLines: null,
-                style: const TextStyle(fontFamily: 'monospace', color: Colors.greenAccent),
+                style: const TextStyle(
+                    fontFamily: 'monospace', color: Colors.greenAccent),
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.all(16),
                   border: InputBorder.none,
@@ -111,7 +117,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             color: AppTheme.backgroundColor,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          child: AITutorChat(mission: widget.mission, scrollController: controller),
+          child: AITutorChat(
+              mission: widget.mission, scrollController: controller),
         ),
       ),
     );
@@ -119,15 +126,16 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   void _submitSolution() {
     // Logic to check solution
-    bool isCorrect = _codeController.text.trim() == widget.mission.solution.trim();
-    
+    bool isCorrect =
+        _codeController.text.trim() == widget.mission.solution.trim();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isCorrect ? "Mission Accomplished!" : "Not Quite..."),
-        content: Text(isCorrect 
-          ? "Great job! You've earned ${widget.mission.points} XP." 
-          : "The code didn't pass the tests. Try asking the AI Tutor for a hint!"),
+        content: Text(isCorrect
+            ? "Great job! You've earned ${widget.mission.points} XP."
+            : "The code didn't pass the tests. Try asking the AI Tutor for a hint!"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

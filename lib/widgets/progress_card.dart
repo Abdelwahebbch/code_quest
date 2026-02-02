@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/mission_model.dart';
+import '../../models/user_progress_model.dart';
 import '../theme/app_theme.dart';
 
 class ProgressCard extends StatelessWidget {
@@ -16,7 +16,7 @@ class ProgressCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.3),
+            color: AppTheme.primaryColor.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -30,17 +30,25 @@ class ProgressCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Level", style: TextStyle(color: Colors.white70, fontSize: 14)),
-                  Text("${user.level}", style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                  const Text("Level",
+                      style: TextStyle(color: Colors.white70, fontSize: 14)),
+                  Text("${user.level}",
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold)),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text("${user.totalPoints} pts", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text("${user.totalPoints} pts",
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -49,7 +57,7 @@ class ProgressCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: user.progressToNextLevel,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
               minHeight: 10,
             ),
@@ -58,9 +66,11 @@ class ProgressCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("${(user.progressToNextLevel * 100).toInt()}% to Level ${user.level + 1}", 
-                style: const TextStyle(color: Colors.white70, fontSize: 12)),
-              const Text("Next Badge: Code Ninja", style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text(
+                  "${(user.progressToNextLevel * 100).toInt()}% to Level ${user.level + 1}",
+                  style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              const Text("Next Badge: Code Ninja",
+                  style: TextStyle(color: Colors.white70, fontSize: 12)),
             ],
           ),
         ],

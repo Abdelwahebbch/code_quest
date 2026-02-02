@@ -6,7 +6,8 @@ class AITutorChat extends StatefulWidget {
   final Mission mission;
   final ScrollController scrollController;
 
-  const AITutorChat({super.key, required this.mission, required this.scrollController});
+  const AITutorChat(
+      {super.key, required this.mission, required this.scrollController});
 
   @override
   State<AITutorChat> createState() => _AITutorChatState();
@@ -14,7 +15,11 @@ class AITutorChat extends StatefulWidget {
 
 class _AITutorChatState extends State<AITutorChat> {
   final List<Map<String, String>> _messages = [
-    {"role": "ai", "content": "Hello! I'm your AI Tutor. Stuck on this mission? I can give you a hint or explain the concepts involved."}
+    {
+      "role": "ai",
+      "content":
+          "Hello! I'm your AI Tutor. Stuck on this mission? I can give you a hint or explain the concepts involved."
+    }
   ];
   final TextEditingController _messageController = TextEditingController();
 
@@ -24,17 +29,20 @@ class _AITutorChatState extends State<AITutorChat> {
       children: [
         Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppTheme.cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Row(
             children: [
               const Icon(Icons.psychology, color: AppTheme.accentColor),
               const SizedBox(width: 12),
-              const Text("AI Tutor", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              const Text("AI Tutor",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               const Spacer(),
-              IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+              IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context)),
             ],
           ),
         ),
@@ -51,15 +59,19 @@ class _AITutorChatState extends State<AITutorChat> {
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
-                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+                  constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.7),
                   decoration: BoxDecoration(
                     color: isAI ? AppTheme.cardColor : AppTheme.primaryColor,
                     borderRadius: BorderRadius.circular(15).copyWith(
-                      bottomLeft: isAI ? Radius.zero : const Radius.circular(15),
-                      bottomRight: isAI ? const Radius.circular(15) : Radius.zero,
+                      bottomLeft:
+                          isAI ? Radius.zero : const Radius.circular(15),
+                      bottomRight:
+                          isAI ? const Radius.circular(15) : Radius.zero,
                     ),
                   ),
-                  child: Text(msg["content"]!, style: const TextStyle(color: Colors.white)),
+                  child: Text(msg["content"]!,
+                      style: const TextStyle(color: Colors.white)),
                 ),
               );
             },
@@ -76,8 +88,11 @@ class _AITutorChatState extends State<AITutorChat> {
                     hintText: "Ask for a hint...",
                     filled: true,
                     fillColor: AppTheme.cardColor,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                   ),
                 ),
               ),
@@ -96,11 +111,15 @@ class _AITutorChatState extends State<AITutorChat> {
 
   void _sendMessage() {
     if (_messageController.text.isEmpty) return;
-    
+
     setState(() {
       _messages.add({"role": "user", "content": _messageController.text});
       // Mock AI response
-      _messages.add({"role": "ai", "content": "That's a great question! In software engineering, this concept is called encapsulation. Try looking at how the variables are accessed..."});
+      _messages.add({
+        "role": "ai",
+        "content":
+            "That's a great question! In software engineering, this concept is called encapsulation. Try looking at how the variables are accessed..."
+      });
     });
     _messageController.clear();
   }
