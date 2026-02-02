@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'views/auth/login_screen.dart';
+import 'services/appwrite_service.dart';
+import 'views/onboarding/language_selection_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeManager(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeManager()),
+        ChangeNotifierProvider(create: (_) => AppwriteService()),
+      ],
       child: const AITutorApp(),
     ),
   );
@@ -18,14 +24,17 @@ class AITutorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
-    
+    final authService = Provider.of<AppwriteService>(context);
+
     return MaterialApp(
       title: 'AI Tutor: Software Engineering',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeManager.themeMode,
-      home: const LoginScreen(),
+      home: authService.user != null
+          ? const LanguageSelectionScreen()
+          : const LoginScreen(),
     );
   }
 }
