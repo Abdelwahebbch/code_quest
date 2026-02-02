@@ -20,15 +20,12 @@ class AppwriteService extends ChangeNotifier {
 
   void _init() {
     client
-        .setEndpoint(
-            'https://fra.cloud.appwrite.io/v1')
+        .setEndpoint('https://fra.cloud.appwrite.io/v1')
         .setProject('697295e70021593c3438')
-        .setSelfSigned(
-            status:
-                true);
+        .setSelfSigned(status: true);
 
     account = Account(client);
-    databases = Databases(client);
+    databases = Databases(client); 
     _checkSession();
   }
 
@@ -90,7 +87,8 @@ class AppwriteService extends ChangeNotifier {
 
   Future<List<Mission>> getMissions() async {
     try {
-      // TODO: Replace with your Database and Collection IDs
+      // TODO: a3mel talla 3la documentation mte3 appwrite
+      //https://appwrite.io/docs/products/databases/quick-start
       final response = await databases.listDocuments(
         databaseId: '6972adad002e2ba515f2',
         collectionId: 'missions',
