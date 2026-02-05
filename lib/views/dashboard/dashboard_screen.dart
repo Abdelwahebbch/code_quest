@@ -56,10 +56,10 @@ class _DashboardHome extends StatefulWidget {
 }
 
 class _DashboardHomeState extends State<_DashboardHome> {
+  // ignore: unused_field
   late Future<List<Mission>> _missionsFuture;
   @override
-  void initState()  {
-
+  void initState() {
     super.initState();
     final authservice = Provider.of<AppwriteService>(context, listen: false);
     _missionsFuture = authservice.getMissions();
@@ -67,12 +67,72 @@ class _DashboardHomeState extends State<_DashboardHome> {
 
   @override
   Widget build(BuildContext context) {
+    //Mock Missions
+    final missions = [
+      Mission(
+        id: "1",
+        title: "The Null Pointer Mystery",
+        description:
+            "Find and fix the null pointer exception in the login logic.",
+        type: MissionType.debug,
+        points: 150,
+        difficulty: 2,
+        initialCode: "void login(User? user) { print(user.name); }",
+        solution:
+            "void login(User? user) { if(user != null) print(user.name); }",
+      ),
+      Mission(
+        id: "2",
+        title: "Data Types Quiz",
+        description:
+            "Which of the following is an immutable data type in Python?",
+        type: MissionType.singleChoice,
+        points: 50,
+        difficulty: 1,
+        options: ["List", "Dictionary", "Tuple", "Set"],
+        solution: "Tuple",
+      ),
+      Mission(
+        id: "3",
+        title: "SOLID Principles",
+        description: "Select all principles that belong to SOLID.",
+        type: MissionType.multipleChoice,
+        points: 100,
+        difficulty: 3,
+        options: [
+          "Single Responsibility",
+          "Open-Closed",
+          "Encapsulation",
+          "Liskov Substitution"
+        ],
+        solution: "Single Responsibility,Open-Closed,Liskov Substitution",
+      ),
+      Mission(
+        id: "4",
+        title: "Algorithm Sequencing",
+        description: "Order the steps of a Binary Search algorithm correctly.",
+        type: MissionType.ordering,
+        points: 150,
+        difficulty: 4,
+        options: [
+          "Find the middle element",
+          "Compare with target",
+          "Divide the range",
+          "Repeat until found"
+        ],
+        correctOrder: [
+          "Find the middle element",
+          "Compare with target",
+          "Divide the range",
+          "Repeat until found"
+        ],
+      ),
+    ];
     final authService = Provider.of<AppwriteService>(context);
     final appwriteUser = authService.user;
 
-    // Mock data for demonstration
     final user = UserProgress(
-        username: appwriteUser?.name ?? "DevExplorer",
+        username: appwriteUser?.name ?? "AlooAloo",
         level: 4,
         experience: 3450,
         totalPoints: 1200,
@@ -127,32 +187,40 @@ class _DashboardHomeState extends State<_DashboardHome> {
                 ),
               ),
             ),
-            FutureBuilder<List<Mission>>(
-              future: _missionsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SliverToBoxAdapter(
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                } else if (snapshot.hasError) {
-                  return SliverToBoxAdapter(
-                    child: Center(child: Text("Error: ${snapshot.error}")),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const SliverToBoxAdapter(
-                    child: Center(child: Text("No missions available.")),
-                  );
-                }
-
-                final missions = snapshot.data!;
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => MissionTile(mission: missions[index]),
-                    childCount: missions.length,
-                  ),
-                );
-              },
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => MissionTile(mission: missions[index]),
+                childCount: missions.length,
+              ),
             ),
+            //Pour afficher le mission depuis DataBase
+
+            // FutureBuilder<List<Mission>>(
+            //   future: _missionsFuture,
+            //   builder: (context, snapshot) {
+            //     if (snapshot.connectionState == ConnectionState.waiting) {
+            //       return const SliverToBoxAdapter(
+            //         child: Center(child: CircularProgressIndicator()),
+            //       );
+            //     } else if (snapshot.hasError) {
+            //       return SliverToBoxAdapter(
+            //         child: Center(child: Text("Error: ${snapshot.error}")),
+            //       );
+            //     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            //       return const SliverToBoxAdapter(
+            //         child: Center(child: Text("No missions available.")),
+            //       );
+            //     }
+
+            //     final missions = snapshot.data!;
+            //     return SliverList(
+            //       delegate: SliverChildBuilderDelegate(
+            //         (context, index) => MissionTile(mission: missions[index]),
+            //         childCount: missions.length,
+            //       ),
+            //     );
+            //   },
+            // ),
           ],
         ),
       ),
