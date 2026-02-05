@@ -62,6 +62,12 @@ class MissionTile extends StatelessWidget {
         return Icons.code;
       case MissionType.test:
         return Icons.checklist;
+      case MissionType.multipleChoice:
+        return Icons.rule;
+      case MissionType.singleChoice:
+        return Icons.quiz;
+      case MissionType.ordering:
+        return Icons.reorder;
     }
   }
 
