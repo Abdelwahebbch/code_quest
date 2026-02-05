@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/views/onboarding/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'views/auth/login_screen.dart';
@@ -24,7 +25,6 @@ class AITutorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
-    final authService = Provider.of<AppwriteService>(context);
 
     return MaterialApp(
       title: 'AI Tutor: Software Engineering',
@@ -32,9 +32,7 @@ class AITutorApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeManager.themeMode,
-      home: authService.user != null
-          ? const LanguageSelectionScreen()
-          : const LoginScreen(),
+      home: const SplashScreen()
     );
   }
 }
