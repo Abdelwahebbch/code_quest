@@ -108,6 +108,51 @@ class _DashboardHomeState extends State<_DashboardHome> {
         solution: "Single Responsibility,Open-Closed,Liskov Substitution",
       ),
       Mission(
+        id: "3",
+        title: "SOLID Principles",
+        description: "Select all principles that belong to SOLID.",
+        type: MissionType.multipleChoice,
+        points: 100,
+        difficulty: 3,
+        options: [
+          "Single Responsibility",
+          "Open-Closed",
+          "Encapsulation",
+          "Liskov Substitution"
+        ],
+        solution: "Single Responsibility,Open-Closed,Liskov Substitution",
+      ),
+      Mission(
+        id: "3",
+        title: "SOLID Principles",
+        description: "Select all principles that belong to SOLID.",
+        type: MissionType.multipleChoice,
+        points: 100,
+        difficulty: 3,
+        options: [
+          "Single Responsibility",
+          "Open-Closed",
+          "Encapsulation",
+          "Liskov Substitution"
+        ],
+        solution: "Single Responsibility,Open-Closed,Liskov Substitution",
+      ),
+      Mission(
+        id: "3",
+        title: "SOLID Principles",
+        description: "Select all principles that belong to SOLID.",
+        type: MissionType.multipleChoice,
+        points: 100,
+        difficulty: 3,
+        options: [
+          "Single Responsibility",
+          "Open-Closed",
+          "Encapsulation",
+          "Liskov Substitution"
+        ],
+        solution: "Single Responsibility,Open-Closed,Liskov Substitution",
+      ),
+      Mission(
         id: "4",
         title: "Algorithm Sequencing",
         description: "Order the steps of a Binary Search algorithm correctly.",
@@ -140,87 +185,59 @@ class _DashboardHomeState extends State<_DashboardHome> {
 
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Welcome back,",
-                                style: Theme.of(context).textTheme.bodyMedium),
-                            Text(user.username,
-                                style:
-                                    Theme.of(context).textTheme.headlineMedium),
-                          ],
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Welcome back,",
+                              style: Theme.of(context).textTheme.bodyMedium),
+                          Text(user.username,
+                              style:
+                                  Theme.of(context).textTheme.headlineMedium),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ProfileScreen()),
+                          );
+                        },
+                        child: const CircleAvatar(
+                          radius: 25,
+                          backgroundColor: AppTheme.primaryColor,
+                          child: Icon(Icons.person, color: Colors.white),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const ProfileScreen()),
-                            );
-                          },
-                          child: const CircleAvatar(
-                            radius: 25,
-                            backgroundColor: AppTheme.primaryColor,
-                            child: Icon(Icons.person, color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-                    ProgressCard(user: user),
-                    const SizedBox(height: 30),
-                    Text("Active Missions",
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 15),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                  ProgressCard(user: user),
+                  const SizedBox(height: 30),
+                  Text("Active Missions",
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 15),
+                ],
               ),
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => MissionTile(mission: missions[index]),
-                childCount: missions.length,
+            Expanded(
+              child: ListView.builder(
+                itemCount: missions.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return MissionTile(mission: missions[index]);
+                },
               ),
-            ),
-            //Pour afficher le mission depuis DataBase
-
-            // FutureBuilder<List<Mission>>(
-            //   future: _missionsFuture,
-            //   builder: (context, snapshot) {
-            //     if (snapshot.connectionState == ConnectionState.waiting) {
-            //       return const SliverToBoxAdapter(
-            //         child: Center(child: CircularProgressIndicator()),
-            //       );
-            //     } else if (snapshot.hasError) {
-            //       return SliverToBoxAdapter(
-            //         child: Center(child: Text("Error: ${snapshot.error}")),
-            //       );
-            //     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            //       return const SliverToBoxAdapter(
-            //         child: Center(child: Text("No missions available.")),
-            //       );
-            //     }
-
-            //     final missions = snapshot.data!;
-            //     return SliverList(
-            //       delegate: SliverChildBuilderDelegate(
-            //         (context, index) => MissionTile(mission: missions[index]),
-            //         childCount: missions.length,
-            //       ),
-            //     );
-            //   },
-            // ),
+            )
           ],
         ),
       ),
