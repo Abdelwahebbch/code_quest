@@ -51,7 +51,7 @@ class ProfileScreen extends StatelessWidget {
               style: const TextStyle(color: Colors.grey),
             ),
             const Text(
-              "Level 4 Software Engineer",
+              "Student",
               style: TextStyle(color: AppTheme.accentColor),
             ),
             const SizedBox(height: 32),
