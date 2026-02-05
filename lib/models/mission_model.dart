@@ -1,4 +1,11 @@
-enum MissionType { debug, complete, test }
+enum MissionType {
+  debug,
+  complete,
+  test,
+  singleChoice,
+  multipleChoice,
+  ordering
+}
 
 class Mission {
   final String id;
@@ -7,8 +14,10 @@ class Mission {
   final MissionType type;
   final int points;
   final int difficulty; // 1-5
-  final String initialCode;
-  final String solution;
+  final String? initialCode;
+  final String? solution;
+  final List<String>? options;
+  final List<String>? correctOrder;
   bool isCompleted;
 
   Mission({
@@ -18,8 +27,10 @@ class Mission {
     required this.type,
     required this.points,
     required this.difficulty,
-    required this.initialCode,
-    required this.solution,
+    this.initialCode,
+    this.solution,
+    this.options, 
+    this.correctOrder, 
     this.isCompleted = false,
   });
 }
