@@ -13,6 +13,8 @@ class AppwriteService extends ChangeNotifier {
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+  // ignore: unused_field
+  final bool isFirstLogin = false;
 
   AppwriteService() {
     _init();
@@ -25,11 +27,11 @@ class AppwriteService extends ChangeNotifier {
         .setSelfSigned(status: true);
 
     account = Account(client);
-    databases = Databases(client); 
-    _checkSession();
+    databases = Databases(client);
+    checkSession();
   }
 
-  Future<void> _checkSession() async {
+  Future<void> checkSession() async {
     try {
       _user = await account.get();
       notifyListeners();
@@ -113,13 +115,13 @@ class AppwriteService extends ChangeNotifier {
       return [
         Mission(
             id: "5",
-            title: "Fer8a",
-            description: "Aloo Aloo",
+            title: "Test Mission",
+            description: "Empty Mission",
             type: MissionType.debug,
             points: 200,
             difficulty: 5,
-            initialCode: "aaa",
-            solution: "adzad")
+            initialCode: "print(\"FSG\")",
+            solution: "print(\"FSG\");")
       ]; // TODO : rajja3 lista fer8a or handle error
     }
   }
