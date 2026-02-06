@@ -71,9 +71,9 @@ class _DashboardHomeState extends State<_DashboardHome> {
 
     final user = UserProgress(
         username: appwriteUser?.name ?? "AlooAloo",
-        level: 4,
-        experience: 3450,
-        totalPoints: 1200,
+        level: 1,
+        experience: 1750,
+        totalPoints: 750,
         progLanguage: 'Python');
 
     return Scaffold(

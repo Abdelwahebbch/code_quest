@@ -45,13 +45,32 @@ class AppwriteService extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      await account.create(
+      final newuser = await account.create(
         userId: ID.unique(),
         email: email,
         password: password,
         name: name,
       );
       await login(email, password);
+      await account.get();
+      await databases.createDocument(
+        databaseId: '6972adad002e2ba515f2',
+        collectionId: 'user_profiles',
+        documentId: ID.unique(),
+        data: {
+          'earnedBadges': "Aloo",
+          'experience': 1000,
+          'level': 1,
+          'userId': newuser.$id,
+          'totalPoints': 1000,
+          'progLanguage': 'Java',
+          'xp': 0,
+        },
+        permissions: [
+          Permission.read(Role.user(newuser.$id)),
+          Permission.update(Role.user(newuser.$id)),
+        ],
+      );
     } catch (e) {
       _isLoading = false;
       notifyListeners();
@@ -90,8 +109,7 @@ class AppwriteService extends ChangeNotifier {
   Future<List<Mission>> getMissions() async {
     try {
       final response = await databases.listDocuments(
-          databaseId: "6972adad002e2ba515f2",
-          collectionId: "missions");
+          databaseId: "6972adad002e2ba515f2", collectionId: "missions");
 
       return response.documents.map((doc) {
         return Mission(
@@ -103,7 +121,7 @@ class AppwriteService extends ChangeNotifier {
           points: doc.data['points'],
           difficulty: doc.data['difficulty'],
           initialCode: doc.data['initialCode'],
-          options: doc.data['options'] ,
+          options: doc.data['options'],
           correctOrder: doc.data['correctOrder'],
           solution: doc.data['solution'],
           isCompleted: doc.data['isCompleted'] ?? false,
@@ -111,17 +129,7 @@ class AppwriteService extends ChangeNotifier {
       }).toList();
     } catch (e) {
       debugPrint("Error fetching missions: $e");
-      return [
-        Mission(
-            id: "5",
-            title: "Test Mission",
-            description: "Empty Mission",
-            type: MissionType.debug,
-            points: 200,
-            difficulty: 5,
-            initialCode: "print(\"FSG\")",
-            solution: "print(\"FSG\");")
-      ]; // TODO : rajja3 lista fer8a or handle error
+      rethrow; 
     }
   }
 }
