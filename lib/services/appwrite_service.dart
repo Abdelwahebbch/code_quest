@@ -103,6 +103,8 @@ class AppwriteService extends ChangeNotifier {
           points: doc.data['points'],
           difficulty: doc.data['difficulty'],
           initialCode: doc.data['initialCode'],
+          options: doc.data['options'] ,
+          correctOrder: doc.data['correctOrder'],
           solution: doc.data['solution'],
           isCompleted: doc.data['isCompleted'] ?? false,
         );
