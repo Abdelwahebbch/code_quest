@@ -86,6 +86,26 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
+  
+  Future<List<String>> getBadges() async{
+    try {
+      final response = await databases.listDocuments(
+          databaseId: "6972adad002e2ba515f2",
+          collectionId: "user_profiles",
+          queries: [
+        Query.equal('userId', _user?.$id),
+        ],
+        );
+        if(response.documents[0].data["earnedBadges"] != null){
+          return List<String>.from(response.documents[0].data["earnedBadges"] )  ;
+        }
+        else{
+        return [];
+        }
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   Future<List<Mission>> getMissions() async {
     try {
