@@ -1,6 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter/material.dart';
+import 'package:pfe_test/models/user_progress_model.dart';
 import '../models/mission_model.dart';
 
 class AppwriteService extends ChangeNotifier {
@@ -15,6 +16,8 @@ class AppwriteService extends ChangeNotifier {
   bool get isLoading => _isLoading;
   // ignore: unused_field
   final bool isFirstLogin = false;
+
+  late UserProgress progress;
 
   AppwriteService() {
     _init();
@@ -34,6 +37,7 @@ class AppwriteService extends ChangeNotifier {
   Future<void> checkSession() async {
     try {
       _user = await account.get();
+      await getUserProgress();
       notifyListeners();
     } catch (e) {
       _user = null;
@@ -41,36 +45,46 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
+  Future<void> createNewRow() async {
+    try {
+      models.User user = await account.get();
+      await databases.createDocument(
+        databaseId: '6972adad002e2ba515f2',
+        collectionId: 'user_profiles',
+        documentId: ID.unique(),
+        data: {
+          'experience': 0,
+          'level': 1,
+          'totalPoints': 0,
+          'progLanguage': 'Java',
+          'earnedBadges': [],
+          'userId': user.$id,
+          'bio': "",
+          'imagePath': "",
+        },
+        permissions: [
+          Permission.read(Role.user(user.$id)),
+          Permission.update(Role.user(user.$id)),
+        ],
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> signup(String email, String password, String name) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final newuser = await account.create(
+      await account.create(
         userId: ID.unique(),
         email: email,
         password: password,
         name: name,
       );
       await login(email, password);
-      await account.get();
-      await databases.createDocument(
-        databaseId: '6972adad002e2ba515f2',
-        collectionId: 'user_profiles',
-        documentId: ID.unique(),
-        data: {
-          'earnedBadges': "Aloo",
-          'experience': 1000,
-          'level': 1,
-          'userId': newuser.$id,
-          'totalPoints': 1000,
-          'progLanguage': 'Java',
-          'xp': 0,
-        },
-        permissions: [
-          Permission.read(Role.user(newuser.$id)),
-          Permission.update(Role.user(newuser.$id)),
-        ],
-      );
+      await createNewRow();
+      await getUserProgress();
     } catch (e) {
       _isLoading = false;
       notifyListeners();
@@ -88,6 +102,7 @@ class AppwriteService extends ChangeNotifier {
       );
       _user = await account.get();
       _isLoading = false;
+      await getUserProgress();
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -105,22 +120,23 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-  
-  Future<List<String>> getBadges() async{
+
+  Future<List<String>> getBadges() async {
     try {
       final response = await databases.listDocuments(
-          databaseId: "6972adad002e2ba515f2",
-          collectionId: "user_profiles",
-          queries: [
-        Query.equal('userId', _user?.$id),
+        databaseId: "6972adad002e2ba515f2",
+        collectionId: "user_profiles",
+        queries: [
+          //TODO : baddlha bel RLS man8ir ma tab9a ta3mel fi select bech kol user tjih automatiquement el row mte3ou 5ater hakka bech twalli ta3mel id el user fkey fi el user_profile w tt3attel akther
+          //TODO : ken nbaddlouha el fonction he4i twalli tloadi el ROW el kol fi marra wa7da 5ater bech tloadi el b9iyya zeda fi fonction wa7da o5ra ywalli barcha
+          Query.equal('userId', _user?.$id),
         ],
-        );
-        if(response.documents[0].data["earnedBadges"] != null){
-          return List<String>.from(response.documents[0].data["earnedBadges"] )  ;
-        }
-        else{
+      );
+      if (response.documents[0].data["earnedBadges"] != null) {
+        return List<String>.from(response.documents[0].data["earnedBadges"]);
+      } else {
         return [];
-        }
+      }
     } catch (e) {
       rethrow;
     }
@@ -149,7 +165,38 @@ class AppwriteService extends ChangeNotifier {
       }).toList();
     } catch (e) {
       debugPrint("Error fetching missions: $e");
-      rethrow; 
+      rethrow;
+    }
+  }
+
+  Future<void> getUserProgress() async {
+    try {
+      models.User user = await account.get();
+      final response = await databases.listDocuments(
+        databaseId: "6972adad002e2ba515f2",
+        collectionId: "user_profiles",
+        queries: [
+          Query.equal('userId', user.$id),
+        ],
+      );
+
+      if (response.documents.isNotEmpty) {
+        final doc = response.documents.first;
+
+        progress = UserProgress(
+          progLanguage: doc.data["progLanguage"],
+          username: _user!.name,
+          level: doc.data["level"],
+          experience: doc.data["experience"],
+          totalPoints: doc.data["totalPoints"],
+          earnedBadges: List<String>.from(doc.data["earnedBadges"] ?? []),
+        );
+
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Aloo Alooo Error $e");
+      rethrow;
     }
   }
 }

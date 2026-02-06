@@ -69,12 +69,7 @@ class _DashboardHomeState extends State<_DashboardHome> {
     final authService = Provider.of<AppwriteService>(context);
     final appwriteUser = authService.user;
 
-    final user = UserProgress(
-        username: appwriteUser?.name ?? "AlooAloo",
-        level: 1,
-        experience: 1750,
-        totalPoints: 750,
-        progLanguage: 'Python');
+    final user = authService.progress; 
 
     return Scaffold(
       body: SafeArea(

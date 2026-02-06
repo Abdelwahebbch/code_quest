@@ -12,6 +12,7 @@ class BadgesScreen extends StatefulWidget {
 }
 
 class _BadgesScreenState extends State<BadgesScreen> {
+  
   List<String> OwnBadges = [];
   List<Map<String, dynamic>> allBadges = [
       {'name': 'Bug Hunter', 'desc': 'Fix 10 debugging missions', 'icon': Icons.bug_report, 'color': Colors.green, 'unlocked': false},

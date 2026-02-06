@@ -17,3 +17,4 @@ class UserProgress {
 
   double get progressToNextLevel => (experience % 1000) / 1000;
 }
+//TODO : Add Bio , ImagePath att 
