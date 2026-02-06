@@ -34,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen>
   _navigateToNext() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.checkSession(); 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
     if (authService.user != null) {
       Navigator.pushReplacement(

@@ -89,12 +89,9 @@ class AppwriteService extends ChangeNotifier {
 
   Future<List<Mission>> getMissions() async {
     try {
-      // TODO: a3mel talla 3la documentation mte3 appwrite
-      //https://appwrite.io/docs/products/databases/quick-start
       final response = await databases.listDocuments(
-        databaseId: '6972adad002e2ba515f2',
-        collectionId: 'missions',
-      );
+          databaseId: "6972adad002e2ba515f2",
+          collectionId: "missions");
 
       return response.documents.map((doc) {
         return Mission(
