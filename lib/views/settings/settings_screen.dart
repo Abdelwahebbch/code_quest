@@ -59,13 +59,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text("Push Notifications"),
             subtitle: const Text("Get mission reminders"),
             value: _notificationsEnabled,
-            activeThumbColor: AppTheme.primaryColor,
+            activeTrackColor: AppTheme.primaryColor,
             onChanged: (val) => setState(() => _notificationsEnabled = val),
           ),
           SwitchListTile(
             title: const Text("Dark Mode"),
             value: isDark,
-            activeThumbColor: AppTheme.primaryColor,
+            activeTrackColor: AppTheme.primaryColor,
             onChanged: (val) => themeManager.toggleTheme(val),
           ),
           ListTile(
