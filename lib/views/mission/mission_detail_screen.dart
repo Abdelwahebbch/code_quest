@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/widgets/choice_challenge.dart';
+import 'package:pfe_test/widgets/ordering_challenge.dart';
 import '../../models/mission_model.dart';
 import '../../theme/app_theme.dart';
 import '../chat/ai_tutor_chat.dart';
@@ -13,11 +15,13 @@ class MissionDetailScreen extends StatefulWidget {
 
 class _MissionDetailScreenState extends State<MissionDetailScreen> {
   late TextEditingController _codeController;
+  var _currentAnswer;
 
   @override
   void initState() {
     super.initState();
-    _codeController = TextEditingController(text: widget.mission.initialCode);
+    _codeController =
+        TextEditingController(text: widget.mission.initialCode ?? "");
   }
 
   @override
@@ -28,7 +32,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.psychology, color: AppTheme.accentColor),
-            onPressed: () => _showAITutor(context),
+            onPressed: () {
+              return _showAITutor(context);
+            },
           ),
         ],
       ),
@@ -40,40 +46,28 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               color: AppTheme.cardColor,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("MISSION OBJECTIVE",
-                      style: TextStyle(
-                          color: AppTheme.accentColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12)),
-                  const SizedBox(height: 8),
-                  Text(widget.mission.description,
-                      style: const TextStyle(fontSize: 16)),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("MISSION OBJECTIVE",
+                        style: TextStyle(
+                            color: AppTheme.accentColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Text(widget.mission.description,
+                        style: const TextStyle(fontSize: 16)),
+                  ],
+                ),
               ),
             ),
           ),
           Expanded(
             flex: 5,
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade800),
-              ),
-              child: TextField(
-                controller: _codeController,
-                maxLines: null,
-                style: const TextStyle(
-                    fontFamily: 'monospace', color: Colors.greenAccent),
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(16),
-                  border: InputBorder.none,
-                ),
-              ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildChallengeInterface(),
             ),
           ),
           Padding(
@@ -84,15 +78,15 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () => _showAITutor(context),
                     icon: const Icon(Icons.lightbulb_outline),
-                    label: const Text("Get Hint"),
+                    label: const Text("Ask me"),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _submitSolution(),
+                    onPressed: () => _checkAnswer(),
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text("Run Code"),
+                    label: const Text("Submit"),
                   ),
                 ),
               ],
@@ -101,6 +95,44 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildChallengeInterface() {
+    switch (widget.mission.type) {
+      case MissionType.debug:
+      case MissionType.complete:
+      case MissionType.test:
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade800),
+          ),
+          child: TextField(
+            controller: _codeController,
+            maxLines: null,
+            style: const TextStyle(
+                fontFamily: 'monospace', color: Colors.greenAccent),
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.all(16),
+              border: InputBorder.none,
+            ),
+          ),
+        );
+      case MissionType.multipleChoice:
+      case MissionType.singleChoice:
+        return ChoiceChallenge(
+            mission: widget.mission,
+            onAnswerChanged: (answer) {
+              return _currentAnswer = answer;
+            });
+      case MissionType.ordering:
+        return OrderingChallenge(
+            mission: widget.mission,
+            onOrderChanged: (order) {
+              return _currentAnswer = order;
+            });
+    }
   }
 
   void _showAITutor(BuildContext context) {
@@ -124,10 +156,33 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     );
   }
 
-  void _submitSolution() {
-    // Logic to check solution
-    bool isCorrect =
-        _codeController.text.trim() == widget.mission.solution.trim();
+  void _checkAnswer() {
+    bool isCorrect = false;
+    switch (widget.mission.type) {
+      case MissionType.debug:
+      case MissionType.complete:
+      case MissionType.test:
+        isCorrect =
+            _codeController.text.trim() == widget.mission.solution?.trim();
+        break;
+      case MissionType.singleChoice:
+        isCorrect = _currentAnswer == widget.mission.solution;
+        break;
+      case MissionType.multipleChoice:
+        if (_currentAnswer is List<String>) {
+          final correctAnswers = widget.mission.solution?.split(',') ?? [];
+          isCorrect = _currentAnswer.length == correctAnswers.length &&
+              _currentAnswer.every((item) => correctAnswers.contains(item));
+        }
+        break;
+      case MissionType.ordering:
+        if (_currentAnswer is List<String>) {
+          final correctOrder = widget.mission.correctOrder ?? [];
+          isCorrect = _currentAnswer.length == correctOrder.length &&
+              equals(_currentAnswer, correctOrder);
+        }
+        break;
+    }
 
     showDialog(
       context: context,
@@ -135,7 +190,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         title: Text(isCorrect ? "Mission Accomplished!" : "Not Quite..."),
         content: Text(isCorrect
             ? "Great job! You've earned ${widget.mission.points} XP."
-            : "The code didn't pass the tests. Try asking the AI Tutor for a hint!"),
+            : "That's not the right answer. Try asking the AI Tutor for a hint!"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -145,4 +200,12 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       ),
     );
   }
+}
+
+bool equals(List l1, List l2) {
+  if (l1.length != l2.length) return false;
+  for (int i = 0; i < l1.length; i++) {
+    if (l1[i] != l2[i]) return false;
+  }
+  return true;
 }
