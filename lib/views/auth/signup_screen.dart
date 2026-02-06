@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/appwrite_service.dart';
@@ -41,7 +42,9 @@ class _SignupScreenState extends State<SignupScreen> {
         _passwordController.text.trim(),
         _nameController.text.trim(),
       );
-      // Navigation is handled in main.dart based on auth state
+      if (!mounted) return;
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
