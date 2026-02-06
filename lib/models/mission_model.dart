@@ -16,8 +16,8 @@ class Mission {
   final int difficulty; // 1-5
   final String? initialCode;
   final String? solution;
-  final List<String>? options;
-  final List<String>? correctOrder;
+  final List<dynamic>? options;
+  final List<dynamic>? correctOrder;
   bool isCompleted;
 
   Mission({
