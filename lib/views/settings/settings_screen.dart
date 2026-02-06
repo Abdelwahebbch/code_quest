@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/views/settings/edit_prog_lang_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../auth/login_screen.dart';
@@ -45,7 +46,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             icon: Icons.language,
             title: "Change Learning Language",
             subtitle: "Current: Python",
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const EditProgLangScreen()));
+            },
           ),
           const SizedBox(height: 24),
           _buildSectionHeader("Preferences"),
