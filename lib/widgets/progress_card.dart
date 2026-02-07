@@ -32,7 +32,7 @@ class ProgressCard extends StatelessWidget {
                 children: [
                   const Text("Level",
                       style: TextStyle(color: Colors.white70, fontSize: 14)),
-                  Text("${user.level}",
+                  Text("${user.userLevel}",
                       style: const TextStyle(
                           color: Colors.white,
                           fontSize: 32,
@@ -67,7 +67,7 @@ class ProgressCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                  "${(user.progressToNextLevel * 100).toInt()}% to Level ${user.level + 1}",
+                  "${(user.progressToNextLevel * 100).toInt()}% to Level ${user.userLevel + 1}",
                   style: const TextStyle(color: Colors.white70, fontSize: 12)),
               const Text("Next Badge: Code Ninja",
                   style: TextStyle(color: Colors.white70, fontSize: 12)),
