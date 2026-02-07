@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/widgets/choice_challenge.dart';
 import 'package:pfe_test/widgets/ordering_challenge.dart';
+import 'package:provider/provider.dart';
 import '../../models/mission_model.dart';
 import '../../theme/app_theme.dart';
 import '../chat/ai_tutor_chat.dart';
@@ -157,6 +159,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   }
 
   void _checkAnswer() {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
     bool isCorrect = false;
     switch (widget.mission.type) {
       case MissionType.debug:
@@ -193,7 +196,11 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             : "That's not the right answer. Try asking the AI Tutor for a hint!"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              authService.updateXp(widget.mission.points);
+              //debugPrint("XP = ${authService.progress.experience}");
+              return Navigator.pop(context);
+            },
             child: const Text("OK"),
           ),
         ],
