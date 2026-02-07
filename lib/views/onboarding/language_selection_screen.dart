@@ -16,7 +16,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   final List<Map<String, dynamic>> languages = [
     {'name': 'Python', 'icon': Icons.code, 'color': Colors.blue},
     {'name': 'JavaScript', 'icon': Icons.javascript, 'color': Colors.yellow},
-    {'name': 'Dart', 'icon': Icons.add, 'color': Colors.cyan},
+    {'name': 'Dart', 'icon': Icons.computer, 'color': Colors.cyan},
     {'name': 'Java', 'icon': Icons.coffee, 'color': Colors.orange},
     {'name': 'C++', 'icon': Icons.terminal, 'color': Colors.blueAccent},
   ];

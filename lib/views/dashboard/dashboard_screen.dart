@@ -66,7 +66,6 @@ class _DashboardHomeState extends State<_DashboardHome> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context);
-   // final appwriteUser = authService.user;
 
     final user = authService.progress; 
 
