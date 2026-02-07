@@ -7,7 +7,7 @@ import '../models/mission_model.dart';
 class AppwriteService extends ChangeNotifier {
   Client client = Client();
   late Account account;
-  late Databases databases;
+  late TablesDB database;
 
   models.User? _user;
   models.User? get user => _user;
@@ -30,7 +30,7 @@ class AppwriteService extends ChangeNotifier {
         .setSelfSigned(status: true);
 
     account = Account(client);
-    databases = Databases(client);
+    database = TablesDB(client);
     checkSession();
   }
 
@@ -48,17 +48,16 @@ class AppwriteService extends ChangeNotifier {
   Future<void> createNewRow() async {
     try {
       models.User user = await account.get();
-      await databases.createDocument(
+      await database.createRow(
         databaseId: '6972adad002e2ba515f2',
-        collectionId: 'user_profiles',
-        documentId: ID.unique(),
+        tableId: 'user_profiles',
+        rowId: user.$id,
         data: {
           'experience': 0,
           'level': 1,
           'totalPoints': 0,
           'progLanguage': 'Java',
           'earnedBadges': [],
-          'userId': user.$id,
           'bio': "",
           'imagePath': "",
         },
@@ -107,6 +106,7 @@ class AppwriteService extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
+      debugPrint("Error : $e");
       rethrow;
     }
   }
@@ -121,33 +121,13 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<List<String>> getBadges() async {
-    try {
-      final response = await databases.listDocuments(
-        databaseId: "6972adad002e2ba515f2",
-        collectionId: "user_profiles",
-        queries: [
-          //TODO : baddlha bel RLS man8ir ma tab9a ta3mel fi select bech kol user tjih automatiquement el row mte3ou 5ater hakka bech twalli ta3mel id el user fkey fi el user_profile w tt3attel akther
-          //TODO : ken nbaddlouha el fonction he4i twalli tloadi el ROW el kol fi marra wa7da 5ater bech tloadi el b9iyya zeda fi fonction wa7da o5ra ywalli barcha
-          Query.equal('userId', _user?.$id),
-        ],
-      );
-      if (response.documents[0].data["earnedBadges"] != null) {
-        return List<String>.from(response.documents[0].data["earnedBadges"]);
-      } else {
-        return [];
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
 
   Future<List<Mission>> getMissions() async {
     try {
-      final response = await databases.listDocuments(
-          databaseId: "6972adad002e2ba515f2", collectionId: "missions");
+      final response = await database.listRows(
+          databaseId: "6972adad002e2ba515f2", tableId: "missions");
 
-      return response.documents.map((doc) {
+      return response.rows.map((doc) {
         return Mission(
           id: doc.$id,
           title: doc.data['title'],
@@ -172,28 +152,21 @@ class AppwriteService extends ChangeNotifier {
   Future<void> getUserProgress() async {
     try {
       models.User user = await account.get();
-      final response = await databases.listDocuments(
-        databaseId: "6972adad002e2ba515f2",
-        collectionId: "user_profiles",
-        queries: [
-          Query.equal('userId', user.$id),
-        ],
+      final row = await database.getRow(
+          databaseId: "6972adad002e2ba515f2",
+          tableId: "user_profiles",
+          rowId: user.$id);
+
+      progress = UserProgress(
+        progLanguage: row.data["progLanguage"],
+        username: _user!.name,
+        level: row.data["level"],
+        experience: row.data["experience"],
+        totalPoints: row.data["totalPoints"],
+        earnedBadges: List<String>.from(row.data["earnedBadges"] ?? []),
       );
 
-      if (response.documents.isNotEmpty) {
-        final doc = response.documents.first;
-
-        progress = UserProgress(
-          progLanguage: doc.data["progLanguage"],
-          username: _user!.name,
-          level: doc.data["level"],
-          experience: doc.data["experience"],
-          totalPoints: doc.data["totalPoints"],
-          earnedBadges: List<String>.from(doc.data["earnedBadges"] ?? []),
-        );
-
-        notifyListeners();
-      }
+      notifyListeners();
     } catch (e) {
       debugPrint("Aloo Alooo Error $e");
       rethrow;
