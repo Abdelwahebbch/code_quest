@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 
 class BadgesScreen extends StatefulWidget {
-  
   const BadgesScreen({super.key});
 
   @override
@@ -12,19 +11,65 @@ class BadgesScreen extends StatefulWidget {
 }
 
 class _BadgesScreenState extends State<BadgesScreen> {
-  
-  List<String> OwnBadges = [];
   List<Map<String, dynamic>> allBadges = [
-      {'name': 'Bug Hunter', 'desc': 'Fix 10 debugging missions', 'icon': Icons.bug_report, 'color': Colors.green, 'unlocked': false},
-      {'name': 'Code Ninja', 'desc': 'Complete 5 missions without hints', 'icon': Icons.bolt, 'color': Colors.orange, 'unlocked': false},
-      {'name': 'Test Master', 'desc': 'Write 20 unit tests', 'icon': Icons.verified, 'color': Colors.blue, 'unlocked': false},
-      {'name': 'Fast Learner', 'desc': 'Complete 3 missions in one day', 'icon': Icons.speed, 'color': Colors.purple, 'unlocked': false},
-      {'name': 'Architect', 'desc': 'Design a complex system', 'icon': Icons.architecture, 'color': Colors.red, 'unlocked': false},
-      {'name': 'Clean Coder', 'desc': 'Maintain high code quality', 'icon': Icons.cleaning_services, 'color': Colors.teal, 'unlocked': false},
-      {'name': 'Team Player', 'desc': 'Review 5 peer solutions', 'icon': Icons.groups, 'color': Colors.indigo, 'unlocked': false},
-      {'name': 'AI Whisperer', 'desc': 'Ask 50 insightful questions', 'icon': Icons.psychology, 'color': Colors.pink, 'unlocked': false},
-    ];
-  
+    {
+      'name': 'Bug Hunter',
+      'desc': 'Fix 10 debugging missions',
+      'icon': Icons.bug_report,
+      'color': Colors.green,
+      'unlocked': false
+    },
+    {
+      'name': 'Code Ninja',
+      'desc': 'Complete 5 missions without hints',
+      'icon': Icons.bolt,
+      'color': Colors.orange,
+      'unlocked': false
+    },
+    {
+      'name': 'Test Master',
+      'desc': 'Write 20 unit tests',
+      'icon': Icons.verified,
+      'color': Colors.blue,
+      'unlocked': false
+    },
+    {
+      'name': 'Fast Learner',
+      'desc': 'Complete 3 missions in one day',
+      'icon': Icons.speed,
+      'color': Colors.purple,
+      'unlocked': false
+    },
+    {
+      'name': 'Architect',
+      'desc': 'Design a complex system',
+      'icon': Icons.architecture,
+      'color': Colors.red,
+      'unlocked': false
+    },
+    {
+      'name': 'Clean Coder',
+      'desc': 'Maintain high code quality',
+      'icon': Icons.cleaning_services,
+      'color': Colors.teal,
+      'unlocked': false
+    },
+    {
+      'name': 'Team Player',
+      'desc': 'Review 5 peer solutions',
+      'icon': Icons.groups,
+      'color': Colors.indigo,
+      'unlocked': false
+    },
+    {
+      'name': 'AI Whisperer',
+      'desc': 'Ask 50 insightful questions',
+      'icon': Icons.psychology,
+      'color': Colors.pink,
+      'unlocked': false
+    },
+  ];
+
   bool _isLoading = true;
   //we will discust about it
   /*@override
@@ -34,33 +79,30 @@ class _BadgesScreenState extends State<BadgesScreen> {
   }*/
   @override
   void initState() {
-  super.initState();
-  loadBadges();
+    super.initState();
+    loadBadges();
   }
-  
-   Future<void> loadBadges() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
-    final badges = await authService.getBadges();
-    OwnBadges = badges;
+
+  void loadBadges()  {
+    final authService = Provider.of<AppwriteService>(context ,listen: false);
+    List<String> OwnBadges =  authService.progress.earnedBadges;
     setState(() {
-    for (var bagde in allBadges) {
-      if(OwnBadges.contains(bagde['name'])){
-          bagde['unlocked']=true;
+      for (var bagde in allBadges) {
+        if (OwnBadges.contains(bagde['name'])) {
+          bagde['unlocked'] = true;
+        }
       }
-    }
-    _isLoading = false;
+      _isLoading = false;
     });
-    }
-  
-  
-  @override
-  Widget build(BuildContext context)  {
-    
-    if (_isLoading) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("Your Achievements"),
@@ -102,7 +144,8 @@ class _BadgesScreenState extends State<BadgesScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [AppTheme.primaryColor, AppTheme.accentColor]),
+        gradient: const LinearGradient(
+            colors: [AppTheme.primaryColor, AppTheme.accentColor]),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -112,9 +155,13 @@ class _BadgesScreenState extends State<BadgesScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("$unlockedCount / ${badges.length}", 
-                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-              const Text("Badges Unlocked", style: TextStyle(color: Colors.white70)),
+              Text("$unlockedCount / ${badges.length}",
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold)),
+              const Text("Badges Unlocked",
+                  style: TextStyle(color: Colors.white70)),
             ],
           ),
         ],
