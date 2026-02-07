@@ -46,11 +46,11 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> createNewRow() async {
     try {
-      models.User user = await account.get();
+      //  models.User user = await account.get();
       await database.createRow(
         databaseId: '6972adad002e2ba515f2',
         tableId: 'user_profiles',
-        rowId: user.$id,
+        rowId: _user!.$id,
         data: {
           'experience': 0,
           'totalPoints': 0,
@@ -60,11 +60,12 @@ class AppwriteService extends ChangeNotifier {
           'imagePath': "",
         },
         permissions: [
-          Permission.read(Role.user(user.$id)),
-          Permission.update(Role.user(user.$id)),
+          Permission.read(Role.user(_user!.$id)),
+          Permission.update(Role.user(_user!.$id)),
         ],
       );
     } catch (e) {
+      debugPrint("Error : $e");
       rethrow;
     }
   }
@@ -79,10 +80,13 @@ class AppwriteService extends ChangeNotifier {
         password: password,
         name: name,
       );
-      await login(email, password);
+      await account.createEmailPasswordSession(
+        email: email,
+        password: password,
+      );
+      _user = await account.get();
       await createNewRow();
       await getUserInfo();
-      isFirstLogin = progress.progLanguage != "";
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -102,7 +106,7 @@ class AppwriteService extends ChangeNotifier {
       _user = await account.get();
       _isLoading = false;
       await getUserInfo();
-      isFirstLogin = progress.progLanguage != "";
+      isFirstLogin = progress.progLanguage != null;
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -157,12 +161,9 @@ class AppwriteService extends ChangeNotifier {
           tableId: "user_profiles",
           rowId: user.$id);
 
-          //  final rowt = await database..updateRow(databaseId: databaseId, tableId: tableId, rowId: rowId)
-
       progress = UserInfo(
         progLanguage: row.data["progLanguage"] ?? "not selected",
-        username: _user!.name,
-    
+        username: user.name,
         experience: row.data["experience"],
         totalPoints: row.data["totalPoints"],
         earnedBadges: List<String>.from(row.data["earnedBadges"] ?? []),
@@ -181,8 +182,8 @@ class AppwriteService extends ChangeNotifier {
   void updateXp(int newXp) {
     progress.experience += newXp;
     notifyListeners();
-  } 
-  
+  }
+
   void updateBio(int newXp) {
     progress.experience += newXp;
     notifyListeners();
