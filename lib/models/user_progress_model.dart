@@ -16,5 +16,13 @@ class UserProgress {
   });
 
   double get progressToNextLevel => (experience % 1000) / 1000;
+  int get userLevel {
+    int lvl = (experience / 1000).toInt();
+    if (lvl == 0) {
+      return 1;
+    } else {
+      return lvl;
+    }
+  }
 }
-//TODO : Add Bio , ImagePath att 
+//TODO : Add Bio , ImagePath att
