@@ -16,7 +16,7 @@ class AppwriteService extends ChangeNotifier {
   late Account account;
   late TablesDB database;
   late bool isFirstLogin = true;
-  late UserProgress progress;
+  late UserInfo progress;
 
   AppwriteService() {
     _init();
@@ -36,7 +36,7 @@ class AppwriteService extends ChangeNotifier {
   Future<void> checkSession() async {
     try {
       _user = await account.get();
-      await getUserProgress();
+      await getUserInfo();
       notifyListeners();
     } catch (e) {
       _user = null;
@@ -53,7 +53,6 @@ class AppwriteService extends ChangeNotifier {
         rowId: user.$id,
         data: {
           'experience': 0,
-          'level': 1,
           'totalPoints': 0,
           'progLanguage': "",
           'earnedBadges': [],
@@ -82,7 +81,7 @@ class AppwriteService extends ChangeNotifier {
       );
       await login(email, password);
       await createNewRow();
-      await getUserProgress();
+      await getUserInfo();
       isFirstLogin = progress.progLanguage != "";
       notifyListeners();
     } catch (e) {
@@ -102,7 +101,7 @@ class AppwriteService extends ChangeNotifier {
       );
       _user = await account.get();
       _isLoading = false;
-      await getUserProgress();
+      await getUserInfo();
       isFirstLogin = progress.progLanguage != "";
       notifyListeners();
     } catch (e) {
@@ -150,7 +149,7 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<void> getUserProgress() async {
+  Future<void> getUserInfo() async {
     try {
       models.User user = await account.get();
       final row = await database.getRow(
@@ -158,10 +157,12 @@ class AppwriteService extends ChangeNotifier {
           tableId: "user_profiles",
           rowId: user.$id);
 
-      progress = UserProgress(
+          //  final rowt = await database..updateRow(databaseId: databaseId, tableId: tableId, rowId: rowId)
+
+      progress = UserInfo(
         progLanguage: row.data["progLanguage"] ?? "not selected",
         username: _user!.name,
-        level: row.data["level"],
+    
         experience: row.data["experience"],
         totalPoints: row.data["totalPoints"],
         earnedBadges: List<String>.from(row.data["earnedBadges"] ?? []),
@@ -178,6 +179,11 @@ class AppwriteService extends ChangeNotifier {
   void saveUserChanges() {}
 
   void updateXp(int newXp) {
+    progress.experience += newXp;
+    notifyListeners();
+  } 
+  
+  void updateBio(int newXp) {
     progress.experience += newXp;
     notifyListeners();
   }

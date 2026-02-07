@@ -3,7 +3,7 @@ import '../../models/user_progress_model.dart';
 import '../theme/app_theme.dart';
 
 class ProgressCard extends StatelessWidget {
-  final UserProgress user;
+  final UserInfo user;
 
   const ProgressCard({super.key, required this.user});
 
