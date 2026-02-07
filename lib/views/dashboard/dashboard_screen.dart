@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/mission_model.dart';
-import '../../models/user_progress_model.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/progress_card.dart';
 import '../../widgets/mission_tile.dart';
@@ -67,7 +66,7 @@ class _DashboardHomeState extends State<_DashboardHome> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context);
-    final appwriteUser = authService.user;
+   // final appwriteUser = authService.user;
 
     final user = authService.progress; 
 
