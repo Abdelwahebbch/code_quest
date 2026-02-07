@@ -6,17 +6,16 @@ import '../models/mission_model.dart';
 
 class AppwriteService extends ChangeNotifier {
   Client client = Client();
-  late Account account;
-  late TablesDB database;
 
   models.User? _user;
   models.User? get user => _user;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
-  // ignore: unused_field
-  final bool isFirstLogin = false;
 
+  late Account account;
+  late TablesDB database;
+  late bool isFirstLogin = true;
   late UserProgress progress;
 
   AppwriteService() {
@@ -56,7 +55,7 @@ class AppwriteService extends ChangeNotifier {
           'experience': 0,
           'level': 1,
           'totalPoints': 0,
-          'progLanguage': 'Java',
+          'progLanguage': "",
           'earnedBadges': [],
           'bio': "",
           'imagePath': "",
@@ -84,6 +83,8 @@ class AppwriteService extends ChangeNotifier {
       await login(email, password);
       await createNewRow();
       await getUserProgress();
+      isFirstLogin = progress.progLanguage != "";
+      notifyListeners();
     } catch (e) {
       _isLoading = false;
       notifyListeners();
@@ -102,6 +103,7 @@ class AppwriteService extends ChangeNotifier {
       _user = await account.get();
       _isLoading = false;
       await getUserProgress();
+      isFirstLogin = progress.progLanguage != "";
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -120,7 +122,6 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-
 
   Future<List<Mission>> getMissions() async {
     try {
@@ -158,7 +159,7 @@ class AppwriteService extends ChangeNotifier {
           rowId: user.$id);
 
       progress = UserProgress(
-        progLanguage: row.data["progLanguage"],
+        progLanguage: row.data["progLanguage"] ?? "not selected",
         username: _user!.name,
         level: row.data["level"],
         experience: row.data["experience"],
@@ -171,5 +172,13 @@ class AppwriteService extends ChangeNotifier {
       debugPrint("Aloo Alooo Error $e");
       rethrow;
     }
+  }
+
+//TODO : te5dem 9bal el logout
+  void saveUserChanges() {}
+
+  void updateXp(int newXp) {
+    progress.experience += newXp;
+    notifyListeners();
   }
 }
