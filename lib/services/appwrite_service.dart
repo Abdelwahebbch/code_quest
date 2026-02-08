@@ -1,7 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter/material.dart';
-import 'package:pfe_test/models/user_progress_model.dart';
+import 'package:pfe_test/models/user_info_model.dart';
 import '../models/mission_model.dart';
 
 class AppwriteService extends ChangeNotifier {
@@ -58,6 +58,7 @@ class AppwriteService extends ChangeNotifier {
           'earnedBadges': [],
           'bio': "",
           'imagePath': "",
+          'nbMission': 0,
         },
         permissions: [
           Permission.read(Role.user(_user!.$id)),
@@ -106,7 +107,7 @@ class AppwriteService extends ChangeNotifier {
       _user = await account.get();
       _isLoading = false;
       await getUserInfo();
-      isFirstLogin = progress.progLanguage != null;
+      isFirstLogin = progress.progLanguage.isEmpty;
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -160,43 +161,46 @@ class AppwriteService extends ChangeNotifier {
           databaseId: "6972adad002e2ba515f2",
           tableId: "user_profiles",
           rowId: user.$id);
+      int x = await getRank();
 
       progress = UserInfo(
-        progLanguage: row.data["progLanguage"] ?? "not selected",
-        username: user.name,
-        experience: row.data["experience"],
-        totalPoints: row.data["totalPoints"],
-        earnedBadges: List<String>.from(row.data["earnedBadges"] ?? []),
-        bio: row.data["bio"],
-        imagePath: row.data["imagePath"],
-        email: user.email,
-      );
+          progLanguage: row.data["progLanguage"] ?? "not selected",
+          username: user.name,
+          experience: row.data["experience"],
+          totalPoints: row.data["totalPoints"],
+          earnedBadges: List<String>.from(row.data["earnedBadges"] ?? []),
+          bio: row.data["bio"],
+          imagePath: row.data["imagePath"],
+          email: user.email,
+          rank: x ,
+          nbMissions: row.data["nbMission"] ?? 0);
 
       notifyListeners();
     } catch (e) {
-      debugPrint("Aloo Alooo Error $e");
+      debugPrint("Error fi getUserInfo $e");
       rethrow;
     }
   }
-   
+
   Future<void> updateProfile(
       String imagePath, String userName, String bio) async {
     try {
-      final row = await database.updateRow(
+      // zeyda < final row = >
+      await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
-        tableId:"user_profiles",
+        tableId: "user_profiles",
         rowId: _user!.$id,
         data: {'imagePath': imagePath, 'bio': bio},
       );
-      progress.bio=bio;
-      progress.imagePath=imagePath;
-      progress.username=userName;
+      progress.bio = bio;
+      progress.imagePath = imagePath;
+      progress.username = userName;
       notifyListeners();
     } catch (e) {
       rethrow;
     }
-
   }
+
 //TODO : te5dem 9bal el logout
   void saveUserChanges() {}
 
@@ -205,8 +209,27 @@ class AppwriteService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateBio(int newXp) {
-    progress.experience += newXp;
+  void updateBio(String newBio) {
+    progress.bio = newBio;
     notifyListeners();
+  }
+
+  Future<int> getRank() async {
+    try {
+      final r = await database.listRows(
+          databaseId: "6972adad002e2ba515f2",
+          tableId: "user_profiles",
+          queries: [
+            Query.orderDesc("experience"),
+          ]);
+
+      return r.rows.indexWhere(
+            (row) => row.$id == _user!.$id,
+          ) +
+          1;
+    } on AppwriteException catch (e) {
+      debugPrint("Error getRank : ${e.message}");
+      rethrow;
+    }
   }
 }
