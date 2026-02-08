@@ -167,6 +167,9 @@ class AppwriteService extends ChangeNotifier {
         experience: row.data["experience"],
         totalPoints: row.data["totalPoints"],
         earnedBadges: List<String>.from(row.data["earnedBadges"] ?? []),
+        bio: row.data["bio"],
+        imagePath: row.data["imagePath"],
+        email: user.email,
       );
 
       notifyListeners();
@@ -175,7 +178,25 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
+   
+  Future<void> updateProfile(
+      String imagePath, String userName, String bio) async {
+    try {
+      final row = await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId:"user_profiles",
+        rowId: _user!.$id,
+        data: {'imagePath': imagePath, 'bio': bio},
+      );
+      progress.bio=bio;
+      progress.imagePath=imagePath;
+      progress.username=userName;
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
 
+  }
 //TODO : te5dem 9bal el logout
   void saveUserChanges() {}
 

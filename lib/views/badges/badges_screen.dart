@@ -70,20 +70,8 @@ class _BadgesScreenState extends State<BadgesScreen> {
     },
   ];
 
-  bool _isLoading = true;
-  //we will discust about it
-  /*@override
-  void didChangeDependencies() {
-  super.didChangeDependencies();
-  loadBadges(); // reload badges every time dependencies change
-  }*/
   @override
-  void initState() {
-    super.initState();
-    loadBadges();
-  }
-
-  void loadBadges()  {
+  Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context ,listen: false);
     List<String> OwnBadges =  authService.progress.earnedBadges;
     setState(() {
@@ -92,17 +80,9 @@ class _BadgesScreenState extends State<BadgesScreen> {
           bagde['unlocked'] = true;
         }
       }
-      _isLoading = false;
+      
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text("Your Achievements"),

@@ -1,9 +1,12 @@
 class UserInfo {
-  final String username;
-  final String progLanguage;
+  String username;
+  String progLanguage;
   int experience;
   int totalPoints;
   List<String> earnedBadges;
+  String imagePath;
+  String bio;
+  String email;
 
   UserInfo({
     required this.username,
@@ -11,6 +14,9 @@ class UserInfo {
     this.experience = 0,
     this.totalPoints = 0,
     this.earnedBadges = const [],
+    this.imagePath="",
+    this.bio="",
+    this.email="",
   });
 
   double get progressToNextLevel => (experience % 1000) / 1000;
