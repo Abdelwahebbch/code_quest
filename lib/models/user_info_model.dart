@@ -3,6 +3,8 @@ class UserInfo {
   String progLanguage;
   int experience;
   int totalPoints;
+  int rank;
+  int nbMissions;
   List<String> earnedBadges;
   String imagePath;
   String bio;
@@ -14,9 +16,11 @@ class UserInfo {
     this.experience = 0,
     this.totalPoints = 0,
     this.earnedBadges = const [],
-    this.imagePath="",
-    this.bio="",
-    this.email="",
+    this.imagePath = "",
+    this.bio = "",
+    this.email = "",
+    this.nbMissions = 0,
+    this.rank = 0,
   });
 
   double get progressToNextLevel => (experience % 1000) / 1000;
@@ -29,5 +33,7 @@ class UserInfo {
       return lvl;
     }
   }
+
+  
 }
 //TODO : Add Bio , ImagePath att
