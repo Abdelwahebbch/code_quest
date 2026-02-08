@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -23,30 +22,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Icon? icon;
   String pickedPath = "";
   List<String> profile = [];
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _userNameController = TextEditingController();
-  TextEditingController _bioController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
 
   void _pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked != null) {
       setState(() {
-        pickedPath=picked.path;
+        pickedPath = picked.path;
         image = FileImage(File(picked.path));
       });
     }
   }
- 
+
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     pickedPath = authService.progress.imagePath;
-      image = FileImage(File(pickedPath));
-      _userNameController.text = authService.progress.username;
-      _emailController.text = authService.progress.email;
-      _bioController.text = authService.progress.bio;
+    image = FileImage(File(pickedPath));
+    _userNameController.text = authService.progress.username;
+    _emailController.text = authService.progress.email;
+    _bioController.text = authService.progress.bio;
     if (image == null) {
-      icon = Icon(Icons.person, size: 50, color: Colors.white);
+      icon = const Icon(Icons.person, size: 50, color: Colors.white);
     } else {
       icon = null;
       backgroundImage = image;
@@ -59,7 +58,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             onPressed: () async {
               await authService.updateProfile(
                   pickedPath, _userNameController.text, _bioController.text);
-
+             
               Navigator.pop(context);
             },
             child: const Text("SAVE",
@@ -93,18 +92,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         onPressed: () {
                           _pickImage();
                         },
-                        icon: Icon(Icons.camera_alt,
+                        icon: const Icon(Icons.camera_alt,
                             size: 20, color: Colors.white)),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 32),
-            _buildEditField(context, "Username", _userNameController,false ),
+            _buildEditField(context, "Username", _userNameController, false),
             const SizedBox(height: 16),
-            _buildEditField(context, "Email", _emailController,true),
+            _buildEditField(context, "Email", _emailController, true),
             const SizedBox(height: 16),
-            _buildEditField(context, "Bio", _bioController,false),
+            _buildEditField(context, "Bio", _bioController, false),
           ],
         ),
       ),
@@ -112,7 +111,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildEditField(BuildContext context, String label,
-      TextEditingController userNameController,bool editable) {
+      TextEditingController userNameController, bool editable) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
