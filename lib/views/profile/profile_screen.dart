@@ -50,12 +50,12 @@ class ProfileScreen extends StatelessWidget {
               user?.email ?? "",
               style: const TextStyle(color: Colors.grey),
             ),
-            const Text(
-              "Student",
-              style: TextStyle(color: AppTheme.accentColor),
+            Text(
+              authService.progress.bio,
+              style: const TextStyle(color: AppTheme.accentColor),
             ),
             const SizedBox(height: 32),
-            _buildStatRow(),
+            _buildStatRow(context),
             const SizedBox(height: 32),
             _buildSectionTitle(context, "Earned Badges"),
             const SizedBox(height: 16),
@@ -70,13 +70,14 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatRow() {
+  Widget _buildStatRow(context)  {
+      final authService = Provider.of<AppwriteService>(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildStatItem("Missions", "24"),
-        _buildStatItem("Points", "1,200"),
-        _buildStatItem("Rank", "#12"),
+        _buildStatItem("Missions", "${authService.progress.nbMissions}"),
+        _buildStatItem("Points", "${authService.progress.totalPoints}"),
+        _buildStatItem("Rank", "#${authService.progress.rank}"),
       ],
     );
   }
