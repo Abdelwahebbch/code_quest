@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class UserInfo {
   String username;
   String progLanguage;
@@ -23,17 +25,18 @@ class UserInfo {
     this.rank = 0,
   });
 
-  double get progressToNextLevel => (experience % 1000) / 1000;
+  double get progressToNextLevel {
+    const baseXP = 500;
+    int level = userLevel;
 
-  int get userLevel {
-    int lvl = (experience / 1000).toInt();
-    if (lvl == 0) {
-      return 1;
-    } else {
-      return lvl;
-    }
+    int currentLevelXP = baseXP * level * level;
+    int nextLevelXP = baseXP * (level + 1) * (level + 1);
+
+    return (experience - currentLevelXP) / (nextLevelXP - currentLevelXP);
   }
 
-  
+  int get userLevel {
+    return max(1, sqrt(experience / 500).floor());
+  }
 }
-//TODO : Add Bio , ImagePath att
+
