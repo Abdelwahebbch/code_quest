@@ -222,6 +222,22 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
+  Future<void> updateLanguageSelected(String languageSelected) async {
+    try {
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "user_profiles",
+        rowId: _user!.$id,
+        data: {'progLanguage':languageSelected},
+      );
+      progress.progLanguage=languageSelected;
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+
+  }
+
 //TODO : te5dem 9bal el logout
   void saveUserChanges() {}
 

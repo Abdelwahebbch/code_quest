@@ -1,19 +1,38 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 
-class EditProgLangScreen extends StatelessWidget {
+class EditProgLangScreen extends StatefulWidget {
   const EditProgLangScreen({super.key});
 
   @override
+  State<EditProgLangScreen> createState() => _EditProgLangScreenState();
+}
+
+class _EditProgLangScreenState extends State<EditProgLangScreen> {
+  List<String> items = ['Python', 'JavaScript', 'Dart', 'Java', 'C++'];
+  String? selectedLanguage;
+  @override
+  void initState() {
+    super.initState();
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    selectedLanguage = authService.progress.progLanguage;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Change Language"),
         actions: [
           TextButton(
             onPressed: () {
+              authService.updateLanguageSelected(selectedLanguage!);
               Navigator.pop(context);
-              //TODO : zid el save w el load fi el database
             },
             child: const Text("SAVE",
                 style: TextStyle(
@@ -24,37 +43,44 @@ class EditProgLangScreen extends StatelessWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 32),
-            _buildEditField(context, "Programming Language", "Python"),
+            const Text("Programming Language",
+                style: TextStyle(
+                    color: AppTheme.accentColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12)),
+            const SizedBox(height: 8),
+            Container(
+              child: DropdownButton2(
+                isExpanded: true,
+                underline: const SizedBox(),
+                hint: Text(
+                  selectedLanguage!,
+                  style: TextStyle(color: Colors.white),
+                ),
+                items: items.map((lang) {
+                  return DropdownMenuItem<String>(
+                    value: lang,
+                    child: lang == selectedLanguage
+                        ? Text(
+                            lang,
+                            style: TextStyle(color: AppTheme.primaryColor),
+                          )
+                        : Text(lang),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedLanguage = value;
+                  });
+                },
+              ),
+            ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildEditField(
-      BuildContext context, String label, String initialValue) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(
-                color: AppTheme.accentColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 12)),
-        const SizedBox(height: 8),
-        TextField(
-          controller: TextEditingController(text: initialValue),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Theme.of(context).cardColor,
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none),
-          ),
-        ),
-      ],
     );
   }
 }

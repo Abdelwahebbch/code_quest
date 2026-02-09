@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/views/settings/edit_prog_lang_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
@@ -19,7 +20,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AppwriteService>(context, listen: true);
     final themeManager = Provider.of<ThemeManager>(context);
+    String curruntLanguage=authService.progress.progLanguage;
     final isDark = themeManager.themeMode == ThemeMode.dark;
     return Scaffold(
       appBar: AppBar(
@@ -45,7 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSettingTile(
             icon: Icons.language,
             title: "Change Learning Language",
-            subtitle: "Current: Python",
+            subtitle: "Current: $curruntLanguage",
             onTap: () {
               Navigator.push(
                   context,
