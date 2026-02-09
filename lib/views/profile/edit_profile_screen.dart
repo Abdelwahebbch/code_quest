@@ -21,7 +21,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   ImageProvider? backgroundImage;
   Icon? icon;
   String pickedPath = "";
+  String dataBasePickedPath="";
   List<String> profile = [];
+  NetworkImage? dataBaseImage;
+  bool isPickedPath=true;
+  bool isDataBasePickedPath=true;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
@@ -31,24 +35,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (picked != null) {
       setState(() {
         pickedPath = picked.path;
-        image = FileImage(File(picked.path));
       });
     }
+  }
+  @override
+  void initState(){
+    super.initState();
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    dataBasePickedPath = authService.progress.imageId;
+    _userNameController.text = authService.progress.username;
+    _emailController.text = authService.progress.email;
+    _bioController.text = authService.progress.bio;
   }
 
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context, listen: false);
-    pickedPath = authService.progress.imagePath;
-    image = FileImage(File(pickedPath));
-    _userNameController.text = authService.progress.username;
-    _emailController.text = authService.progress.email;
-    _bioController.text = authService.progress.bio;
-    if (image == null) {
-      icon = const Icon(Icons.person, size: 50, color: Colors.white);
-    } else {
+    if (pickedPath.isNotEmpty) {
+      backgroundImage = FileImage(File(pickedPath));
       icon = null;
-      backgroundImage = image;
+      isPickedPath=true;
+      isDataBasePickedPath=false;
+    } else if (dataBasePickedPath.isNotEmpty){
+      dataBaseImage=NetworkImage('https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/$dataBasePickedPath/view?project=697295e70021593c3438&mode=admin');
+      icon = null;
+      isDataBasePickedPath=true;
+      isPickedPath=false;
+    }
+    else {
+      icon = const Icon(Icons.person, size: 50, color: Colors.white);
+      isPickedPath=false;
+      isDataBasePickedPath=false;
     }
     return Scaffold(
       appBar: AppBar(
@@ -58,7 +75,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             onPressed: () async {
               await authService.updateProfile(
                   pickedPath, _userNameController.text, _bioController.text);
-             
+              //it handle in appservice function to not make tow function
               Navigator.pop(context);
             },
             child: const Text("SAVE",
@@ -72,12 +89,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Column(
           children: [
             Stack(
+              alignment: Alignment.center,
               children: [
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: AppTheme.primaryColor,
-                  backgroundImage: backgroundImage,
-                  child: icon,
+                  backgroundImage: isPickedPath ? backgroundImage :(isDataBasePickedPath ? dataBaseImage : null) ,
+                  
+                  child: (isDataBasePickedPath && isPickedPath )? null : icon,
                 ),
                 Positioned(
                   bottom: 0,

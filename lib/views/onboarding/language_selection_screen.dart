@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../dashboard/dashboard_screen.dart';
 
@@ -23,6 +25,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -102,6 +105,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                   onPressed: selectedLanguage == null
                       ? null
                       : () {
+                          authService.updateLanguageSelected(selectedLanguage!);
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
