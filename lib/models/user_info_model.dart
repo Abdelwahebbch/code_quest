@@ -6,7 +6,7 @@ class UserInfo {
   int rank;
   int nbMissions;
   List<String> earnedBadges;
-  String imagePath;
+  String imageId;
   String bio;
   String email;
 
@@ -16,7 +16,7 @@ class UserInfo {
     this.experience = 0,
     this.totalPoints = 0,
     this.earnedBadges = const [],
-    this.imagePath = "",
+    this.imageId = "",
     this.bio = "",
     this.email = "",
     this.nbMissions = 0,

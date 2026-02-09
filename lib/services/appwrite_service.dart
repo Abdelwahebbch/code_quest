@@ -15,6 +15,7 @@ class AppwriteService extends ChangeNotifier {
 
   late Account account;
   late TablesDB database;
+  late Storage storage;
   late bool isFirstLogin = true;
   late UserInfo progress;
 
@@ -30,6 +31,7 @@ class AppwriteService extends ChangeNotifier {
 
     account = Account(client);
     database = TablesDB(client);
+    storage = Storage(client);
     checkSession();
   }
 
@@ -57,7 +59,7 @@ class AppwriteService extends ChangeNotifier {
           'progLanguage': "",
           'earnedBadges': [],
           'bio': "",
-          'imagePath': "",
+          'imageId': "",
           'nbMission': 0,
         },
         permissions: [
@@ -170,9 +172,9 @@ class AppwriteService extends ChangeNotifier {
           totalPoints: row.data["totalPoints"],
           earnedBadges: List<String>.from(row.data["earnedBadges"] ?? []),
           bio: row.data["bio"],
-          imagePath: row.data["imagePath"],
+          imageId: row.data["imageId"],
           email: user.email,
-          rank: x ,
+          rank: x,
           nbMissions: row.data["nbMission"] ?? 0);
 
       notifyListeners();
@@ -185,17 +187,36 @@ class AppwriteService extends ChangeNotifier {
   Future<void> updateProfile(
       String imagePath, String userName, String bio) async {
     try {
-      // zeyda < final row = >
+      
+      if(imagePath.isNotEmpty){
+      final file = await storage.createFile(
+        bucketId: '69891b1d0012c9a7e862',
+        fileId: ID.unique(),
+        file: InputFile.fromPath(
+            path: imagePath, filename: imagePath.split('/').last),
+      );
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "user_profiles",
         rowId: _user!.$id,
-        data: {'imagePath': imagePath, 'bio': bio},
+        data: {'imageId': file.$id, 'bio': bio},
       );
       progress.bio = bio;
-      progress.imagePath = imagePath;
+      progress.imageId = file.$id;
       progress.username = userName;
       notifyListeners();
+      }
+      else{
+        await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "user_profiles",
+        rowId: _user!.$id,
+        data: { 'bio': bio},
+      );
+      progress.bio = bio;
+      progress.username = userName;
+      notifyListeners();
+      }
     } catch (e) {
       rethrow;
     }
