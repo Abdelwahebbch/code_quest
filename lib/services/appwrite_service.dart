@@ -238,18 +238,6 @@ class AppwriteService extends ChangeNotifier {
 
   }
 
-//TODO : te5dem 9bal el logout
-  void saveUserChanges() {}
-
-  void updateXp(int newXp) {
-    progress.experience += newXp;
-    notifyListeners();
-  }
-
-  void updateBio(String newBio) {
-    progress.bio = newBio;
-    notifyListeners();
-  }
 
   Future<int> getRank() async {
     try {
@@ -269,4 +257,13 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
+
+
+  void updateXp(int newXp) {
+    progress.experience += newXp;
+    notifyListeners();
+  }
+
+
+
 }
