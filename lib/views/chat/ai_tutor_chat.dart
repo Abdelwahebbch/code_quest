@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/models/message_model.dart';
+import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:provider/provider.dart';
 import '../../models/mission_model.dart';
 import '../../theme/app_theme.dart';
 
@@ -14,13 +18,7 @@ class AITutorChat extends StatefulWidget {
 }
 
 class _AITutorChatState extends State<AITutorChat> {
-  final List<Map<String, String>> _messages = [
-    {
-      "role": "ai",
-      "content":
-          "Hello! I'm your AI Tutor. Stuck on this mission? I can give you a hint or explain the concepts involved."
-    }
-  ];
+  final List<Message> _messages = [Message(role: "bot", message: "Bonjour")];
   final TextEditingController _messageController = TextEditingController();
 
   @override
@@ -53,7 +51,7 @@ class _AITutorChatState extends State<AITutorChat> {
             itemCount: _messages.length,
             itemBuilder: (context, index) {
               final msg = _messages[index];
-              final isAI = msg["role"] == "ai";
+              final isAI = msg.role == "bot";
               return Align(
                 alignment: isAI ? Alignment.centerLeft : Alignment.centerRight,
                 child: Container(
@@ -70,7 +68,7 @@ class _AITutorChatState extends State<AITutorChat> {
                           isAI ? const Radius.circular(15) : Radius.zero,
                     ),
                   ),
-                  child: Text(msg["content"]!,
+                  child: Text(msg.message,
                       style: const TextStyle(color: Colors.white)),
                 ),
               );
@@ -109,18 +107,26 @@ class _AITutorChatState extends State<AITutorChat> {
     );
   }
 
-  void _sendMessage() {
+  void _sendMessage() async {
+    // ignore: unused_local_variable
+    final authservice = Provider.of<AppwriteService>(context, listen: false);
+    // ignore: unused_local_variable
+    final ai =
+        Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     if (_messageController.text.isEmpty) return;
-
+    Message m = Message(
+        userInfo: authservice.progress,
+        role: "user",
+        message: _messageController.text,
+        mission: widget.mission);
     setState(() {
-      _messages.add({"role": "user", "content": _messageController.text});
-      // Mock AI response
-      _messages.add({
-        "role": "ai",
-        "content":
-            "That's a great question! In software engineering, this concept is called encapsulation. Try looking at how the variables are accessed..."
-      });
+      _messages.add(m);
     });
     _messageController.clear();
+    final data = await ai.sendMessage(m);
+    setState(() {
+      // Mock AI response
+      _messages.add(Message(role: "bot", message: data["response"]));
+    });
   }
 }
