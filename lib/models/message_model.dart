@@ -11,10 +11,7 @@ class Message {
   UserInfo? userInfo;
 
   Message(
-      {required this.role,
-       this.userInfo,
-      required this.message,
-      this.mission});
+      {required this.role, this.userInfo, required this.message, this.mission});
 
   String get finalMessage {
     return jsonEncode({

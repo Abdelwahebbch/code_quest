@@ -109,7 +109,7 @@ class AppwriteService extends ChangeNotifier {
       _user = await account.get();
       _isLoading = false;
       await getUserInfo();
-      isFirstLogin = progress.progLanguage.isEmpty;
+      // isFirstLogin = progress.language.isEmpty;
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -127,6 +127,12 @@ class AppwriteService extends ChangeNotifier {
     } catch (e) {
       rethrow;
     }
+  }
+
+  void completeOnboarding(String language) {
+    //progress.language = language;
+    //isFirstLogin = false;
+    notifyListeners();
   }
 
   Future<List<Mission>> getMissions() async {
@@ -166,7 +172,7 @@ class AppwriteService extends ChangeNotifier {
       int x = await getRank();
 
       progress = UserInfo(
-          progLanguage: row.data["progLanguage"] ?? "not selected",
+          progLanguage: row.data["language"] ?? "not selected",
           username: user.name,
           experience: row.data["experience"],
           totalPoints: row.data["totalPoints"],
@@ -187,35 +193,33 @@ class AppwriteService extends ChangeNotifier {
   Future<void> updateProfile(
       String imagePath, String userName, String bio) async {
     try {
-      
-      if(imagePath.isNotEmpty){
-      final file = await storage.createFile(
-        bucketId: '69891b1d0012c9a7e862',
-        fileId: ID.unique(),
-        file: InputFile.fromPath(
-            path: imagePath, filename: imagePath.split('/').last),
-      );
-      await database.updateRow(
-        databaseId: "6972adad002e2ba515f2",
-        tableId: "user_profiles",
-        rowId: _user!.$id,
-        data: {'imageId': file.$id, 'bio': bio},
-      );
-      progress.bio = bio;
-      progress.imageId = file.$id;
-      progress.username = userName;
-      notifyListeners();
-      }
-      else{
+      if (imagePath.isNotEmpty) {
+        final file = await storage.createFile(
+          bucketId: '69891b1d0012c9a7e862',
+          fileId: ID.unique(),
+          file: InputFile.fromPath(
+              path: imagePath, filename: imagePath.split('/').last),
+        );
         await database.updateRow(
-        databaseId: "6972adad002e2ba515f2",
-        tableId: "user_profiles",
-        rowId: _user!.$id,
-        data: { 'bio': bio},
-      );
-      progress.bio = bio;
-      progress.username = userName;
-      notifyListeners();
+          databaseId: "6972adad002e2ba515f2",
+          tableId: "user_profiles",
+          rowId: _user!.$id,
+          data: {'imageId': file.$id, 'bio': bio},
+        );
+        progress.bio = bio;
+        progress.imageId = file.$id;
+        progress.username = userName;
+        notifyListeners();
+      } else {
+        await database.updateRow(
+          databaseId: "6972adad002e2ba515f2",
+          tableId: "user_profiles",
+          rowId: _user!.$id,
+          data: {'bio': bio},
+        );
+        progress.bio = bio;
+        progress.username = userName;
+        notifyListeners();
       }
     } catch (e) {
       rethrow;
@@ -228,16 +232,14 @@ class AppwriteService extends ChangeNotifier {
         databaseId: "6972adad002e2ba515f2",
         tableId: "user_profiles",
         rowId: _user!.$id,
-        data: {'progLanguage':languageSelected},
+        data: {'language': languageSelected},
       );
-      progress.progLanguage=languageSelected;
+      progress.progLanguage = languageSelected;
       notifyListeners();
     } catch (e) {
       rethrow;
     }
-
   }
-
 
   Future<int> getRank() async {
     try {
@@ -258,12 +260,8 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-
   void updateXp(int newXp) {
     progress.experience += newXp;
     notifyListeners();
   }
-
-
-
 }

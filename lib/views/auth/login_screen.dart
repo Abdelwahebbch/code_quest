@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
-import 'package:pfe_test/views/onboarding/language_selection_screen.dart';
+import 'package:pfe_test/views/onboarding/smart_onboarding_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/appwrite_service.dart';
@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => const LanguageSelectionScreen()),
+              builder: (context) => const SmartOnboardingScreen()),
         );
       } else {
         Navigator.pushReplacement(

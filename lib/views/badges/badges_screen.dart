@@ -73,10 +73,10 @@ class _BadgesScreenState extends State<BadgesScreen> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context ,listen: false);
-    List<String> OwnBadges =  authService.progress.earnedBadges;
+    List<String> ownBadges =  authService.progress.earnedBadges;
     setState(() {
       for (var bagde in allBadges) {
-        if (OwnBadges.contains(bagde['name'])) {
+        if (ownBadges.contains(bagde['name'])) {
           bagde['unlocked'] = true;
         }
       }
