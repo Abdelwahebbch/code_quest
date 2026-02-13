@@ -12,11 +12,10 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
 
     try  {
       final Map<String, dynamic> data = jsonDecode(res.body);
-      print(data['response']);
-      print(res.statusCode);
+  
       return data;
     } catch(e) {
-      print(res.body);
+ 
       throw Exception("Failed to load data");
     }
   }
