@@ -76,6 +76,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               await authService.updateProfile(
                   pickedPath, _userNameController.text, _bioController.text);
               //it handle in appservice function to not make tow function
+              // ignore: use_build_context_synchronously
               Navigator.pop(context);
             },
             child: const Text("SAVE",
