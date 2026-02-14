@@ -22,7 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context, listen: true);
     final themeManager = Provider.of<ThemeManager>(context);
-    String curruntLanguage=authService.progress.progLanguage;
+
     final isDark = themeManager.themeMode == ThemeMode.dark;
     return Scaffold(
       appBar: AppBar(
@@ -48,7 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSettingTile(
             icon: Icons.language,
             title: "Change Learning Language",
-            subtitle: "Current: $curruntLanguage",
+            subtitle: "Current: ${authService.progress.progLanguage}",
             onTap: () {
               Navigator.push(
                   context,

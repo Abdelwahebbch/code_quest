@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/views/onboarding/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
@@ -11,6 +12,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
         ChangeNotifierProvider(create: (_) => AppwriteService()),
+        ChangeNotifierProvider(create: (_) => AppwritecloudfunctionsService()),
       ],
       child: const AITutorApp(),
     ),
