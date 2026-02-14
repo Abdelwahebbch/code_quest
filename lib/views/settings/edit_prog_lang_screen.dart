@@ -52,31 +52,29 @@ class _EditProgLangScreenState extends State<EditProgLangScreen> {
                     fontWeight: FontWeight.bold,
                     fontSize: 12)),
             const SizedBox(height: 8),
-            Container(
-              child: DropdownButton2(
-                isExpanded: true,
-                underline: const SizedBox(),
-                hint: Text(
-                  selectedLanguage!,
-                  style: TextStyle(color: Colors.white),
-                ),
-                items: items.map((lang) {
-                  return DropdownMenuItem<String>(
-                    value: lang,
-                    child: lang == selectedLanguage
-                        ? Text(
-                            lang,
-                            style: TextStyle(color: AppTheme.primaryColor),
-                          )
-                        : Text(lang),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedLanguage = value;
-                  });
-                },
+            DropdownButton2(
+              isExpanded: true,
+              underline: const SizedBox(),
+              hint: Text(
+                selectedLanguage!,
+                style: const TextStyle(color: Colors.white),
               ),
+              items: items.map((lang) {
+                return DropdownMenuItem<String>(
+                  value: lang,
+                  child: lang == selectedLanguage
+                      ? Text(
+                          lang,
+                          style: const TextStyle(color: AppTheme.primaryColor),
+                        )
+                      : Text(lang),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedLanguage = value;
+                });
+              },
             ),
           ],
         ),

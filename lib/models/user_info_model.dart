@@ -46,5 +46,8 @@ class UserInfo {
   int get userLevel {
     return max(1, sqrt(experience / 500).floor());
   }
-}
 
+
+
+
+}

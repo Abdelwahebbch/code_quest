@@ -119,7 +119,7 @@ class AppwriteService extends ChangeNotifier {
       _user = await account.get();
       _isLoading = false;
       await getUserInfo();
-      isFirstLogin = progress.progLanguage.isEmpty;
+      // isFirstLogin = progress.language.isEmpty;
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -137,6 +137,12 @@ class AppwriteService extends ChangeNotifier {
     } catch (e) {
       rethrow;
     }
+  }
+
+  void completeOnboarding(String language) {
+    //progress.language = language;
+    //isFirstLogin = false;
+    notifyListeners();
   }
 
   Future<List<Mission>> getMissions() async {

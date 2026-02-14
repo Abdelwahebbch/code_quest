@@ -18,6 +18,7 @@ class MissionDetailScreen extends StatefulWidget {
 
 class _MissionDetailScreenState extends State<MissionDetailScreen> {
   late TextEditingController _codeController;
+  // ignore: prefer_typing_uninitialized_variables
   var _currentAnswer;
 
   @override
