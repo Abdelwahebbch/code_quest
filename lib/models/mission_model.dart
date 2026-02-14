@@ -15,7 +15,7 @@ class Mission {
   final int points;
   final int difficulty; // 1-5
   final String? initialCode;
-  final String? solution;
+  String? solution;
   final List<dynamic>? options;
   final List<dynamic>? correctOrder;
   bool isCompleted;
@@ -29,8 +29,10 @@ class Mission {
     required this.difficulty,
     this.initialCode,
     this.solution,
-    this.options, 
-    this.correctOrder, 
+    this.options,
+    this.correctOrder,
     this.isCompleted = false,
   });
+
+
 }
