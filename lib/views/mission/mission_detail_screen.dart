@@ -8,8 +8,8 @@ import '../../theme/app_theme.dart';
 import '../chat/ai_tutor_chat.dart';
 
 class MissionDetailScreen extends StatefulWidget {
-  final Mission mission;
-  const MissionDetailScreen({super.key, required this.mission});
+   Mission mission;
+   MissionDetailScreen({super.key, required this.mission});
 
   @override
   State<MissionDetailScreen> createState() => _MissionDetailScreenState();
@@ -79,7 +79,10 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _showAITutor(context),
+                    onPressed: () {
+                      widget.mission.solution = _codeController.text.trim();
+                      _showAITutor(context);
+                    },
                     icon: const Icon(Icons.lightbulb_outline),
                     label: const Text("Ask me"),
                   ),

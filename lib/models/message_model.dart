@@ -16,22 +16,18 @@ class Message {
   String get finalMessage {
     return jsonEncode({
       "student_profile": {
-        "level": userInfo!.userLevel , 
+        "level": userInfo!.userLevel,
         "programming_language": userInfo!.progLanguage,
         "topic": mission!.title
       },
       "mission": {
         "title": mission!.title,
         "description": mission!.description,
-        "type": mission!.type.name
+        "type": mission!.type.name,
+        "initial_code": mission!.initialCode,
       },
-      "code": "public class UserService {...}",
-      "observed_behavior": {
-        "error_message": "NullPointerException at line 12",
-        "unexpected_output": "Program crashes",
-        "expected_output": "Print user name"
-      },
-      "student_attempt": "I think the constructor is correct but I'm not sure."
+      "student_code_attempt": mission!.solution,
+      "student_question": message
     });
   }
 
