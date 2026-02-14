@@ -9,8 +9,11 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context);
+    final authService = Provider.of<AppwriteService>(context, listen: false);
     final user = authService.user;
+    final String userImage = authService.progress.imageId;
+    NetworkImage dataBaseImage = NetworkImage(
+        'https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/$userImage/view?project=697295e70021593c3438&mode=admin');
 
     return Scaffold(
       appBar: AppBar(
@@ -36,10 +39,13 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 60,
               backgroundColor: AppTheme.primaryColor,
-              child: Icon(Icons.person, size: 60, color: Colors.white),
+              backgroundImage: userImage.isEmpty ? null : dataBaseImage,
+              child: userImage.isEmpty
+                  ? const Icon(Icons.person, color: Colors.white)
+                  : null,
             ),
             const SizedBox(height: 16),
             Text(
@@ -59,8 +65,8 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 32),
             _buildSectionTitle(context, "Earned Badges"),
             const SizedBox(height: 16),
-            _buildBadgeGrid(),
-            const SizedBox(height: 32),
+            _buildBadgeGrid(context),
+            const SizedBox(height: 16),
             _buildSectionTitle(context, "Learning Progress"),
             const SizedBox(height: 16),
             _buildProgressList(),
@@ -70,8 +76,8 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatRow(context)  {
-      final authService = Provider.of<AppwriteService>(context);
+  Widget _buildStatRow(context) {
+    final authService = Provider.of<AppwriteService>(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -102,14 +108,73 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgeGrid() {
-    final badges = [
-      {'name': 'Bug Hunter', 'icon': Icons.bug_report, 'color': Colors.green},
-      {'name': 'Code Ninja', 'icon': Icons.bolt, 'color': Colors.orange},
-      {'name': 'Test Master', 'icon': Icons.verified, 'color': Colors.blue},
-      {'name': 'Fast Learner', 'icon': Icons.speed, 'color': Colors.purple},
+  Widget _buildBadgeGrid(context) {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    List<String> earnBadges = authService.progress.earnedBadges;
+    List<Map<String, dynamic>> allBadges = [
+      {
+        'name': 'Bug Hunter',
+        'desc': 'Fix 10 debugging missions',
+        'icon': Icons.bug_report,
+        'color': Colors.green,
+        'unlocked': false
+      },
+      {
+        'name': 'Code Ninja',
+        'desc': 'Complete 5 missions without hints',
+        'icon': Icons.bolt,
+        'color': Colors.orange,
+        'unlocked': false
+      },
+      {
+        'name': 'Test Master',
+        'desc': 'Write 20 unit tests',
+        'icon': Icons.verified,
+        'color': Colors.blue,
+        'unlocked': false
+      },
+      {
+        'name': 'Fast Learner',
+        'desc': 'Complete 3 missions in one day',
+        'icon': Icons.speed,
+        'color': Colors.purple,
+        'unlocked': false
+      },
+      {
+        'name': 'Architect',
+        'desc': 'Design a complex system',
+        'icon': Icons.architecture,
+        'color': Colors.red,
+        'unlocked': false
+      },
+      {
+        'name': 'Clean Coder',
+        'desc': 'Maintain high code quality',
+        'icon': Icons.cleaning_services,
+        'color': Colors.teal,
+        'unlocked': false
+      },
+      {
+        'name': 'Team Player',
+        'desc': 'Review 5 peer solutions',
+        'icon': Icons.groups,
+        'color': Colors.indigo,
+        'unlocked': false
+      },
+      {
+        'name': 'AI Whisperer',
+        'desc': 'Ask 50 insightful questions',
+        'icon': Icons.psychology,
+        'color': Colors.pink,
+        'unlocked': false
+      },
     ];
-
+    List<Map<String, dynamic>> badges=[];
+    for(int i=0;i<allBadges.length;i++){
+      if(earnBadges.contains(allBadges[i]['name'])){
+        badges.add(allBadges[i]);
+      }
+    }
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),

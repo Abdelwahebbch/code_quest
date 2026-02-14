@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter/material.dart';
@@ -61,6 +63,14 @@ class AppwriteService extends ChangeNotifier {
           'bio': "",
           'imageId': "",
           'nbMission': 0,
+          'badgesProgress': jsonEncode({
+            "debug": 0,
+            "complete": 0,
+            "test": 0,
+            "singleChoice": 0,
+            "multipleChoice": 0,
+            "ordering": 0
+          }),
         },
         permissions: [
           Permission.read(Role.user(_user!.$id)),
@@ -153,7 +163,7 @@ class AppwriteService extends ChangeNotifier {
           options: doc.data['options'],
           correctOrder: doc.data['correctOrder'],
           solution: doc.data['solution'],
-          isCompleted: doc.data['isCompleted'] ?? false,
+          isCompleted: doc.data['isCompleted'],
         );
       }).toList();
     } catch (e) {
@@ -172,16 +182,21 @@ class AppwriteService extends ChangeNotifier {
       int x = await getRank();
 
       progress = UserInfo(
-          progLanguage: row.data["language"] ?? "not selected",
-          username: user.name,
-          experience: row.data["experience"],
-          totalPoints: row.data["totalPoints"],
-          earnedBadges: List<String>.from(row.data["earnedBadges"] ?? []),
-          bio: row.data["bio"],
-          imageId: row.data["imageId"],
-          email: user.email,
-          rank: x,
-          nbMissions: row.data["nbMission"] ?? 0);
+        progLanguage: row.data["progLanguage"] ?? "not selected",
+        username: user.name,
+        experience: row.data["experience"],
+        totalPoints: row.data["totalPoints"],
+        earnedBadges: List<String>.from(row.data["earnedBadges"] ?? []),
+        bio: row.data["bio"],
+        imageId: row.data["imageId"],
+        email: user.email,
+        rank: x,
+        nbMissions: row.data["nbMission"] ?? 0,
+        missions: await getMissions(),
+        badgesProgress:
+            jsonDecode(row.data["badgesProgress"]), //replaced by the database,
+        showingBadges: [],
+      );
 
       notifyListeners();
     } catch (e) {
@@ -232,10 +247,70 @@ class AppwriteService extends ChangeNotifier {
         databaseId: "6972adad002e2ba515f2",
         tableId: "user_profiles",
         rowId: _user!.$id,
-        data: {'language': languageSelected},
+        data: {'progLanguage': languageSelected},
       );
       progress.progLanguage = languageSelected;
       notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<String>> checkbadges(int missionNb) async {
+    try {
+      List<String> returnedBagdes = [];
+      String missionType = progress.missions[missionNb].type.name;
+      progress.badgesProgress[missionType] =
+          (progress.badgesProgress[missionType]! + 1);
+      if (progress.badgesProgress['debug']! >= 2) {
+        if (!progress.earnedBadges.contains('Bug Hunter') &&
+            !progress.earnedBadges.contains('Code Ninja')) {
+          progress.earnedBadges.add('Bug Hunter');
+          returnedBagdes.add('Bug Hunter');
+          progress.earnedBadges.add('Code Ninja');
+          returnedBagdes.add('Code Ninja');
+          progress.showingBadges.add('Code Ninja');
+          progress.showingBadges.add('Bug Hunter');
+        }
+        
+      }
+      notifyListeners();
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "user_profiles",
+        rowId: _user!.$id,
+        data: {
+          'badgesProgress': jsonEncode(progress.badgesProgress),
+          'earnedBadges': progress.earnedBadges
+        },
+      );
+
+      return returnedBagdes;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<String>> updateMissionStatus(String id) async {
+    try {
+      //missing database
+      List<String> returnedBagdes = [];
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "missions",
+        rowId: id,
+        data: {'isCompleted': true},
+      );
+      int? missionNb;
+      for (int i = 0; i < progress.missions.length; i++) {
+        if (progress.missions[i].id == id) {
+          progress.missions[i].isCompleted = true;
+          missionNb = i;
+        }
+      }
+      returnedBagdes = await checkbadges(missionNb!);
+      notifyListeners();
+      return returnedBagdes;
     } catch (e) {
       rethrow;
     }
@@ -259,7 +334,12 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-
+  void emptyShowingBadges(){
+    print(progress.showingBadges);
+    progress.showingBadges=[];
+    notifyListeners();
+  print(progress.showingBadges);
+  }
   void updateXp(int newXp) {
     progress.experience += newXp;
     notifyListeners();

@@ -25,14 +25,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     final isDark = themeManager.themeMode == ThemeMode.dark;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Settings"),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+      
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          SizedBox(height: 40,),
+          const Text("Settings",style: TextStyle(color: Colors.white,fontSize: 21,fontWeight: FontWeight.bold ),),
+           SizedBox(height: 16,),
           _buildSectionHeader("Account"),
           _buildSettingTile(
             icon: Icons.person_outline,

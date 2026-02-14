@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:pfe_test/widgets/choice_challenge.dart';
 import 'package:pfe_test/widgets/ordering_challenge.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +30,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.mission.title),
@@ -87,7 +89,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _checkAnswer(),
+                    onPressed: () {
+                      _checkAnswer();
+                    },
                     icon: const Icon(Icons.play_arrow),
                     label: const Text("Submit"),
                   ),
@@ -159,7 +163,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     );
   }
 
-  void _checkAnswer() {
+  Future<void> _checkAnswer() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     bool isCorrect = false;
     switch (widget.mission.type) {
@@ -197,17 +201,29 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             : "That's not the right answer. Try asking the AI Tutor for a hint!"),
         actions: [
           TextButton(
-            onPressed: () {
-              authService.updateXp(widget.mission.points);
+            onPressed: () async {
               //debugPrint("XP = ${authService.progress.experience}");
-              return Navigator.pop(context);
+              if (isCorrect) {
+                authService.updateXp(widget.mission.points);
+                final List<String> returnedBadges =await authService.updateMissionStatus(widget.mission.id);
+                Navigator.pop(context);
+                 Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>  DashboardScreen()),
+                            );
+              } else {
+                Navigator.pop(context);
+              }
             },
             child: const Text("OK"),
           ),
         ],
       ),
     );
+    
   }
+  
 }
 
 bool equals(List l1, List l2) {
