@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as authservice;
 import 'package:provider/provider.dart';
 import '../../models/mission_model.dart';
 import '../../theme/app_theme.dart';
@@ -22,7 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
 
   Future<void> showNotif(List<String> badges) async {
-    print(badges);
+    //print(badges);
     if (badges.isNotEmpty) {
       for (int i = 0; i < badges.length; i++) {
         await showMissionCompleted(context, badges[i]);
@@ -43,14 +42,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _screens = [
-      DashboardHome(),
-      BadgesScreen(),
-      SettingsScreen(),
+    final List<Widget> screens = [
+     const DashboardHome(),
+     const BadgesScreen(),
+     const SettingsScreen(),
     ];
 
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
@@ -231,7 +230,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class DashboardHome extends StatefulWidget {
-  const DashboardHome();
+  const DashboardHome({super.key});
 
   @override
   State<DashboardHome> createState() => DashboardHomeState();
@@ -293,7 +292,7 @@ class DashboardHomeState extends State<DashboardHome> {
                             backgroundImage:
                                 userImage.isEmpty ? null : dataBaseImage,
                             child: userImage.isEmpty
-                                ? Icon(Icons.person, color: Colors.white)
+                                ? const Icon(Icons.person, color: Colors.white)
                                 : null,
                           ),
                         ),

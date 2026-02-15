@@ -90,9 +90,9 @@ class _BadgesScreenState extends State<BadgesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 40,),
+           const SizedBox(height: 40,),
           const Text("Your Achievements",style: TextStyle(color: Colors.white,fontSize: 22,fontWeight: FontWeight.bold ),),
-           SizedBox(height: 16,),
+         const  SizedBox(height: 16,),
             _buildSummaryCard(allBadges),
             const SizedBox(height: 24),
             Text("All Badges", style: Theme.of(context).textTheme.titleLarge),

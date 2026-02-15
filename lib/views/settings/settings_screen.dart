@@ -29,9 +29,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          SizedBox(height: 40,),
+          const SizedBox(height: 40,),
           const Text("Settings",style: TextStyle(color: Colors.white,fontSize: 21,fontWeight: FontWeight.bold ),),
-           SizedBox(height: 16,),
+          const SizedBox(height: 16,),
           _buildSectionHeader("Account"),
           _buildSettingTile(
             icon: Icons.person_outline,

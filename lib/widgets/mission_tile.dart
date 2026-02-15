@@ -43,7 +43,7 @@ class MissionTile extends StatelessWidget {
             ),
           ],
         ),
-        trailing: isComplete? Icon(Icons.check,color: AppTheme.warningColor,): Icon(Icons.chevron_right),
+        trailing: isComplete? const Icon(Icons.check,color: AppTheme.warningColor,): const Icon(Icons.chevron_right),
         onTap: () {
           //add if is it commplet
          if(!isComplete){

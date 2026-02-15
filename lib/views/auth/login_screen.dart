@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:pfe_test/views/onboarding/onboarding_screen.dart';
+import 'package:pfe_test/widgets/google_sign_in_button.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/appwrite_service.dart';
 import 'signup_screen.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -129,6 +131,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 child: const Text("Don't have an account? Sign Up"),
               ),
+              const SizedBox(
+                height: 50,
+              ),
+              const GoogleSignInButton()
             ],
           ),
         ),
