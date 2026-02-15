@@ -119,7 +119,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ],
             ),
             const SizedBox(height: 32),
-            _buildEditField(context, "Username", _userNameController, false),
+            _buildEditField(context, "Username", _userNameController, true),
             const SizedBox(height: 16),
             _buildEditField(context, "Email", _emailController, true),
             const SizedBox(height: 16),
