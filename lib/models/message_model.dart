@@ -16,6 +16,7 @@ class Message {
   String get finalMessage {
     return jsonEncode({
       "student_profile": {
+        "name": userInfo!.username,
         "level": userInfo!.userLevel,
         "programming_language": userInfo!.progLanguage,
         "topic": mission!.title
