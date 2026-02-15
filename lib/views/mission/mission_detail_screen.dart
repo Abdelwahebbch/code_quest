@@ -9,8 +9,8 @@ import '../../theme/app_theme.dart';
 import '../chat/ai_tutor_chat.dart';
 
 class MissionDetailScreen extends StatefulWidget {
-   Mission mission;
-   MissionDetailScreen({super.key, required this.mission});
+  Mission mission;
+  MissionDetailScreen({super.key, required this.mission});
 
   @override
   State<MissionDetailScreen> createState() => _MissionDetailScreenState();
@@ -30,7 +30,6 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.mission.title),
@@ -208,13 +207,13 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               //debugPrint("XP = ${authService.progress.experience}");
               if (isCorrect) {
                 authService.updateXp(widget.mission.points);
-                final List<String> returnedBadges =await authService.updateMissionStatus(widget.mission.id);
-                Navigator.pop(context);
-                 Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>  DashboardScreen()),
-                            );
+                await authService.updateMissionStatus(widget.mission.id);
+
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DashboardHome()),
+                    (Route<dynamic> route) => false);
               } else {
                 Navigator.pop(context);
               }
@@ -224,9 +223,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         ],
       ),
     );
-    
   }
-  
 }
 
 bool equals(List l1, List l2) {
