@@ -1,4 +1,4 @@
-# Rapport d'Étude de Besoins : Tuteur IA Gamifié pour le Génie Logiciel
+# Rapport d'Étude de Besoins : Code Quest "Tuteur IA Gamifié"
 
 ## 1. Introduction
 Ce document présente l'étude des besoins pour le développement d'une application mobile (Flutter) visant à enseigner les concepts du génie logiciel. L'innovation majeure réside dans l'utilisation d'un Grand Modèle de Langage (LLM) comme tuteur adaptatif au sein d'un environnement d'apprentissage gamifié.
