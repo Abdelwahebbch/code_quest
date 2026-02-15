@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:pfe_test/views/onboarding/onboarding_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
@@ -36,10 +37,16 @@ class _SplashScreenState extends State<SplashScreen>
     await authService.checkSession();
     await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
-    if (authService.user != null) {
+    if (authService.user != null && authService.isFirstLogin) {
+      authService.updateIsFirstLogin();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+      );
+    } else if (authService.user != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardHome()),
       );
     } else {
       Navigator.pushReplacement(

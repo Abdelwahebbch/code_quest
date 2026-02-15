@@ -180,7 +180,7 @@ class AppwriteService extends ChangeNotifier {
           tableId: "user_profiles",
           rowId: user.$id);
       int x = await getRank();
-
+      isFirstLogin = row.data["isFirstLogin"] ?? true;
       progress = UserInfo(
         progLanguage: row.data["progLanguage"] ?? "not selected",
         username: user.name,
@@ -272,7 +272,6 @@ class AppwriteService extends ChangeNotifier {
           progress.showingBadges.add('Code Ninja');
           progress.showingBadges.add('Bug Hunter');
         }
-        
       }
       notifyListeners();
       await database.updateRow(
@@ -334,14 +333,29 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-  void emptyShowingBadges(){
-    print(progress.showingBadges);
-    progress.showingBadges=[];
+
+  void emptyShowingBadges() {
+   // print(progress.showingBadges);
+    progress.showingBadges = [];
     notifyListeners();
-  print(progress.showingBadges);
+   // print(progress.showingBadges);
   }
+
   void updateXp(int newXp) {
     progress.experience += newXp;
     notifyListeners();
+  }
+
+  void updateIsFirstLogin() {
+    if (isFirstLogin) {
+      database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "user_profiles",
+        rowId: user!.$id,
+        data: {'isFirstLogin': false},
+      );
+      isFirstLogin = false;
+      notifyListeners();
+    }
   }
 }
