@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
+import 'package:pfe_test/services/notifications_service.dart';
 import 'package:pfe_test/views/onboarding/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
@@ -7,6 +8,7 @@ import 'services/appwrite_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationsService().initNotification(); 
   runApp(
     MultiProvider(
       providers: [
@@ -27,12 +29,11 @@ class AITutorApp extends StatelessWidget {
     final themeManager = Provider.of<ThemeManager>(context);
 
     return MaterialApp(
-      title: 'AI Tutor: Software Engineering',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeManager.themeMode,
-      home: const SplashScreen()
-    );
+        title: 'AI Tutor: Software Engineering',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeManager.themeMode,
+        home: const SplashScreen());
   }
 }
