@@ -46,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen>
     } else if (authService.user != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const DashboardHome()),
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
     } else {
       Navigator.pushReplacement(

@@ -212,7 +212,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const DashboardHome()),
+                        builder: (context) => const DashboardScreen()),
                     (Route<dynamic> route) => false);
               } else {
                 Navigator.pop(context);
