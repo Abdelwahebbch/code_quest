@@ -9,8 +9,8 @@ import '../../theme/app_theme.dart';
 import '../chat/ai_tutor_chat.dart';
 
 class MissionDetailScreen extends StatefulWidget {
-  Mission mission;
-  MissionDetailScreen({super.key, required this.mission});
+ final Mission mission;
+  const MissionDetailScreen({super.key, required this.mission});
 
   @override
   State<MissionDetailScreen> createState() => _MissionDetailScreenState();

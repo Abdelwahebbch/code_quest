@@ -1,4 +1,4 @@
-package com.pfe.pfe_test;
+package com.fsg.pfe;
 
 import io.flutter.embedding.android.FlutterActivity;
 
