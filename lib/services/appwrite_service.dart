@@ -164,6 +164,7 @@ class AppwriteService extends ChangeNotifier {
           correctOrder: doc.data['correctOrder'],
           solution: doc.data['solution'],
           isCompleted: doc.data['isCompleted'],
+          nbFailed: doc.data['nbFailed']?? 0,
         );
       }).toList();
     } catch (e) {
@@ -292,7 +293,7 @@ class AppwriteService extends ChangeNotifier {
 
   Future<List<String>> updateMissionStatus(String id) async {
     try {
-      //missing database
+      
       List<String> returnedBagdes = [];
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
@@ -335,10 +336,33 @@ class AppwriteService extends ChangeNotifier {
   }
 
   void emptyShowingBadges() {
-   // print(progress.showingBadges);
     progress.showingBadges = [];
     notifyListeners();
-   // print(progress.showingBadges);
+  }
+
+  Future<void> updateFailedNb(String id) async{
+    try {
+      
+      int previousNbFailed=0;
+      for (int i = 0; i < progress.missions.length; i++) {
+        if (progress.missions[i].id == id) {
+          var previousNbFailed=progress.missions[i].nbFailed;
+          progress.missions[i].nbFailed = previousNbFailed+1;
+        }
+      }
+      int cuurentNbFailed=previousNbFailed+1;
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "missions",
+        rowId: id,
+        data: {'nbFailed': cuurentNbFailed},
+      );
+      
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+
   }
 
   void updateXp(int newXp) {
