@@ -37,19 +37,27 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
             "description": mission.description,
             "type": mission.type.name,
             "initial_code": mission.initialCode,
-            "failed_time" : mission.nbFailed,
+            "failed_time": mission.nbFailed,
           },
           "topic": mission.title,
           "student_code_attempt": solution
         }));
     try {
-      final Map<String, dynamic> data = jsonDecode(res.body);
+      final Map<String, dynamic> data ={};
       var outPut = jsonDecode(res.body);
       var response = outPut["response"];
+      if (response.startsWith("```json")) {
+        response = response.substring("```json".length);
+      }
+      if (response.endsWith("```")) {
+        response = response.substring(0, response.length - "```".length);
+      }
       var realResponse = jsonDecode(response);
-      print(realResponse["result"]);
-      data.addAll({"result":realResponse["result"],"success":realResponse["success"]});
-      
+      data.addAll({
+        "result": realResponse["result"],
+        "success": realResponse["success"]
+      });
+
       return data;
     } catch (e) {
       throw Exception(e);
