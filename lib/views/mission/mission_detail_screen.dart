@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:pfe_test/widgets/choice_challenge.dart';
@@ -167,13 +168,16 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   Future<void> _checkAnswer() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
+    final ai =Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     bool isCorrect = false;
     switch (widget.mission.type) {
       case MissionType.debug:
       case MissionType.complete:
       case MissionType.test:
-        isCorrect =
-            _codeController.text.trim() == widget.mission.solution?.trim();
+        final Map<String,dynamic> check= await ai.checkAnwser(authService.progress, widget.mission, _codeController.text.trim());
+        isCorrect= check["result"];
+        print(check["success"]);
+            
         break;
       case MissionType.singleChoice:
         isCorrect = _currentAnswer == widget.mission.solution;
