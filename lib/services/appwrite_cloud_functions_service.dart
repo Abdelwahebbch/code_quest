@@ -36,7 +36,8 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
             "title": mission.title,
             "description": mission.description,
             "type": mission.type.name,
-            "initial_code": mission.initialCode
+            "initial_code": mission.initialCode,
+            "failed_time" : mission.nbFailed,
           },
           "topic": mission.title,
           "student_code_attempt": solution

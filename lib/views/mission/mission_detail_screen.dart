@@ -219,6 +219,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                         builder: (context) => const DashboardScreen()),
                     (Route<dynamic> route) => false);
               } else {
+                await authService.updateFailedNb(widget.mission.id);
                 Navigator.pop(context);
               }
             },

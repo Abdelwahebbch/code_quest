@@ -19,6 +19,7 @@ class Mission {
   final List<dynamic>? options;
   final List<dynamic>? correctOrder;
   bool isCompleted;
+  int nbFailed;
 
   Mission({
     required this.id,
@@ -32,6 +33,7 @@ class Mission {
     this.options,
     this.correctOrder,
     this.isCompleted = false,
+    this.nbFailed = 0,
   });
 
 
