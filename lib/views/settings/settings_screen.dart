@@ -25,13 +25,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     final isDark = themeManager.themeMode == ThemeMode.dark;
     return Scaffold(
-      
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const SizedBox(height: 40,),
-          const Text("Settings",style: TextStyle(color: Colors.white,fontSize: 21,fontWeight: FontWeight.bold ),),
-          const SizedBox(height: 16,),
+          const SizedBox(
+            height: 40,
+          ),
+          const Text(
+            "Settings",
+            style: TextStyle(
+                color: Colors.white, fontSize: 21, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(
+            height: 16,
+          ),
           _buildSectionHeader("Account"),
           _buildSettingTile(
             icon: Icons.person_outline,
@@ -100,11 +107,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 40),
           ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-                (route) => false,
-              );
+            onPressed: () async {
+              await authService.logout();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (context) => const LoginScreen()),
+                    (route) => false);
+              }
             },
             style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red.withValues(alpha: 0.8)),
