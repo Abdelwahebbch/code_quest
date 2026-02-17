@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
+import 'package:pfe_test/views/onboarding/onboarding_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/appwrite_service.dart';
@@ -43,8 +44,13 @@ class _SignupScreenState extends State<SignupScreen> {
         _nameController.text.trim(),
       );
       if (!mounted) return;
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => const DashboardScreen()));
+      if (authService.isFirstLogin) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const OnboardingScreen()));
+      } else {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const DashboardScreen()));
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
