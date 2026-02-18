@@ -380,7 +380,46 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-
+  Future<void> updateUserPoints(int nb) async{
+    try {
+      int previousTotalPoints=progress.totalPoints;
+      int currentTotalPoints=previousTotalPoints+nb;
+      progress.totalPoints=currentTotalPoints;
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "user_profiles",
+        rowId: _user!.$id,
+        data: {
+          'totalPoints':currentTotalPoints
+        },
+      );
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+  Future<void> updateMissionAiPoints(String id) async{
+    try {
+      int previousAiPointsUsed = 0;
+      for (int i = 0; i < progress.missions.length; i++) {
+        if (progress.missions[i].id == id) {
+          var previousAiPointsUsed = progress.missions[i].aiPointsUsed;
+          progress.missions[i].aiPointsUsed = previousAiPointsUsed + 1;
+        }
+      }
+      int cuurentAiPointsUsed = previousAiPointsUsed + 1;
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "missions",
+        rowId: id,
+        data: {'aiPointsUsed': cuurentAiPointsUsed},
+      );
+      await updateUserPoints(-1);
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
   void updateIsFirstLogin() {
     if (isFirstLogin) {
       database.updateRow(

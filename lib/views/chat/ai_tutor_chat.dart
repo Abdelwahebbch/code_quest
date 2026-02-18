@@ -128,5 +128,6 @@ class _AITutorChatState extends State<AITutorChat> {
       // Mock AI response
       _messages.add(Message(role: "bot", message: data["response"]));
     });
+    await authservice.updateMissionAiPoints(widget.mission.id);
   }
 }
