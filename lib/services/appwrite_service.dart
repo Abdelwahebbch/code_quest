@@ -56,7 +56,7 @@ class AppwriteService extends ChangeNotifier {
         tableId: 'user_profiles',
         rowId: _user!.$id,
         data: {
-          'experience': 0,
+          'experience': 500,
           'totalPoints': 0,
           'progLanguage': "",
           'earnedBadges': [],
