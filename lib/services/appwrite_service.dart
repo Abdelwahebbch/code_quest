@@ -199,6 +199,10 @@ class AppwriteService extends ChangeNotifier {
         badgesProgress:
             jsonDecode(row.data["badgesProgress"]), //replaced by the database,
         showingBadges: [],
+        nbMissionCompletedWithoutHints:
+            row.data["nbMissionCompletedWithoutHints"] ?? 0,
+        totalFailures: row.data["totalFailures"] ?? 0,
+        totalAIQuestions: row.data["totalAIQuestions"] ?? 0,
       );
 
       notifyListeners();
@@ -265,15 +269,69 @@ class AppwriteService extends ChangeNotifier {
       String missionType = progress.missions[missionNb].type.name;
       progress.badgesProgress[missionType] =
           (progress.badgesProgress[missionType]! + 1);
-      if (progress.badgesProgress['debug']! >= 2) {
-        if (!progress.earnedBadges.contains('Bug Hunter') &&
-            !progress.earnedBadges.contains('Code Ninja')) {
+      int missionsCompletedToday = 0;
+      for (int i = 0; i < progress.missions.length; i++) {
+        if (progress.missions[i].isCompleted) {
+          missionsCompletedToday += 1;
+        }
+      }
+
+      if (progress.badgesProgress['debug']! >= 10) {
+        if (!progress.earnedBadges.contains('Bug Hunter')) {
           progress.earnedBadges.add('Bug Hunter');
           returnedBagdes.add('Bug Hunter');
+          progress.showingBadges.add('Bug Hunter');
+        }
+      }
+      if (progress.nbMissionCompletedWithoutHints >= 5) {
+        if (!progress.earnedBadges.contains('Code Ninja')) {
           progress.earnedBadges.add('Code Ninja');
           returnedBagdes.add('Code Ninja');
           progress.showingBadges.add('Code Ninja');
-          progress.showingBadges.add('Bug Hunter');
+        }
+      }
+      if (progress.badgesProgress['test']! >= 5) {
+        if (!progress.earnedBadges.contains('Test Master')) {
+          progress.earnedBadges.add('Test Master');
+          returnedBagdes.add('Test Master');
+          progress.showingBadges.add('Test Master');
+        }
+      }
+      if (missionsCompletedToday >= 3) {
+        if (!progress.earnedBadges.contains('Fast Learner')) {
+          progress.earnedBadges.add('Fast Learner');
+          returnedBagdes.add('Fast Learner');
+          progress.showingBadges.add('Fast Learner');
+        }
+      }
+      if (progress.badgesProgress['ordering'] >= 10) {
+        if (!progress.earnedBadges.contains('Architect')) {
+          progress.earnedBadges.add('Architect');
+          returnedBagdes.add('Architect');
+          progress.showingBadges.add('Architect');
+        }
+      }
+      if (progress.badgesProgress['complete'] >= 10 &&
+          progress.totalFailures <= 30) {
+        if (!progress.earnedBadges.contains('Clean Coder')) {
+          progress.earnedBadges.add('Clean Coder');
+          returnedBagdes.add('Clean Coder');
+          progress.showingBadges.add('Clean Coder');
+        }
+      }
+      if (progress.badgesProgress['singleChoice'] >= 10 &&
+          progress.badgesProgress['multipleChoice'] >= 10) {
+        if (!progress.earnedBadges.contains('Team Player')) {
+          progress.earnedBadges.add('Team Player');
+          returnedBagdes.add('Team Player');
+          progress.showingBadges.add('Team Player');
+        }
+      }
+      if (progress.totalAIQuestions >= 50) {
+        if (!progress.earnedBadges.contains('Team Player')) {
+          progress.earnedBadges.add('AI Whisperer');
+          returnedBagdes.add('AI Whisperer');
+          progress.showingBadges.add('AI Whisperer');
         }
       }
       notifyListeners();
@@ -346,18 +404,26 @@ class AppwriteService extends ChangeNotifier {
       int previousNbFailed = 0;
       for (int i = 0; i < progress.missions.length; i++) {
         if (progress.missions[i].id == id) {
-          var previousNbFailed = progress.missions[i].nbFailed;
+          previousNbFailed = progress.missions[i].nbFailed;
           progress.missions[i].nbFailed = previousNbFailed + 1;
         }
       }
       int cuurentNbFailed = previousNbFailed + 1;
+      int previousTotalFailures = progress.totalFailures;
+      int currentTotalFailures = previousTotalFailures + 1;
+      progress.totalFailures = currentTotalFailures;
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "missions",
         rowId: id,
         data: {'nbFailed': cuurentNbFailed},
       );
-
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "user_profiles",
+        rowId: user!.$id,
+        data: {'totalFailures': currentTotalFailures},
+      );
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -366,7 +432,7 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> updateXp(int xp) async {
     try {
-      int newExperience=progress.experience +xp;
+      int newExperience = progress.experience + xp;
       progress.experience = newExperience;
       notifyListeners();
       await database.updateRow(
@@ -375,44 +441,52 @@ class AppwriteService extends ChangeNotifier {
         rowId: user!.$id,
         data: {'experience': newExperience},
       );
-      
     } catch (e) {
       rethrow;
     }
   }
-  Future<void> updateUserPoints(int nb) async{
+
+  Future<void> updateUserPoints(int nb) async {
     try {
-      int previousTotalPoints=progress.totalPoints;
-      int currentTotalPoints=previousTotalPoints+nb;
-      progress.totalPoints=currentTotalPoints;
+      int previousTotalPoints = progress.totalPoints;
+      int currentTotalPoints = previousTotalPoints + nb;
+      progress.totalPoints = currentTotalPoints;
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "user_profiles",
         rowId: _user!.$id,
-        data: {
-          'totalPoints':currentTotalPoints
-        },
+        data: {'totalPoints': currentTotalPoints},
       );
       notifyListeners();
     } catch (e) {
       rethrow;
     }
   }
-  Future<void> updateMissionAiPoints(String id) async{
+
+  Future<void> updateMissionAiPoints(String id) async {
     try {
       int previousAiPointsUsed = 0;
       for (int i = 0; i < progress.missions.length; i++) {
         if (progress.missions[i].id == id) {
-          var previousAiPointsUsed = progress.missions[i].aiPointsUsed;
+          previousAiPointsUsed = progress.missions[i].aiPointsUsed;
           progress.missions[i].aiPointsUsed = previousAiPointsUsed + 1;
         }
       }
-      int cuurentAiPointsUsed = previousAiPointsUsed + 1;
+      int currentAiPointsUsed = previousAiPointsUsed + 1;
+      int previousTotalAIQuestions = progress.totalAIQuestions;
+      int currentToalAIQuestions = previousTotalAIQuestions + 1;
+      progress.totalAIQuestions = currentToalAIQuestions;
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "missions",
         rowId: id,
-        data: {'aiPointsUsed': cuurentAiPointsUsed},
+        data: {'aiPointsUsed': currentAiPointsUsed},
+      );
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "user_profiles",
+        rowId: user!.$id,
+        data: {'totalAIQuestions': currentToalAIQuestions},
       );
       await updateUserPoints(-1);
       notifyListeners();
@@ -420,6 +494,7 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
+
   void updateIsFirstLogin() {
     if (isFirstLogin) {
       database.updateRow(
