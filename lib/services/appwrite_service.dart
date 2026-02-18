@@ -167,6 +167,7 @@ class AppwriteService extends ChangeNotifier {
           isCompleted: doc.data['isCompleted'],
           nbFailed: doc.data['nbFailed'] ?? 0,
           aiPointsUsed: doc.data['aiPointsUsed'] ?? 0,
+          conversation:List<String>.from(doc.data['conversation'] ?? []),
         );
       }).toList();
     } catch (e) {
@@ -197,7 +198,7 @@ class AppwriteService extends ChangeNotifier {
         nbMissions: row.data["nbMission"] ?? 0,
         missions: await getMissions(),
         badgesProgress:
-            jsonDecode(row.data["badgesProgress"]), //replaced by the database,
+            jsonDecode(row.data["badgesProgress"]), 
         showingBadges: [],
         nbMissionCompletedWithoutHints:
             row.data["nbMissionCompletedWithoutHints"] ?? 0,
@@ -494,7 +495,20 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-
+  Future<void> addToConversation(int index,String id,String msg) async{
+    try {
+      progress.missions[index].conversation.add(msg);
+      
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "missions",
+        rowId: id,
+        data: {'conversation': progress.missions[index].conversation},
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
   void updateIsFirstLogin() {
     if (isFirstLogin) {
       database.updateRow(

@@ -21,6 +21,7 @@ class Mission {
   bool isCompleted;
   int nbFailed;
   int aiPointsUsed;
+  List<String> conversation;
 
   Mission({
     required this.id,
@@ -36,6 +37,7 @@ class Mission {
     this.isCompleted = false,
     this.nbFailed =0,
     this.aiPointsUsed=0,
+    this.conversation=const [],
   });
 
 
