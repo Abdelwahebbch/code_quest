@@ -12,48 +12,126 @@ class OnboardingScreen extends StatefulWidget {
 
 class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   final List<OnboardingQuestion> _questions = [
+    // --- GATEKEEPER ---
     OnboardingQuestion(
-      id: 'goal_beg',
-      question: "Quel est votre objectif principal ?",
+      id: 'persona',
+      question: "Comment décririez-vous votre profil ?",
       options: [
         OnboardingOption(
-            id: 'bases', label: "Apprendre les bases", nextQuestionId: 'level'),
-        OnboardingOption(
-            id: 'hobby', label: "Préparer un examen", nextQuestionId: 'level'),
-        OnboardingOption(
-            id: 'hobby',
-            label: "Améliorer tes compétences",
+            id: 'student',
+            label: "Étudiant (Exams/Cours)",
             nextQuestionId: 'level'),
+        OnboardingOption(
+            id: 'dev_pro',
+            label: "Développeur (Maîtriser un langage)",
+            nextQuestionId: 'lang_goal'),
+        OnboardingOption(
+            id: 'curious',
+            label: "Débutant (Découvrir les concepts)",
+            nextQuestionId: 'curiosity_path'),
       ],
     ),
+
+    // --- PATH: STUDENT ---
     OnboardingQuestion(
       id: 'level',
-      question: "Quel est ton niveau d'étude ?",
+      question: "Quel est votre niveau actuel ?",
       options: [
-        OnboardingOption(id: 'lycee', label: "Lycée", nextQuestionId: 'lang'),
         OnboardingOption(
-            id: 'licence', label: "Licence", nextQuestionId: 'lang'),
-        OnboardingOption(id: 'master', label: "Master", nextQuestionId: 'lang'),
-        OnboardingOption(id: 'autre', label: "Autre", nextQuestionId: 'rythme'),
+            id: 'lycee', label: "Lycée / Bac", nextQuestionId: 'exam_deadline'),
+        OnboardingOption(
+            id: 'licence',
+            label: "Licence / Prépa",
+            nextQuestionId: 'exam_deadline'),
+        OnboardingOption(
+            id: 'master',
+            label: "Master / Ingénieur",
+            nextQuestionId: 'exam_deadline'),
       ],
     ),
     OnboardingQuestion(
-      id: 'lang',
-      question: "Quel langage vous est la plus familière ?",
+      id: 'exam_deadline',
+      question: "Quand est votre prochain examen important ?",
       options: [
-        OnboardingOption(id: 'py', label: "Python", nextQuestionId: 'rythme'),
-        OnboardingOption(id: 'java', label: "Java", nextQuestionId: 'rythme'),
-        OnboardingOption(id: 'dart', label: "Dart", nextQuestionId: 'rythme'),
-        OnboardingOption(id: 'C', label: "C / C++", nextQuestionId: 'rythme'),
+        OnboardingOption(
+            id: 'urgent',
+            label: "Moins de 2 semaines",
+            nextQuestionId: 'rythme'),
+        OnboardingOption(
+            id: 'chill',
+            label: "Dans plus d'un mois",
+            nextQuestionId: 'rythme'),
+        OnboardingOption(
+            id: 'none', label: "Juste pour réviser", nextQuestionId: 'rythme'),
       ],
     ),
+
+    // --- PATH: LANGUAGE MASTER ---
+    OnboardingQuestion(
+      id: 'lang_goal',
+      question: "Quel langage souhaitez-vous maîtriser ?",
+      options: [
+        OnboardingOption(
+            id: 'py', label: "Python (Data/AI)", nextQuestionId: 'current_exp'),
+        OnboardingOption(
+            id: 'dart',
+            label: "Dart (Flutter/Mobile)",
+            nextQuestionId: 'current_exp'),
+        OnboardingOption(
+            id: 'java',
+            label: "Java (Enterprise/Backend)",
+            nextQuestionId: 'current_exp'),
+        OnboardingOption(
+            id: 'js', label: "JavaScript (Web)", nextQuestionId: 'current_exp'),
+      ],
+    ),
+    OnboardingQuestion(
+      id: 'current_exp',
+      question: "Quelle est votre expérience avec ce langage ?",
+      options: [
+        OnboardingOption(
+            id: 'none',
+            label: "Zéro (Je pars de rien)",
+            nextQuestionId: 'rythme'),
+        OnboardingOption(
+            id: 'inter',
+            label: "Intermédiaire (Je connais la syntaxe)",
+            nextQuestionId: 'rythme'),
+        OnboardingOption(
+            id: 'expert',
+            label: "Avancé (Je veux optimiser)",
+            nextQuestionId: 'rythme'),
+      ],
+    ),
+
+    // --- PATH: BEGINNER CONCEPTS ---
+    OnboardingQuestion(
+      id: 'curiosity_path',
+      question: "Qu'est-ce qui vous attire le plus ?",
+      options: [
+        OnboardingOption(
+            id: 'logic',
+            label: "La logique pure (Algorithmes)",
+            nextQuestionId: 'rythme'),
+        OnboardingOption(
+            id: 'visual',
+            label: "Le visuel (Comment on fait une App)",
+            nextQuestionId: 'rythme'),
+        OnboardingOption(
+            id: 'ai',
+            label: "L'IA (Comment ça réfléchit)",
+            nextQuestionId: 'rythme'),
+      ],
+    ),
+
+    // --- FINAL: COMMITMENT (Universal) ---
     OnboardingQuestion(
       id: 'rythme',
-      question: "Quel rythme d'apprentissage préférez-vous ?",
+      question: "Combien de temps pouvez-vous consacrer par jour ?",
       options: [
-        OnboardingOption(id: 'casual', label: "Occasionnel (15 min/jour)"),
-        OnboardingOption(id: 'serious', label: "Sérieux (1h/jour)"),
-        OnboardingOption(id: 'intense', label: "Intensif (3h+/jour)"),
+        OnboardingOption(id: 'casual', label: "☕ 10 min (Mode Zen)"),
+        OnboardingOption(id: 'serious', label: "⚡ 30 min (Mode Focus)"),
+        OnboardingOption(id: 'intense', label: "🔥 1h+ (Mode Hardcore)"),
       ],
     ),
   ];
@@ -159,10 +237,10 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: InkWell(
         onTap: () => _handleOptionSelect(option),
-        borderRadius: BorderRadius.circular(15),
-        child: Container(
+        borderRadius:  BorderRadius.circular(15),
+        child:  Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding:const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: AppTheme.cardColor,
             borderRadius: BorderRadius.circular(15),
@@ -174,9 +252,9 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
               Text(
                 option.label,
                 style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                   const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
-              const Icon(Icons.chevron_right, color: AppTheme.primaryColor),
+             const Icon(Icons.chevron_right, color: AppTheme.primaryColor),
             ],
           ),
         ),

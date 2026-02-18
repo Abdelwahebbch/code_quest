@@ -32,7 +32,7 @@ class UserInfo {
     this.badgesProgress=const {"debug":0 ,"complete":0 ,"test":0 ,"singleChoice":0 ,"multipleChoice":0 ,"ordering":0 },
     this.showingBadges=const[],
   });
-  //Alert : we must discust about it quickly
+  //TODO : we must discust about it quickly
   double get progressToNextLevel {
     const baseXP = 500;
     int level = userLevel;//1

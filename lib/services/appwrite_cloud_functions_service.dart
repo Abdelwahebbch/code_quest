@@ -46,6 +46,7 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
       final Map<String, dynamic> data ={};
       var outPut = jsonDecode(res.body);
       var response = outPut["response"];
+      debugPrint(response); 
       if (response.startsWith("```json")) {
         response = response.substring("```json".length);
       }
