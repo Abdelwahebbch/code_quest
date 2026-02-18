@@ -57,7 +57,7 @@ class AppwriteService extends ChangeNotifier {
         rowId: _user!.$id,
         data: {
           'experience': 0,
-          'totalPoints': 0,
+          'totalPoints': 10,
           'progLanguage': "",
           'earnedBadges': [],
           'bio': "",
@@ -71,6 +71,7 @@ class AppwriteService extends ChangeNotifier {
             "multipleChoice": 0,
             "ordering": 0
           }),
+          'isFirstLogin': false,
         },
         permissions: [
           Permission.read(Role.user(_user!.$id)),
@@ -164,7 +165,8 @@ class AppwriteService extends ChangeNotifier {
           correctOrder: doc.data['correctOrder'],
           solution: doc.data['solution'],
           isCompleted: doc.data['isCompleted'],
-          nbFailed: doc.data['nbFailed']?? 0,
+          nbFailed: doc.data['nbFailed'] ?? 0,
+          aiPointsUsed: doc.data['aiPointsUsed'] ?? 0,
         );
       }).toList();
     } catch (e) {
@@ -293,7 +295,6 @@ class AppwriteService extends ChangeNotifier {
 
   Future<List<String>> updateMissionStatus(String id) async {
     try {
-      
       List<String> returnedBagdes = [];
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
@@ -340,34 +341,44 @@ class AppwriteService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateFailedNb(String id) async{
+  Future<void> updateFailedNb(String id) async {
     try {
-      
-      int previousNbFailed=0;
+      int previousNbFailed = 0;
       for (int i = 0; i < progress.missions.length; i++) {
         if (progress.missions[i].id == id) {
-          var previousNbFailed=progress.missions[i].nbFailed;
-          progress.missions[i].nbFailed = previousNbFailed+1;
+          var previousNbFailed = progress.missions[i].nbFailed;
+          progress.missions[i].nbFailed = previousNbFailed + 1;
         }
       }
-      int cuurentNbFailed=previousNbFailed+1;
+      int cuurentNbFailed = previousNbFailed + 1;
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "missions",
         rowId: id,
         data: {'nbFailed': cuurentNbFailed},
       );
-      
+
       notifyListeners();
     } catch (e) {
       rethrow;
     }
-
   }
 
-  void updateXp(int newXp) {
-    progress.experience += newXp;
-    notifyListeners();
+  Future<void> updateXp(int xp) async {
+    try {
+      int newExperience=progress.experience +xp;
+      progress.experience = newExperience;
+      notifyListeners();
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "missions",
+        rowId: user!.$id,
+        data: {'experience': newExperience},
+      );
+      
+    } catch (e) {
+      rethrow;
+    }
   }
 
   void updateIsFirstLogin() {
