@@ -371,7 +371,7 @@ class AppwriteService extends ChangeNotifier {
       notifyListeners();
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
-        tableId: "missions",
+        tableId: "user_profiles",
         rowId: user!.$id,
         data: {'experience': newExperience},
       );
