@@ -20,9 +20,33 @@ class AITutorChat extends StatefulWidget {
 class _AITutorChatState extends State<AITutorChat> {
   final List<Message> _messages = [Message(role: "bot", message: "Bonjour")];
   final TextEditingController _messageController = TextEditingController();
-
+   int missionIndex=0;
+  
+  @override
+  void initState(){
+    super.initState();
+    final authservice = Provider.of<AppwriteService>(context, listen: false);
+   
+    for(int i=0;i<authservice.progress.missions.length;i++){
+      if(authservice.progress.missions[i].id==widget.mission.id){
+         missionIndex=i;
+      }
+    }
+    for(int i=0;i<authservice.progress.missions[missionIndex].conversation.length;i++){
+      String role="";
+      if(i%2==1){
+        role="bot";
+      }
+      else{
+        role="user";
+      }
+      Message msg=Message(role: role, message: authservice.progress.missions[missionIndex].conversation[i]);
+      _messages.add(msg);
+    }
+  }
   @override
   Widget build(BuildContext context) {
+    
     return Column(
       children: [
         Container(
@@ -119,14 +143,17 @@ class _AITutorChatState extends State<AITutorChat> {
         role: "user",
         message: _messageController.text,
         mission: widget.mission);
-    setState(() {
+    setState(()  {
       _messages.add(m);
     });
+    await authservice.addToConversation( missionIndex,widget.mission.id,_messageController.text);
     _messageController.clear();
     final data = await ai.sendMessage(m);
-    setState(() {
+    setState(()  {
       // Mock AI response
       _messages.add(Message(role: "bot", message: data["response"]));
     });
+    await authservice.addToConversation(  missionIndex,widget.mission.id,data["response"]?.toString() ?? "");
+    await authservice.updateMissionAiPoints(widget.mission.id);
   }
 }

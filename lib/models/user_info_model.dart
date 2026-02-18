@@ -16,6 +16,9 @@ class UserInfo {
   List<Mission> missions;
   Map<String,dynamic> badgesProgress;
   List<String> showingBadges;
+  int nbMissionCompletedWithoutHints;
+  int totalFailures;
+  int totalAIQuestions;
 
   UserInfo({
     required this.username,
@@ -31,6 +34,9 @@ class UserInfo {
     this.missions= const [],
     this.badgesProgress=const {"debug":0 ,"complete":0 ,"test":0 ,"singleChoice":0 ,"multipleChoice":0 ,"ordering":0 },
     this.showingBadges=const[],
+    this.nbMissionCompletedWithoutHints=0,
+    this.totalFailures=0,
+    this.totalAIQuestions=0
   });
   //TODO : we must discust about it quickly
   double get progressToNextLevel {

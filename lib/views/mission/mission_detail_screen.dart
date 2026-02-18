@@ -210,7 +210,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             onPressed: () async {
               //debugPrint("XP = ${authService.progress.experience}");
               if (isCorrect) {
-                authService.updateXp(widget.mission.points);
+                await authService.updateXp(widget.mission.points);
                 await authService.updateMissionStatus(widget.mission.id);
 
                 Navigator.pushAndRemoveUntil(
