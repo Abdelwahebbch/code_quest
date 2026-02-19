@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/onboarding_model.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -138,20 +140,21 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
 
   late String _currentQuesId;
   final List<String> _history = [];
+  final Map<String, String> _answers = {};
   @override
   void initState() {
     super.initState();
     _currentQuesId = _questions.first.id;
   }
 
-  void _handleOptionSelect(OnboardingOption op) {
+  void _handleOptionSelect(OnboardingOption option) {
     setState(() {
       _history.add(_currentQuesId);
-      if (op.nextQuestionId != null) {
-        _currentQuesId = op.nextQuestionId!;
+      _answers.addEntries({MapEntry(_currentQuestion.id, option.label)});
+      if (option.nextQuestionId != null) {
+        _currentQuesId = option.nextQuestionId!;
       } else {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen()));
+        _saveUserChoices();
       }
     });
   }
@@ -162,6 +165,8 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   void _goBack() {
     if (_history.isNotEmpty) {
       setState(() {
+        _answers
+            .removeWhere((key, val) => key.contains(_currentQuestion.question));
         _currentQuesId = _history.removeLast();
       });
     }
@@ -170,6 +175,19 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   void _skip() {
     Navigator.pushReplacement(context,
         MaterialPageRoute(builder: (context) => const DashboardScreen()));
+  }
+
+  Future<void> _saveUserChoices() async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    try {
+      authService.completeOnboarding(_answers);
+      if (mounted) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const DashboardScreen()));
+      }
+    } catch (e) {
+      debugPrint("Errir when saving choices");
+    }
   }
 
   @override
@@ -237,10 +255,10 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: InkWell(
         onTap: () => _handleOptionSelect(option),
-        borderRadius:  BorderRadius.circular(15),
-        child:  Container(
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
           width: double.infinity,
-          padding:const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: AppTheme.cardColor,
             borderRadius: BorderRadius.circular(15),
@@ -252,9 +270,9 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
               Text(
                 option.label,
                 style:
-                   const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
-             const Icon(Icons.chevron_right, color: AppTheme.primaryColor),
+              const Icon(Icons.chevron_right, color: AppTheme.primaryColor),
             ],
           ),
         ),
