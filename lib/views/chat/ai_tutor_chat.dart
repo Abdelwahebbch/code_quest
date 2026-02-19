@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:pfe_test/models/message_model.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
@@ -32,18 +34,9 @@ class _AITutorChatState extends State<AITutorChat> {
         missionIndex = i;
       }
     }
-    for (int i = 0;
-        i < authservice.progress.missions[missionIndex].conversation.length;
-        i++) {
-      String role = "";
-      if (i % 2 == 1) {
-        role = "bot";
-      } else {
-        role = "user";
-      }
-      Message msg = Message(
-          role: role,
-          message: authservice.progress.missions[missionIndex].conversation[i]);
+    for(int i=0;i<authservice.progress.missions[missionIndex].conversation.length;i++){
+      var message=jsonDecode(authservice.progress.missions[missionIndex].conversation[i]);
+      Message msg=Message(role: message['role'], message: message['message']);
       _messages.add(msg);
     }
     _scrollToBottom();
@@ -150,6 +143,7 @@ class _AITutorChatState extends State<AITutorChat> {
     setState(() {
       _messages.add(m);
     });
+    await authservice.addToConversation( "user",missionIndex,widget.mission.id,_messageController.text);
     _messageController.clear();
       _scrollToBottom();
     await authservice.addToConversation(
@@ -159,9 +153,7 @@ class _AITutorChatState extends State<AITutorChat> {
       // Mock AI response
       _messages.add(Message(role: "bot", message: data["response"]));
     });
-    _scrollToBottom();
-    await authservice.addToConversation(
-        missionIndex, widget.mission.id, data["response"]?.toString() ?? "");
+    await authservice.addToConversation( "bot", missionIndex,widget.mission.id,data["response"]?.toString() ?? "");
     await authservice.updateMissionAiPoints(widget.mission.id);
   }
 

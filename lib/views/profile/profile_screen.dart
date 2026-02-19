@@ -69,7 +69,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _buildSectionTitle(context, "Learning Progress"),
             const SizedBox(height: 16),
-            _buildProgressList(),
+            _buildProgressList(context),
           ],
         ),
       ),
@@ -209,14 +209,41 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressList() {
+  Widget _buildProgressList(context) {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    Map<String,dynamic> progress=authService.progress.badgesProgress;
+    int missionsCompletedToday = 0;
+      for (int i = 0; i < authService.progress.missions.length; i++) {
+        if (authService.progress.missions[i].isCompleted) {
+          missionsCompletedToday += 1;
+        }
+      }
+    double bugHunter =(progress['debug']/10)>=1 ? 1 : progress['debug']/10;
+    double codeNinja =((authService.progress.nbMissionCompletedWithoutHints/10)*2)>=1 ? 1 : (authService.progress.nbMissionCompletedWithoutHints/10)*2;
+    double TestMaster =((progress['test']/10)*2)>=1 ? 1 : (progress['test']/10)*2;
+    double FastLearner= missionsCompletedToday/3 >=1 ? 1 :missionsCompletedToday/3;
+    double Architect= progress['ordering']/10 >=1 ? 1 : progress['ordering']/10;
+    double CleanCoder=((progress['complete']/10>1 ? 1: progress['complete']/10)+(authService.progress.totalFailures/30>1 ? 1 : authService.progress.totalFailures/30))/2;
+    double TeamPlayer= ((progress['singleChoice']/10>1 ? 1 :progress['singleChoice']/10)+(progress['multipleChoice']/10>1 ? 1 :progress['multipleChoice']/10))/2;
+    double AIWhisperer= (authService.progress.totalAIQuestions/50)>1 ? 1 : (authService.progress.totalAIQuestions/50);
     return Column(
       children: [
-        _buildProgressItem("Python", 0.8),
+        _buildProgressItem("Bug Hunter", bugHunter),
         const SizedBox(height: 12),
-        _buildProgressItem("Data Structures", 0.4),
+        _buildProgressItem("Code Ninja", codeNinja),
         const SizedBox(height: 12),
-        _buildProgressItem("Algorithms", 0.2),
+        _buildProgressItem("Test Master", TestMaster),
+        const SizedBox(height: 12),
+        _buildProgressItem("Fast Learner", FastLearner),
+        const SizedBox(height: 12),
+        _buildProgressItem("Architect", Architect),
+        const SizedBox(height: 12),
+        _buildProgressItem("Clean Coder", CleanCoder),
+        const SizedBox(height: 12),
+        _buildProgressItem("Team Player", TeamPlayer),
+        const SizedBox(height: 12),
+        _buildProgressItem("AI Whisperer", AIWhisperer),
+        const SizedBox(height: 12),
       ],
     );
   }
