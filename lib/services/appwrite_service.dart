@@ -46,6 +46,7 @@ class AppwriteService extends ChangeNotifier {
     } catch (e) {
       _user = null;
       notifyListeners();
+      rethrow;
     }
   }
 
@@ -72,7 +73,7 @@ class AppwriteService extends ChangeNotifier {
             "multipleChoice": 0,
             "ordering": 0
           }),
-          'isFirstLogin': false,
+          'isFirstLogin': true,
         },
         permissions: [
           Permission.read(Role.user(_user!.$id)),
@@ -121,7 +122,6 @@ class AppwriteService extends ChangeNotifier {
       _user = await account.get();
       _isLoading = false;
       await getUserInfo();
-      // isFirstLogin = progress.language.isEmpty;
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -161,7 +161,11 @@ class AppwriteService extends ChangeNotifier {
       final response = await database.listRows(
           databaseId: "6972adad002e2ba515f2",
           tableId: "missions",
-          queries: [Query.equal("user_id", user!.$id)]);
+          queries: [
+            !isFirstLogin
+                ? Query.equal("user_id", user!.$id)
+                : Query.equal("user_id", "mock_miss"),
+          ]);
 
       return response.rows.map((doc) {
         return Mission(
@@ -176,7 +180,7 @@ class AppwriteService extends ChangeNotifier {
           options: doc.data['options'],
           correctOrder: doc.data['correctOrder'],
           solution: doc.data['solution'],
-          isCompleted: doc.data['isCompleted'],
+          isCompleted: isFirstLogin ? false : doc.data['isCompleted'],
           nbFailed: doc.data['nbFailed'] ?? 0,
           aiPointsUsed: doc.data['aiPointsUsed'] ?? 0,
           conversation: List<String>.from(doc.data['conversation'] ?? []),
@@ -198,6 +202,7 @@ class AppwriteService extends ChangeNotifier {
       int x = await getRank();
 
       isFirstLogin = row.data["isFirstLogin"] ?? true;
+      notifyListeners();
       progress = UserInfo(
         progLanguage: row.data["progLanguage"] ?? "not selected",
         username: user.name,
