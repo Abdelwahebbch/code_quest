@@ -46,7 +46,6 @@ class AppwriteService extends ChangeNotifier {
     } catch (e) {
       _user = null;
       notifyListeners();
-      rethrow;
     }
   }
 
@@ -103,6 +102,7 @@ class AppwriteService extends ChangeNotifier {
       _user = await account.get();
       await createNewRow();
       await getUserInfo();
+      _isLoading = false;
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -512,11 +512,13 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-  Future<void> addToConversation(String role,int index,String id,String msg) async{
+
+  Future<void> addToConversation(
+      String role, int index, String id, String msg) async {
     try {
-      
-      progress.missions[index].conversation.add(jsonEncode({'role':role,'message':msg}));
-      
+      progress.missions[index].conversation
+          .add(jsonEncode({'role': role, 'message': msg}));
+
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "missions",
