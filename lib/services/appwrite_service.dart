@@ -329,7 +329,7 @@ class AppwriteService extends ChangeNotifier {
         }
       }
       if (progress.totalAIQuestions >= 50) {
-        if (!progress.earnedBadges.contains('Team Player')) {
+        if (!progress.earnedBadges.contains('AI Whisperer')) {
           progress.earnedBadges.add('AI Whisperer');
           returnedBagdes.add('AI Whisperer');
           progress.showingBadges.add('AI Whisperer');
@@ -495,9 +495,10 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-  Future<void> addToConversation(int index,String id,String msg) async{
+  Future<void> addToConversation(String role,int index,String id,String msg) async{
     try {
-      progress.missions[index].conversation.add(msg);
+      
+      progress.missions[index].conversation.add(jsonEncode({'role':role,'message':msg}));
       
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
