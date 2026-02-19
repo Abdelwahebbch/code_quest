@@ -44,13 +44,10 @@ class _SignupScreenState extends State<SignupScreen> {
         _nameController.text.trim(),
       );
       if (!mounted) return;
-      if (authService.isFirstLogin) {
+    
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => const OnboardingScreen()));
-      } else {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen()));
-      }
+     
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
