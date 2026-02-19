@@ -20,33 +20,37 @@ class AITutorChat extends StatefulWidget {
 class _AITutorChatState extends State<AITutorChat> {
   final List<Message> _messages = [Message(role: "bot", message: "Bonjour")];
   final TextEditingController _messageController = TextEditingController();
-   int missionIndex=0;
-  
+  int missionIndex = 0;
+
   @override
-  void initState(){
+  void initState() {
     super.initState();
     final authservice = Provider.of<AppwriteService>(context, listen: false);
-   
-    for(int i=0;i<authservice.progress.missions.length;i++){
-      if(authservice.progress.missions[i].id==widget.mission.id){
-         missionIndex=i;
+
+    for (int i = 0; i < authservice.progress.missions.length; i++) {
+      if (authservice.progress.missions[i].id == widget.mission.id) {
+        missionIndex = i;
       }
     }
-    for(int i=0;i<authservice.progress.missions[missionIndex].conversation.length;i++){
-      String role="";
-      if(i%2==1){
-        role="bot";
+    for (int i = 0;
+        i < authservice.progress.missions[missionIndex].conversation.length;
+        i++) {
+      String role = "";
+      if (i % 2 == 1) {
+        role = "bot";
+      } else {
+        role = "user";
       }
-      else{
-        role="user";
-      }
-      Message msg=Message(role: role, message: authservice.progress.missions[missionIndex].conversation[i]);
+      Message msg = Message(
+          role: role,
+          message: authservice.progress.missions[missionIndex].conversation[i]);
       _messages.add(msg);
     }
+    _scrollToBottom();
   }
+
   @override
   Widget build(BuildContext context) {
-    
     return Column(
       children: [
         Container(
@@ -143,17 +147,33 @@ class _AITutorChatState extends State<AITutorChat> {
         role: "user",
         message: _messageController.text,
         mission: widget.mission);
-    setState(()  {
+    setState(() {
       _messages.add(m);
     });
-    await authservice.addToConversation( missionIndex,widget.mission.id,_messageController.text);
     _messageController.clear();
+      _scrollToBottom();
+    await authservice.addToConversation(
+        missionIndex, widget.mission.id, m.message);
     final data = await ai.sendMessage(m);
-    setState(()  {
+    setState(() {
       // Mock AI response
       _messages.add(Message(role: "bot", message: data["response"]));
     });
-    await authservice.addToConversation(  missionIndex,widget.mission.id,data["response"]?.toString() ?? "");
+    _scrollToBottom();
+    await authservice.addToConversation(
+        missionIndex, widget.mission.id, data["response"]?.toString() ?? "");
     await authservice.updateMissionAiPoints(widget.mission.id);
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.scrollController.hasClients) {
+        widget.scrollController.animateTo(
+          widget.scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 }
