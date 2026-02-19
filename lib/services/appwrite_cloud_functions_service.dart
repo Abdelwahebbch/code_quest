@@ -22,6 +22,17 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
     }
   }
 
+  Future<void> createCustomMissions() async {
+    try {
+      final res = await http
+          .get(Uri.parse('https://6995ccc5002bc1b94906.fra.appwrite.run/'));
+      debugPrint(res.body);
+    } catch (e) {
+      debugPrint("Error when create custom missions");
+      rethrow;
+    }
+  }
+
   Future<Map<String, dynamic>> checkAnwser(
       UserInfo user, Mission mission, String solution) async {
     final res = await http.post(
@@ -43,10 +54,10 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
           "student_code_attempt": solution
         }));
     try {
-      final Map<String, dynamic> data ={};
+      final Map<String, dynamic> data = {};
       var outPut = jsonDecode(res.body);
       var response = outPut["response"];
-      debugPrint(response); 
+      debugPrint(response);
       if (response.startsWith("```json")) {
         response = response.substring("```json".length);
       }

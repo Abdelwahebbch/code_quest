@@ -4,6 +4,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter/material.dart';
 import 'package:pfe_test/models/user_info_model.dart';
+import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import '../models/mission_model.dart';
 
 class AppwriteService extends ChangeNotifier {
@@ -140,16 +141,27 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  void completeOnboarding(String language) {
-    //progress.language = language;
-    //isFirstLogin = false;
-    notifyListeners();
+//TODO : nzidou les dates mte3 les exams haka3lech Map<String, --> dynamic <---- >
+  void completeOnboarding(Map<String, dynamic> data) async {
+    try {
+      await database.createRow(
+          databaseId: "6972adad002e2ba515f2",
+          tableId: "user_goals",
+          rowId: user!.$id,
+          data: data);
+      updateIsFirstLogin();
+      await AppwritecloudfunctionsService().createCustomMissions();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<Mission>> getMissions() async {
     try {
       final response = await database.listRows(
-          databaseId: "6972adad002e2ba515f2", tableId: "missions");
+          databaseId: "6972adad002e2ba515f2",
+          tableId: "missions",
+          queries: [Query.equal("user_id", user!.$id)]);
 
       return response.rows.map((doc) {
         return Mission(
@@ -167,7 +179,7 @@ class AppwriteService extends ChangeNotifier {
           isCompleted: doc.data['isCompleted'],
           nbFailed: doc.data['nbFailed'] ?? 0,
           aiPointsUsed: doc.data['aiPointsUsed'] ?? 0,
-          conversation:List<String>.from(doc.data['conversation'] ?? []),
+          conversation: List<String>.from(doc.data['conversation'] ?? []),
         );
       }).toList();
     } catch (e) {
@@ -184,6 +196,7 @@ class AppwriteService extends ChangeNotifier {
           tableId: "user_profiles",
           rowId: user.$id);
       int x = await getRank();
+
       isFirstLogin = row.data["isFirstLogin"] ?? true;
       progress = UserInfo(
         progLanguage: row.data["progLanguage"] ?? "not selected",
@@ -197,8 +210,7 @@ class AppwriteService extends ChangeNotifier {
         rank: x,
         nbMissions: row.data["nbMission"] ?? 0,
         missions: await getMissions(),
-        badgesProgress:
-            jsonDecode(row.data["badgesProgress"]), 
+        badgesProgress: jsonDecode(row.data["badgesProgress"]),
         showingBadges: [],
         nbMissionCompletedWithoutHints:
             row.data["nbMissionCompletedWithoutHints"] ?? 0,
@@ -495,10 +507,11 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-  Future<void> addToConversation(int index,String id,String msg) async{
+
+  Future<void> addToConversation(int index, String id, String msg) async {
     try {
       progress.missions[index].conversation.add(msg);
-      
+
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "missions",
@@ -509,6 +522,7 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
+
   void updateIsFirstLogin() {
     if (isFirstLogin) {
       database.updateRow(
