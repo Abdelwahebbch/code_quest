@@ -128,10 +128,8 @@ class _AITutorChatState extends State<AITutorChat> {
     );
   }
 
-  void _sendMessage() async {
-    // ignore: unused_local_variable
+  void _sendMessage() async { 
     final authservice = Provider.of<AppwriteService>(context, listen: false);
-    // ignore: unused_local_variable
     final ai =
         Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     if (_messageController.text.isEmpty) return;
@@ -143,16 +141,15 @@ class _AITutorChatState extends State<AITutorChat> {
     setState(() {
       _messages.add(m);
     });
-    await authservice.addToConversation( "user",missionIndex,widget.mission.id,_messageController.text);
     _messageController.clear();
       _scrollToBottom();
     final data = await ai.sendMessage(m);
     setState(() {
-      // Mock AI response
       _messages.add(Message(role: "bot", message: data["response"]));
     });
-    await authservice.addToConversation( "bot", missionIndex,widget.mission.id,data["response"]?.toString() ?? "");
     await authservice.updateMissionAiPoints(widget.mission.id);
+    await authservice.addToConversation( "user",missionIndex,widget.mission.id, m.message);
+    await authservice.addToConversation( "bot", missionIndex,widget.mission.id,data["response"]?.toString() ?? "");
   }
 
   void _scrollToBottom() {
