@@ -46,7 +46,7 @@ class AppwriteService extends ChangeNotifier {
     } catch (e) {
       _user = null;
       notifyListeners();
-      rethrow;
+
     }
   }
 
@@ -281,9 +281,9 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<List<String>> checkbadges(int missionNb) async {
+  Future<void> checkbadges(int missionNb) async {
     try {
-      List<String> returnedBagdes = [];
+      
       String missionType = progress.missions[missionNb].type.name;
       progress.badgesProgress[missionType] =
           (progress.badgesProgress[missionType]! + 1);
@@ -297,59 +297,59 @@ class AppwriteService extends ChangeNotifier {
       if (progress.badgesProgress['debug']! >= 10) {
         if (!progress.earnedBadges.contains('Bug Hunter')) {
           progress.earnedBadges.add('Bug Hunter');
-          returnedBagdes.add('Bug Hunter');
           progress.showingBadges.add('Bug Hunter');
+          await updateUserPoints(10);
         }
       }
       if (progress.nbMissionCompletedWithoutHints >= 5) {
         if (!progress.earnedBadges.contains('Code Ninja')) {
           progress.earnedBadges.add('Code Ninja');
-          returnedBagdes.add('Code Ninja');
           progress.showingBadges.add('Code Ninja');
+          await updateUserPoints(10);
         }
       }
       if (progress.badgesProgress['test']! >= 5) {
         if (!progress.earnedBadges.contains('Test Master')) {
           progress.earnedBadges.add('Test Master');
-          returnedBagdes.add('Test Master');
           progress.showingBadges.add('Test Master');
+          await updateUserPoints(10);
         }
       }
       if (missionsCompletedToday >= 3) {
         if (!progress.earnedBadges.contains('Fast Learner')) {
           progress.earnedBadges.add('Fast Learner');
-          returnedBagdes.add('Fast Learner');
           progress.showingBadges.add('Fast Learner');
+          await updateUserPoints(10);
         }
       }
       if (progress.badgesProgress['ordering'] >= 10) {
         if (!progress.earnedBadges.contains('Architect')) {
           progress.earnedBadges.add('Architect');
-          returnedBagdes.add('Architect');
           progress.showingBadges.add('Architect');
+          await updateUserPoints(10);
         }
       }
       if (progress.badgesProgress['complete'] >= 10 &&
           progress.totalFailures <= 30) {
         if (!progress.earnedBadges.contains('Clean Coder')) {
           progress.earnedBadges.add('Clean Coder');
-          returnedBagdes.add('Clean Coder');
           progress.showingBadges.add('Clean Coder');
+          await updateUserPoints(10);
         }
       }
       if (progress.badgesProgress['singleChoice'] >= 10 &&
           progress.badgesProgress['multipleChoice'] >= 10) {
         if (!progress.earnedBadges.contains('Team Player')) {
           progress.earnedBadges.add('Team Player');
-          returnedBagdes.add('Team Player');
           progress.showingBadges.add('Team Player');
+          await updateUserPoints(10);
         }
       }
       if (progress.totalAIQuestions >= 50) {
         if (!progress.earnedBadges.contains('AI Whisperer')) {
           progress.earnedBadges.add('AI Whisperer');
-          returnedBagdes.add('AI Whisperer');
           progress.showingBadges.add('AI Whisperer');
+          await updateUserPoints(10);
         }
       }
       notifyListeners();
@@ -362,16 +362,13 @@ class AppwriteService extends ChangeNotifier {
           'earnedBadges': progress.earnedBadges
         },
       );
-
-      return returnedBagdes;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<List<String>> updateMissionStatus(String id) async {
+  Future<void> updateMissionStatus(String id) async {
     try {
-      List<String> returnedBagdes = [];
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "missions",
@@ -385,9 +382,8 @@ class AppwriteService extends ChangeNotifier {
           missionNb = i;
         }
       }
-      returnedBagdes = await checkbadges(missionNb!);
+      await checkbadges(missionNb!);
       notifyListeners();
-      return returnedBagdes;
     } catch (e) {
       rethrow;
     }

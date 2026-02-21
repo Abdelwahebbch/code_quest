@@ -146,8 +146,6 @@ class _AITutorChatState extends State<AITutorChat> {
     await authservice.addToConversation( "user",missionIndex,widget.mission.id,_messageController.text);
     _messageController.clear();
       _scrollToBottom();
-    await authservice.addToConversation(
-        missionIndex, widget.mission.id, m.message);
     final data = await ai.sendMessage(m);
     setState(() {
       // Mock AI response
