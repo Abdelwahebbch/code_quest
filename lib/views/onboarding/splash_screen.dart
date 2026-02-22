@@ -76,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen>
                   size: 100, color: AppTheme.primaryColor),
               const SizedBox(height: 24),
               Text(
-                "AI TUTOR",
+                "Code Quest",
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: AppTheme.primaryColor,
                       letterSpacing: 4,

@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   size: 100, color: AppTheme.primaryColor),
               const SizedBox(height: 24),
               Text(
-                "AI Tutor",
+                "Code Quest",
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: AppTheme.primaryColor,
