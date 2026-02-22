@@ -142,7 +142,7 @@ class _AITutorChatState extends State<AITutorChat> {
       _messages.add(m);
     });
     _messageController.clear();
-    _scrollToBottom();
+      _scrollToBottom();
     final data = await ai.sendMessage(m);
     setState(() {
       _messages.add(Message(role: "bot", message: data["response"]));
