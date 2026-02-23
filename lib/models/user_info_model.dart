@@ -40,7 +40,7 @@ class UserInfo {
   });
   //TODO : we must discust about it quickly
   double get progressToNextLevel {
-    const baseXP = 500;
+    const baseXP = 500;  
     int level = userLevel;//1
 
     int currentLevelXP = baseXP * level * level;//500

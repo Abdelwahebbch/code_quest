@@ -43,9 +43,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-     const DashboardHome(),
-     const BadgesScreen(),
-     const SettingsScreen(),
+      const DashboardHome(),
+      const BadgesScreen(),
+      const SettingsScreen(),
     ];
 
     return Scaffold(
@@ -181,14 +181,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 border: BoxBorder.all(
                                   color: color,
                                 )),
-                                child:Icon(icon, color: color), 
+                            child: Icon(icon, color: color),
                           ),
-                          
                           const SizedBox(width: 15),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                               Text(
+                              Text(
                                 "Mission Completed: $title",
                                 style: const TextStyle(
                                   color: Colors.white,
@@ -202,7 +201,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                             
                             ],
                           )
                         ],
@@ -242,79 +240,86 @@ class DashboardHomeState extends State<DashboardHome> {
   @override
   void initState() {
     super.initState();
-    final authservice = Provider.of<AppwriteService>(context, listen: false);
-    missions = authservice.progress.missions;
   }
 
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context);
-
+    missions = authService.progress.missions;
     final user = authService.progress;
     final String userImage = user.imageId;
     NetworkImage dataBaseImage = NetworkImage(
         'https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/$userImage/view?project=697295e70021593c3438&mode=admin');
 
     return Scaffold(
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Welcome back,",
-                                style: Theme.of(context).textTheme.bodyMedium),
-                            Text(user.username,
-                                style:
-                                    Theme.of(context).textTheme.headlineMedium),
-                          ],
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const ProfileScreen()),
-                            );
-                          },
-                          child: CircleAvatar(
-                            radius: 25,
-                            backgroundColor: AppTheme.primaryColor,
-                            backgroundImage:
-                                userImage.isEmpty ? null : dataBaseImage,
-                            child: userImage.isEmpty
-                                ? const Icon(Icons.person, color: Colors.white)
-                                : null,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          return authService.getUserInfo();
+        },
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Welcome back,",
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium),
+                              Text(user.username,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-                    ProgressCard(user: user),
-                    const SizedBox(height: 30),
-                    Text("Active Missions",
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 15),
-                  ],
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ProfileScreen()),
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 25,
+                              backgroundColor: AppTheme.primaryColor,
+                              backgroundImage:
+                                  userImage.isEmpty ? null : dataBaseImage,
+                              child: userImage.isEmpty
+                                  ? const Icon(Icons.person,
+                                      color: Colors.white)
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+                      ProgressCard(user: user),
+                      const SizedBox(height: 30),
+                      Text("Active Missions",
+                          style: Theme.of(context).textTheme.titleLarge),
+                      const SizedBox(height: 15),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => MissionTile(mission: missions[index]),
-                childCount: missions.length,
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => MissionTile(mission: missions[index]),
+                  childCount: missions.length,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

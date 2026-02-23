@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/notifications_service.dart';
@@ -8,7 +9,7 @@ import 'services/appwrite_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  NotificationsService().initNotification(); 
+  NotificationsService().initNotification();
   runApp(
     MultiProvider(
       providers: [
@@ -29,6 +30,8 @@ class AITutorApp extends StatelessWidget {
     final themeManager = Provider.of<ThemeManager>(context);
 
     return MaterialApp(
+        scrollBehavior: const MaterialScrollBehavior()
+            .copyWith(dragDevices: PointerDeviceKind.values.toSet()),
         title: 'AI Tutor: Software Engineering',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
