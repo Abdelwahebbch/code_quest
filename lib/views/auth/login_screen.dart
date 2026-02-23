@@ -68,19 +68,11 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 80),
               const Image(
-                height: 200,
-                width: 200,
+                height: 170,
+                width: 170,
                 image: AssetImage('assets/icon/icon.png'),
               ),
-              const SizedBox(height: 8),
-              Text(
-                "Code Quest",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.primaryColor,
-                      letterSpacing: 2,
-                    ),
-              ),
+              
               const Text(
                 "Master Software Engineering",
                 textAlign: TextAlign.center,

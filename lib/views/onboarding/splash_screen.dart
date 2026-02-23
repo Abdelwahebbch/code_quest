@@ -3,6 +3,7 @@ import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:pfe_test/views/onboarding/onboarding_screen.dart';
 import 'package:provider/provider.dart';
+
 import '../../theme/app_theme.dart';
 import '../auth/login_screen.dart';
 
@@ -28,7 +29,6 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
 
     _controller.forward();
-
     _navigateToNext();
   }
 

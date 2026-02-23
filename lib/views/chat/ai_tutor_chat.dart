@@ -20,7 +20,7 @@ class AITutorChat extends StatefulWidget {
 }
 
 class _AITutorChatState extends State<AITutorChat> {
-  final List<Message> _messages = [Message(role: "bot", message: "Bonjour")];
+  final List<Message> _messages = [Message(role: "bot", message: "What can I help with?")];
   final TextEditingController _messageController = TextEditingController();
   int missionIndex = 0;
 
