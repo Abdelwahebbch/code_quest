@@ -24,13 +24,13 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await authService.logout();
               if (context.mounted) {
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
                         builder: (context) => const LoginScreen()),
                     (route) => false);
               }
+              await authService.logout();
             },
           )
         ],
@@ -226,6 +226,8 @@ class ProfileScreen extends StatelessWidget {
     double CleanCoder=((progress['complete']/10>1 ? 1: progress['complete']/10)+(authService.progress.totalFailures/30>1 ? 1 : authService.progress.totalFailures/30))/2;
     double TeamPlayer= ((progress['singleChoice']/10>1 ? 1 :progress['singleChoice']/10)+(progress['multipleChoice']/10>1 ? 1 :progress['multipleChoice']/10))/2;
     double AIWhisperer= (authService.progress.totalAIQuestions/50)>1 ? 1 : (authService.progress.totalAIQuestions/50);
+    
+    //TODO : lazem dynamique 
     return Column(
       children: [
         _buildProgressItem("Bug Hunter", bugHunter),
