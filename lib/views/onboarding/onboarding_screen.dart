@@ -17,19 +17,19 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
     // --- GATEKEEPER ---
     OnboardingQuestion(
       id: 'persona',
-      question: "Comment décririez-vous votre profil ?",
+      question: "How would you describe your profile?",
       options: [
         OnboardingOption(
             id: 'student',
-            label: "Étudiant (Exams/Cours)",
+            label: "Student (Exams/Coursework)",
             nextQuestionId: 'level'),
         OnboardingOption(
             id: 'dev_pro',
-            label: "Développeur (Maîtriser un langage)",
+            label: "Developer (Mastering a language)",
             nextQuestionId: 'lang_goal'),
         OnboardingOption(
             id: 'curious',
-            label: "Débutant (Découvrir les concepts)",
+            label: "Beginner (Discovering concepts)",
             nextQuestionId: 'curiosity_path'),
       ],
     ),
@@ -37,41 +37,37 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
     // --- PATH: STUDENT ---
     OnboardingQuestion(
       id: 'level',
-      question: "Quel est votre niveau actuel ?",
+      question: "What is your current level?",
       options: [
         OnboardingOption(
-            id: 'lycee', label: "Lycée / Bac", nextQuestionId: 'exam_deadline'),
+            id: 'lycee', label: "High School", nextQuestionId: 'exam_deadline'),
         OnboardingOption(
             id: 'licence',
-            label: "Licence / Prépa",
+            label: "Bachelor's / Undergrad",
             nextQuestionId: 'exam_deadline'),
         OnboardingOption(
             id: 'master',
-            label: "Master / Ingénieur",
+            label: "Master's / Engineering",
             nextQuestionId: 'exam_deadline'),
       ],
     ),
     OnboardingQuestion(
       id: 'exam_deadline',
-      question: "Quand est votre prochain examen important ?",
+      question: "When is your next major exam?",
       options: [
         OnboardingOption(
-            id: 'urgent',
-            label: "Moins de 2 semaines",
-            nextQuestionId: 'rythme'),
+            id: 'urgent', label: "Less than 2 weeks", nextQuestionId: 'rythme'),
         OnboardingOption(
-            id: 'chill',
-            label: "Dans plus d'un mois",
-            nextQuestionId: 'rythme'),
+            id: 'chill', label: "Select range", nextQuestionId: 'rythme'),
         OnboardingOption(
-            id: 'none', label: "Juste pour réviser", nextQuestionId: 'rythme'),
+            id: 'none', label: "Just reviewing", nextQuestionId: 'rythme'),
       ],
     ),
 
     // --- PATH: LANGUAGE MASTER ---
     OnboardingQuestion(
       id: 'lang_goal',
-      question: "Quel langage souhaitez-vous maîtriser ?",
+      question: "Which language do you want to master?",
       options: [
         OnboardingOption(
             id: 'py', label: "Python (Data/AI)", nextQuestionId: 'current_exp'),
@@ -89,19 +85,19 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
     ),
     OnboardingQuestion(
       id: 'current_exp',
-      question: "Quelle est votre expérience avec ce langage ?",
+      question: "What is your experience with this language?",
       options: [
         OnboardingOption(
             id: 'none',
-            label: "Zéro (Je pars de rien)",
+            label: "Zero (Starting from scratch)",
             nextQuestionId: 'rythme'),
         OnboardingOption(
             id: 'inter',
-            label: "Intermédiaire (Je connais la syntaxe)",
+            label: "Intermediate (I know the syntax)",
             nextQuestionId: 'rythme'),
         OnboardingOption(
             id: 'expert',
-            label: "Avancé (Je veux optimiser)",
+            label: "Advanced (I want to optimize)",
             nextQuestionId: 'rythme'),
       ],
     ),
@@ -109,31 +105,29 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
     // --- PATH: BEGINNER CONCEPTS ---
     OnboardingQuestion(
       id: 'curiosity_path',
-      question: "Qu'est-ce qui vous attire le plus ?",
+      question: "What interests you the most?",
       options: [
         OnboardingOption(
             id: 'logic',
-            label: "La logique pure (Algorithmes)",
+            label: "Pure Logic (Algorithms)",
             nextQuestionId: 'rythme'),
         OnboardingOption(
             id: 'visual',
-            label: "Le visuel (Comment on fait une App)",
+            label: "Visuals (Building an App)",
             nextQuestionId: 'rythme'),
         OnboardingOption(
-            id: 'ai',
-            label: "L'IA (Comment ça réfléchit)",
-            nextQuestionId: 'rythme'),
+            id: 'ai', label: "AI (How it thinks)", nextQuestionId: 'rythme'),
       ],
     ),
 
     // --- FINAL: COMMITMENT (Universal) ---
     OnboardingQuestion(
       id: 'rythme',
-      question: "Combien de temps pouvez-vous consacrer par jour ?",
+      question: "How much time can you commit per day?",
       options: [
-        OnboardingOption(id: 'casual', label: "☕ 10 min (Mode Zen)"),
-        OnboardingOption(id: 'serious', label: "⚡ 30 min (Mode Focus)"),
-        OnboardingOption(id: 'intense', label: "🔥 1h+ (Mode Hardcore)"),
+        OnboardingOption(id: 'casual', label: "☕ 10 min (Zen Mode)"),
+        OnboardingOption(id: 'serious', label: "⚡ 30 min (Focus Mode)"),
+        OnboardingOption(id: 'intense', label: "🔥 1h+ (Hardcore Mode)"),
       ],
     ),
   ];
@@ -147,10 +141,28 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
     _currentQuesId = _questions.first.id;
   }
 
-  void _handleOptionSelect(OnboardingOption option) {
+  void _handleOptionSelect(OnboardingOption option) async {
+    if (option.label.contains("Select range")) {
+      final DateTimeRange? selectedRange = await showDateRangePicker(
+        context: context,
+        firstDate: DateTime(2025),
+        lastDate: DateTime(2027),
+      );
+      if (selectedRange == null) {
+        return;
+      }
+
+      final DateTime startDate = selectedRange.start;
+      final DateTime endDate = selectedRange.end;
+      //TODO : save to DB
+      print("Start Date: $startDate");
+      print("End Date: $endDate");
+    }
+
     setState(() {
       _history.add(_currentQuesId);
       _answers.addEntries({MapEntry(_currentQuestion.id, option.label)});
+
       if (option.nextQuestionId != null) {
         _currentQuesId = option.nextQuestionId!;
       } else {
