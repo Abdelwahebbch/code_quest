@@ -33,7 +33,7 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> checkAnwser(
+  Future<List<dynamic>> checkAnwser(
       UserInfo user, Mission mission, String solution) async {
     final res = await http.post(
         Uri.parse('https://699266030015f5f27806.fra.appwrite.run/'),
@@ -54,22 +54,18 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
           "student_code_attempt": solution
         }));
     try {
-      final Map<String, dynamic> data = {};
-      var outPut = jsonDecode(res.body);
-      var response = outPut["response"];
-      debugPrint(response);
-      if (response.startsWith("```json")) {
-        response = response.substring("```json".length);
-      }
-      if (response.endsWith("```")) {
-        response = response.substring(0, response.length - "```".length);
-      }
-      var realResponse = jsonDecode(response);
-      data.addAll({
-        "result": realResponse["result"],
-        "success": realResponse["success"]
-      });
+      List<dynamic> data = [];
+      final Map<String, dynamic> decoded = jsonDecode(res.body);
+      print(decoded);
+      final String responseString = decoded["response"]; 
 
+
+     data = jsonDecode(responseString);
+
+      print(data[0]);
+      print(data[1]);
+      data.add(data[0]);
+      data.add(data[1]);
       return data;
     } catch (e) {
       throw Exception(e);

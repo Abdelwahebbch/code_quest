@@ -368,13 +368,13 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<void> updateMissionStatus(String id) async {
+  Future<void> updateMissionStatus(String id, double rate) async {
     try {
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "missions",
         rowId: id,
-        data: {'isCompleted': true},
+        data: {'isCompleted': true,"rate":rate},
       );
       int? missionNb;
       for (int i = 0; i < progress.missions.length; i++) {
