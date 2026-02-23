@@ -35,40 +35,34 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
 
   Future<List<dynamic>> checkAnwser(
       UserInfo user, Mission mission, String solution) async {
-    final res = await http.post(
-        Uri.parse('https://699266030015f5f27806.fra.appwrite.run/'),
-        body: jsonEncode({
-          "name": user.username,
-          "student_profile": {
-            "level": user.userLevel,
-            "programming_language": user.progLanguage
-          },
-          "mission": {
-            "title": mission.title,
-            "description": mission.description,
-            "type": mission.type.name,
-            "initial_code": mission.initialCode,
-            "failed_time": mission.nbFailed,
-          },
-          "topic": mission.title,
-          "student_code_attempt": solution
-        }));
     try {
+      final res = await http.post(
+          Uri.parse('https://699266030015f5f27806.fra.appwrite.run/'),
+          body: jsonEncode({
+            "name": user.username,
+            "student_profile": {
+              "level": user.userLevel,
+              "programming_language": user.progLanguage
+            },
+            "mission": {
+              "title": mission.title,
+              "description": mission.description,
+              "type": mission.type.name,
+              "initial_code": mission.initialCode,
+              "failed_time": mission.nbFailed,
+            },
+            "topic": mission.title,
+            "student_code_attempt": solution
+          }));
+
       List<dynamic> data = [];
       final Map<String, dynamic> decoded = jsonDecode(res.body);
-      print(decoded);
-      final String responseString = decoded["response"]; 
+      final String responseString = decoded["response"];
+      data = jsonDecode(responseString);
 
-
-     data = jsonDecode(responseString);
-
-      print(data[0]);
-      print(data[1]);
-      data.add(data[0]);
-      data.add(data[1]);
       return data;
     } catch (e) {
-      throw Exception(e);
+      rethrow;
     }
   }
 }
