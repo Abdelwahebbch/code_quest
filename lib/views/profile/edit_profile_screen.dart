@@ -76,10 +76,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             onPressed: () async {
               showDialog(
                 context: context,
+                barrierDismissible: false,
                 builder: (context) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return Center(
+                      child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                        color: AppTheme.secondaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                        ),
+                    child: Padding(padding: EdgeInsets.all(30),child: CircularProgressIndicator(),),
+                  ));
                 },
               );
               await authService.updateProfile(

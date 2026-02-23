@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
@@ -10,7 +11,7 @@ import '../../theme/app_theme.dart';
 import '../chat/ai_tutor_chat.dart';
 
 class MissionDetailScreen extends StatefulWidget {
- final Mission mission;
+  final Mission mission;
   const MissionDetailScreen({super.key, required this.mission});
 
   @override
@@ -21,7 +22,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   late TextEditingController _codeController;
   // ignore: prefer_typing_uninitialized_variables
   var _currentAnswer;
-
+  
   @override
   void initState() {
     super.initState();
@@ -168,16 +169,43 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   Future<void> _checkAnswer() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
-    final ai =Provider.of<AppwritecloudfunctionsService>(context, listen: false);
+    final ai =
+        Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     bool isCorrect = false;
+    double rate=0.0 ;
     switch (widget.mission.type) {
       case MissionType.debug:
       case MissionType.complete:
       case MissionType.test:
-        final Map<String,dynamic> check= await ai.checkAnwser(authService.progress, widget.mission, _codeController.text.trim());
-        isCorrect= check["result"];
-        print(check["success"]);
-            
+
+        showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) {
+                  return Center(
+                      child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                        color: AppTheme.secondaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                        ),
+                    child: const Column(
+                      children: [
+                        Padding(padding: EdgeInsets.only(top: 40,left:50,right: 50),child: CircularProgressIndicator(),),
+                        SizedBox(height: 15,),
+                        Text("Checking...",style: TextStyle(fontSize: 13,color: Colors.white),),
+                      ],
+                    ),
+                  ));
+                },
+              );
+        final List<dynamic> check = await ai.checkAnwser(
+        authService.progress, widget.mission, _codeController.text.trim());
+        Navigator.pop(context);
+        isCorrect = check[0];
+        rate=check[1];
+
         break;
       case MissionType.singleChoice:
         isCorrect = _currentAnswer == widget.mission.solution;
@@ -211,7 +239,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               //debugPrint("XP = ${authService.progress.experience}");
               if (isCorrect) {
                 await authService.updateXp(widget.mission.points);
-                await authService.updateMissionStatus(widget.mission.id);
+                await authService.updateMissionStatus(widget.mission.id,rate);
 
                 Navigator.pushAndRemoveUntil(
                     context,
