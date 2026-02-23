@@ -21,7 +21,17 @@ class GoogleSignInButton extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
-        onTap: () {},
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return const AlertDialog(
+                  title: Text("Coming Soon"),
+                  content: Text(
+                      "This feature is not yet available. It will be released in a future update."),
+                );
+              });
+        },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

@@ -7,7 +7,6 @@ import '../../theme/app_theme.dart';
 import '../../services/appwrite_service.dart';
 import 'signup_screen.dart';
 
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -68,9 +67,12 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 80),
-              const Icon(Icons.psychology,
-                  size: 100, color: AppTheme.primaryColor),
-              const SizedBox(height: 24),
+              const Image(
+                height: 200,
+                width: 200,
+                image: AssetImage('assets/icon/icon.png'),
+              ),
+              const SizedBox(height: 8),
               Text(
                 "Code Quest",
                 textAlign: TextAlign.center,
@@ -130,6 +132,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                 },
                 child: const Text("Don't have an account? Sign Up"),
+              ),
+              TextButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return const AlertDialog(
+                          title: Text("Coming Soon"),
+                          content: Text("This feature is not yet available. It will be released in a future update."),
+                        
+                        );
+                      });
+                },
+                child: const Text("Forgot Password ?"),
               ),
               const SizedBox(
                 height: 50,

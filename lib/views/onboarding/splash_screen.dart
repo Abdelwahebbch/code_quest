@@ -69,27 +69,22 @@ class _SplashScreenState extends State<SplashScreen>
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.psychology,
-                  size: 100, color: AppTheme.primaryColor),
-              const SizedBox(height: 24),
-              Text(
-                "Code Quest",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.primaryColor,
-                      letterSpacing: 4,
-                      fontWeight: FontWeight.bold,
-                    ),
+              Image(
+                height: 200,
+                width: 200,
+                image: AssetImage('assets/icon/icon.png'),
               ),
-              const SizedBox(height: 8),
-              const Text(
+             
+              SizedBox(height: 8),
+              Text(
                 "Master Software Engineering",
                 style: TextStyle(color: Colors.grey, letterSpacing: 1.2),
               ),
-              const SizedBox(height: 48),
-              const CircularProgressIndicator(
+              SizedBox(height: 48),
+              CircularProgressIndicator(
                 valueColor:
                     AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
               ),

@@ -69,7 +69,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text("Get mission reminders"),
             value: _notificationsEnabled,
             activeTrackColor: AppTheme.primaryColor,
-            onChanged: (val) => setState(() => _notificationsEnabled = val),
+            onChanged: (val) {
+              //=> setState(() => _notificationsEnabled = val)
+
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return const AlertDialog(
+                      title: Text("Coming Soon"),
+                      content: Text(
+                          "This feature is not yet available. It will be released in a future update."),
+                    );
+                  });
+            },
           ),
           SwitchListTile(
             title: const Text("Dark Mode"),
