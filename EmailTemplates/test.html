@@ -3,93 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeQuest Update</title>
+    <title>CodeQuest</title>
     <style>
+        /* Reset Styles */
         body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
         table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
         table { border-collapse: collapse !important; }
-        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; }
+        
+        body { 
+            height: 100% !important; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            width: 100% !important; 
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+            background-color: #020617; 
+        }
+/*test*/
+        /* Layout */
+        .wrapper { width: 100%; table-layout: fixed; background-color: #020617; padding-bottom: 40px; }
+        .main { background-color: #ffffff; width: 100%; max-width: 600px; border-radius: 24px; border-spacing: 0; color: #1e293b; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+
+        /* Ramadan Theme Elements */
+        .header-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 4px solid #d4af37;
+        }
+
+        .ramadan-text {
+            font-size: 32px;
+            color: #d4af37;
+            margin: 15px 0 0 0;
+            font-weight: bold;
+        }
+
+        .content-area { padding: 40px 50px; text-align: center; }
+        
+        .badge {
+            display: inline-block;
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .feature-card {
+            background-color: #f8fafc;
+            border-left: 4px solid #d4af37;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: left;
+            margin: 25px 0;
+        }
+
+        .button {
+            background: linear-gradient(to right, #d4af37, #b45309);
+            color: #ffffff !important;
+            padding: 18px 35px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        .footer { background-color: #0f172a; color: #94a3b8; padding: 30px; font-size: 13px; }
 
         @media screen and (max-width: 600px) {
-            .email-container { width: 100% !important; }
-            .mobile-padding { padding-left: 20px !important; padding-right: 20px !important; }
+            .content-area { padding: 30px 20px !important; }
         }
     </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9;">
+<body>
 
-    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f1f5f9;">
-        <tr>
-            <td align="center" style="padding: 40px 10px;">
-                
-                <table border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    
-                    <tr>
-                        <td align="center" style="background-color: #0F172A; padding: 30px 0;">
-                            <img src="https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/6995b18b0024849dd08c/view?project=697295e70021593c3438&mode=admin" alt="CodeQuest Logo" width="100" style="display: block; border-radius: 50%;">
-                        </td>
-                    </tr>
+    <center class="wrapper">
+        <table class="main" width="100%">
+            <tr>
+                <td class="header-gradient">
+                    <img src="https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/6995b18b0024849dd08c/view?project=697295e70021593c3438&mode=admin" alt="CodeQuest" width="80" style="border: 2px solid #d4af37; border-radius: 50%;">
+               
+                </td>
+            </tr>
 
-                    <tr>
-                        <td align="center" style="padding: 20px 0 0 0; background-color: #ffffff;">
-                            <h2 dir="rtl" style="margin: 0; font-family: 'Amiri', serif, 'Segoe UI'; color: #1E40AF; font-size: 28px; font-weight: bold; letter-spacing: 1px;">
-                               رمضان مبارك✨
-                            </h2>
-                        </td>
-                    </tr>
+            <tr>
+                <td class="content-area">
+                    <div class="badge">Mise à jour disponible</div>
+                    <h2 style="font-size: 26px; color: #0f172a; margin: 0;">Nouvelle version disponible !</h2>
+                    <p style="font-size: 16px; line-height: 1.6; color: #475569; margin-top: 15px;">
+                       Salut Coder ! Une nouvelle version de <strong>CodeQuest</strong> vient d'atterrir sur le Play Store . Plus fluide, plus intelligente.
+                    </p>
 
-                    <tr>
-                        <td class="mobile-padding" style="padding: 20px 40px 20px 40px; color: #334155; font-family: sans-serif; text-align: center;">
-                            <span style="background-color: #DBEAFE; color: #1E40AF; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase;">Mise à jour disponible</span>
-                            <h1 style="margin: 15px 0 10px 0; font-size: 26px; color: #0F172A;">Nouvelle version disponible !</h1>
-                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">
-                                Salut Coder ! Une nouvelle version de <strong>CodeQuest</strong> vient d'atterrir sur le Play Store. Mettre à jour, c'est qu'il y a du lourd !
-                            </p>
-                        </td>
-                    </tr>
+                    <div class="feature-card">
+                        <p style="margin: 0 0 10px 0; font-weight: bold; color: #b45309; text-transform: uppercase; font-size: 13px;">Ce qui change :</p>
+                        <ul style="margin: 0; padding-left: 20px; color: #334155; line-height: 1.8;">
+                            <li>🌙 <strong>Pull-to-refresh :</strong> to fetch the latest missions.</li>
+                            <li>🛠️ <strong>Enhanced Onboarding screen :</strong> added a date range picker for exams.</li>
+                            <li>🤖 <strong>Improved general UX </strong> </li>
+                        </ul>
+                    </div>
 
-                    <tr>
-                        <td style="padding: 0 40px 30px 40px;">
-                            <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; text-align: left;">
-                                <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #64748B; text-transform: uppercase;">Quoi de neuf ?</h3>
-                                <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 15px; line-height: 1.8;">
-                                    <li>Correction du bug de connexion via Appwrite.</li>
-                                    <li>Nouveaux défis personnalisés !</li>
-                                    <li>Discutez maintenant avec un tuteur IA et consultez l'historique.</li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
+                    <a href="https://play.google.com/store/apps/details?id=com.fsg.pfe" class="button">
+                        Mettre à jour sur le Play Store
+                    </a>
+                </td>
+            </tr>
 
-                    <tr>
-                        <td align="center" style="padding-bottom: 40px;">
-                            <table border="0" cellpadding="0" cellspacing="0">
-                                <tr>
-                                    <td align="center" style="border-radius: 8px;" bgcolor="#3B82F6">
-                                        <a href="https://play.google.com/store/apps/details?id=com.fsg.pfe" style="font-size: 16px; font-family: sans-serif; font-weight: bold; color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 8px; display: inline-block;">
-                                            Mettre à jour sur le Play Store
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td style="background-color: #f8fafc; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0;">
-                            <p style="margin: 0 0 10px 0;">Keep coding, keep growing.</p>
-                            <p style="margin: 0;">
-                                &copy; 2026 CodeQuest App. Tous droits réservés.<br>
-                                <a href="#" style="color: #64748b; text-decoration: underline;">Support</a>
-                            </p>
-                        </td>
-                    </tr>
-
-                </table>
-            </td>
-        </tr>
-    </table>
+            <tr>
+                <td class="footer" align="center">
+                    <p style="margin: 0 0 15px 0; color: #d4af37; font-weight: bold;">Keep coding, keep growing.</p>
+                    <p style="margin: 0;">
+                        &copy; 2026 CodeQuest App. Tous droits réservés.<br>
+                        Vous recevez cet email car vous êtes un membre de notre communauté.
+                    </p>
+                    <div style="margin-top: 20px;">
+                        <a href="#" style="color: #94a3b8; text-decoration: underline;">Support</a> &nbsp;&bull;&nbsp; 
+                        <a href="#" style="color: #94a3b8; text-decoration: underline;">Se désabonner</a>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </center>
 
 </body>
 </html>
