@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/enums.dart';
 import 'package:appwrite/models.dart' as models;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe_test/models/user_info_model.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
@@ -29,13 +31,39 @@ class AppwriteService extends ChangeNotifier {
   void _init() {
     client
         .setEndpoint('https://fra.cloud.appwrite.io/v1')
-        .setProject('697295e70021593c3438')
-        .setSelfSigned(status: true);
+        .setProject('697295e70021593c3438');
 
     account = Account(client);
     database = TablesDB(client);
     storage = Storage(client);
     checkSession();
+  }
+
+  Future<void> registerNotificationDevice() async {
+    try {
+      // 1. Initialiser le service Account d'Appwrite
+      final account = Account(client);
+
+      // 2. Récupérer le token FCM de Firebase
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      String? fcmToken = await messaging.getToken();
+
+      if (fcmToken != null) {
+        print("Token FCM récupéré : $fcmToken");
+
+        // 3. Créer une "Push Target" sur le compte de l'utilisateur
+        // C'est ici que 'createPushTarget' remplace l'ancienne méthode
+        await account.createPushTarget(
+          targetId: ID.unique(), // ID unique pour cette cible
+          identifier: fcmToken, // Le token FCM
+          providerId: '699bf106002c3fc1716f', // L'ID copié à l'étape 1
+        );
+
+        print("Appareil enregistré avec succès dans Appwrite !");
+      }
+    } catch (e) {
+      print("Erreur lors de l'enregistrement : $e");
+    }
   }
 
   Future<void> checkSession() async {
@@ -46,7 +74,6 @@ class AppwriteService extends ChangeNotifier {
     } catch (e) {
       _user = null;
       notifyListeners();
-
     }
   }
 
@@ -86,24 +113,33 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<void> signup(String email, String password, String name) async {
+  Future<void> signup(
+      String email, String password, String name, bool isGoogle) async {
     _isLoading = true;
     notifyListeners();
     try {
-      await account.create(
-        userId: ID.unique(),
-        email: email,
-        password: password,
-        name: name,
-      );
-      await account.createEmailPasswordSession(
-        email: email,
-        password: password,
-      );
+      switch (isGoogle) {
+        case false:
+          await account.create(
+            userId: ID.unique(),
+            email: email,
+            password: password,
+            name: name,
+          );
+          await account.createEmailPasswordSession(
+            email: email,
+            password: password,
+          );
+        case true:
+          await account.createOAuth2Session(
+            provider: OAuthProvider.google,
+          );
+      }
       _user = await account.get();
       await createNewRow();
       await getUserInfo();
       _isLoading = false;
+      registerNotificationDevice();
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -122,12 +158,30 @@ class AppwriteService extends ChangeNotifier {
       );
       _user = await account.get();
       _isLoading = false;
+      //registerNotificationDevice();
       await getUserInfo();
       notifyListeners();
     } catch (e) {
       _isLoading = false;
       notifyListeners();
       debugPrint("Error : $e");
+      rethrow;
+    }
+  }
+
+  /// Google SignIn
+  Future<void> signInWithGoogle() async {
+    try {
+      await account.createOAuth2Session(
+        provider: OAuthProvider.google,
+      );
+
+      _user = await account.get();
+      _isLoading = false;
+      await getUserInfo();
+      notifyListeners();
+    } on AppwriteException catch (e) {
+      print("Appwrite Auth Error: ${e.message}");
       rethrow;
     }
   }
@@ -143,6 +197,8 @@ class AppwriteService extends ChangeNotifier {
   }
 
 //TODO : nzidou les dates mte3 les exams haka3lech Map<String, --> dynamic <---- >
+  ///to get user info
+  /// @param {}
   void completeOnboarding(Map<String, dynamic> data) async {
     try {
       await database.createRow(
@@ -284,7 +340,6 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> checkbadges(int missionNb) async {
     try {
-      
       String missionType = progress.missions[missionNb].type.name;
       progress.badgesProgress[missionType] =
           (progress.badgesProgress[missionType]! + 1);
@@ -374,7 +429,7 @@ class AppwriteService extends ChangeNotifier {
         databaseId: "6972adad002e2ba515f2",
         tableId: "missions",
         rowId: id,
-        data: {'isCompleted': true,"rate":rate},
+        data: {'isCompleted': true, "rate": rate},
       );
       int? missionNb;
       for (int i = 0; i < progress.missions.length; i++) {

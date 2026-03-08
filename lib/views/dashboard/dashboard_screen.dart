@@ -312,16 +312,33 @@ class DashboardHomeState extends State<DashboardHome> {
                   ),
                 ),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => MissionTile(mission: missions[index]),
-                  childCount: missions.length,
-                ),
-              ),
+              CheckMissionsAv(),
             ],
           ),
         ),
       ),
     );
+  }
+
+
+  Widget CheckMissionsAv() {
+    switch (missions.isEmpty) {
+      case true:
+        return  SliverToBoxAdapter(child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(padding: const EdgeInsets.all(16), child: const Text("There are no missions at the moment !")),
+          ],
+        ));
+
+      case false:
+        return SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => MissionTile(mission: missions[index]),
+            childCount: missions.length,
+          ),
+        );
+    }
   }
 }

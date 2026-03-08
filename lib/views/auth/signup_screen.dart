@@ -37,16 +37,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
     final authService = Provider.of<AppwriteService>(context, listen: false);
     try {
-      await authService.signup(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-        _nameController.text.trim(),
-      );
+      await authService.signup(_emailController.text.trim(),
+          _passwordController.text.trim(), _nameController.text.trim(), false);
       if (!mounted) return;
-    
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const OnboardingScreen()));
-     
+
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => const OnboardingScreen()));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -68,11 +64,10 @@ class _SignupScreenState extends State<SignupScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Image(
-                height: 170,
-                width: 170,
-                image: AssetImage('assets/icon/icon.png'),
-              ),
-       
+              height: 170,
+              width: 170,
+              image: AssetImage('assets/icon/icon.png'),
+            ),
             Text(
               "Create Account",
               textAlign: TextAlign.center,

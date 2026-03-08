@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
+import 'package:provider/provider.dart';
 
 class GoogleSignInButton extends StatelessWidget {
   const GoogleSignInButton({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AppwriteService>(context);
     return Container(
       width: double.infinity,
       height: 45,
@@ -21,16 +25,23 @@ class GoogleSignInButton extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
-        onTap: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return const AlertDialog(
-                  title: Text("Coming Soon"),
-                  content: Text(
-                      "This feature is not yet available. It will be released in a future update."),
-                );
-              });
+        onTap: () async {
+          await authService.signInWithGoogle();
+         
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const DashboardScreen()));
+
+          // showDialog(
+          //     context: context,
+          //     builder: (context) {
+          //       return const AlertDialog(
+          //         title: Text("Coming Soon"),
+          //         content: Text(
+          //             "This feature is not yet available. It will be released in a future update."),
+          //       );
+          //     });
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
