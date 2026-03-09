@@ -86,7 +86,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         color: AppTheme.secondaryColor,
                         borderRadius: BorderRadius.circular(12),
                         ),
-                    child: Padding(padding: EdgeInsets.all(30),child: CircularProgressIndicator(),),
+                    child: const Padding(padding: EdgeInsets.all(30),child: CircularProgressIndicator(),),
                   ));
                 },
               );
