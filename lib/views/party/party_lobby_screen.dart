@@ -61,7 +61,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
 
   @override
   Widget build(BuildContext context) {
-   // final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<AppwriteService>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Party Lobby'),
@@ -331,7 +331,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                 ),
                 const SizedBox(height: 10),
                 if (_party.hostId ==
-                   "authService.user!.\$id") // Check if current user is host
+                   authService.user!.$id) // Check if current user is host
                   SizedBox(
                     width: double.infinity,
                     height: 48,
