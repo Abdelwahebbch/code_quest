@@ -2,8 +2,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationsService {
   final notifPlugin = FlutterLocalNotificationsPlugin();
-
-  bool _isInitialized = false;
+//TODO : El final
+  final bool _isInitialized = false;
 
   bool get isInitialized {
     return _isInitialized;
@@ -14,13 +14,15 @@ class NotificationsService {
     const intiSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: intiSettings);
     await notifPlugin.initialize(settings: initSettings);
-    notifPlugin.resolvePlatformSpecificImplementation<
-    AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
+    notifPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
   }
 
   NotificationDetails notificationDetails() {
     return const NotificationDetails(
-        android: AndroidNotificationDetails( "channelId", "channelName",
+        android: AndroidNotificationDetails("channelId", "channelName",
             importance: Importance.max, priority: Priority.high));
   }
 
@@ -30,6 +32,6 @@ class NotificationsService {
         id: id,
         title: title,
         body: body,
-        notificationDetails:  notificationDetails());
+        notificationDetails: notificationDetails());
   }
 }
