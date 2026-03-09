@@ -117,6 +117,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       builder: (context) => const PrivacyPolicyScreen()));
             },
           ),
+          _buildSectionHeader("Feedback")
+          ,
+           _buildSettingTile(
+            icon: Icons.feedback_outlined,
+            title: "Share your feedback with us !",
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>  const FeedbackBox()));
+            },
+          ),
           const SizedBox(height: 40),
           ElevatedButton(
             onPressed: () async {
