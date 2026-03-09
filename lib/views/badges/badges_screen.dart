@@ -80,23 +80,30 @@ class _BadgesScreenState extends State<BadgesScreen> {
           bagde['unlocked'] = true;
         }
       }
+
+    }); return Scaffold(
       
-    });
-    
-    return Scaffold(
-     
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-           const SizedBox(height: 40,),
-          const Text("Your Achievements",style: TextStyle(color: Colors.white,fontSize: 22,fontWeight: FontWeight.bold ),),
-         const  SizedBox(height: 16,),
+            const SizedBox(
+              height: 40,
+            ),
+            const Text(
+              "Your Achievements",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
             _buildSummaryCard(allBadges),
             const SizedBox(height: 24),
             Text("All Badges", style: Theme.of(context).textTheme.titleLarge),
-         
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

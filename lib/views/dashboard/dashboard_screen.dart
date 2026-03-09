@@ -7,6 +7,7 @@ import '../../widgets/mission_tile.dart';
 import '../profile/profile_screen.dart';
 import '../badges/badges_screen.dart';
 import '../settings/settings_screen.dart';
+import '../party/party_home_screen.dart';
 import '../../services/appwrite_service.dart';
 
 // big probleme
@@ -44,6 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final List<Widget> screens = [
       const DashboardHome(),
+      const PartyHomeScreen(),
       const BadgesScreen(),
       const SettingsScreen(),
     ];
@@ -58,6 +60,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.group), label: "Party"),
           BottomNavigationBarItem(
               icon: Icon(Icons.emoji_events), label: "Badges"),
           BottomNavigationBarItem(
@@ -312,7 +315,7 @@ class DashboardHomeState extends State<DashboardHome> {
                   ),
                 ),
               ),
-              CheckMissionsAv(),
+              checkMissionsAv(),
             ],
           ),
         ),
@@ -321,7 +324,7 @@ class DashboardHomeState extends State<DashboardHome> {
   }
 
 
-  Widget CheckMissionsAv() {
+  Widget checkMissionsAv() {
     switch (missions.isEmpty) {
       case true:
         return  SliverToBoxAdapter(child: Row(

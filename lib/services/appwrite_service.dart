@@ -152,6 +152,7 @@ class AppwriteService extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
+     // await account.deleteSession(sessionId: 'current');
       await account.createEmailPasswordSession(
         email: email,
         password: password,
@@ -198,7 +199,6 @@ class AppwriteService extends ChangeNotifier {
 
 //TODO : nzidou les dates mte3 les exams haka3lech Map<String, --> dynamic <---- >
   ///to get user info
-  /// @param {}
   void completeOnboarding(Map<String, dynamic> data) async {
     try {
       await database.createRow(
