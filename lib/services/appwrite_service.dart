@@ -40,29 +40,21 @@ class AppwriteService extends ChangeNotifier {
   }
 
   Future<void> registerNotificationDevice() async {
+    final account = Account(client);
     try {
-      // 1. Initialiser le service Account d'Appwrite
-      final account = Account(client);
-
-      // 2. Récupérer le token FCM de Firebase
       FirebaseMessaging messaging = FirebaseMessaging.instance;
+      await messaging.requestPermission();
       String? fcmToken = await messaging.getToken();
 
       if (fcmToken != null) {
-        print("Token FCM récupéré : $fcmToken");
-
-        // 3. Créer une "Push Target" sur le compte de l'utilisateur
-        // C'est ici que 'createPushTarget' remplace l'ancienne méthode
         await account.createPushTarget(
-          targetId: ID.unique(), // ID unique pour cette cible
-          identifier: fcmToken, // Le token FCM
-          providerId: '699bf106002c3fc1716f', // L'ID copié à l'étape 1
+          targetId: ID.unique(),
+          identifier: fcmToken,
+          providerId: '699bf106002c3fc1716f',
         );
-
-        print("Appareil enregistré avec succès dans Appwrite !");
       }
     } catch (e) {
-      print("Erreur lors de l'enregistrement : $e");
+      print("Aloo Aloo");
     }
   }
 
@@ -79,7 +71,7 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> createNewRow() async {
     try {
-      //  models.User user = await account.get();
+      // models.User user = await account.get();
       await database.createRow(
         databaseId: '6972adad002e2ba515f2',
         tableId: 'user_profiles',
@@ -152,14 +144,14 @@ class AppwriteService extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-     // await account.deleteSession(sessionId: 'current');
+      await account.deleteSession(sessionId: 'current');
       await account.createEmailPasswordSession(
         email: email,
         password: password,
       );
       _user = await account.get();
       _isLoading = false;
-      //registerNotificationDevice();
+      registerNotificationDevice();
       await getUserInfo();
       notifyListeners();
     } catch (e) {
@@ -225,23 +217,33 @@ class AppwriteService extends ChangeNotifier {
           ]);
 
       return response.rows.map((doc) {
-        return Mission(
-          id: doc.$id,
-          title: doc.data['title'],
-          description: doc.data['description'],
-          type: MissionType.values.firstWhere(
-              (e) => e.toString().split('.').last == doc.data['type']),
-          points: doc.data['points'],
-          difficulty: doc.data['difficulty'],
-          initialCode: doc.data['initialCode'],
-          options: doc.data['options'],
-          correctOrder: doc.data['correctOrder'],
-          solution: doc.data['solution'],
-          isCompleted: isFirstLogin ? false : doc.data['isCompleted'],
-          nbFailed: doc.data['nbFailed'] ?? 0,
-          aiPointsUsed: doc.data['aiPointsUsed'] ?? 0,
-          conversation: List<String>.from(doc.data['conversation'] ?? []),
-        );
+        final MissionType type = MissionType.values
+            .firstWhere((e) => e.name.contains(doc.data["type"]));
+        switch (type) {
+          case MissionType.complete:
+            print("complete");
+            return Mission.completeMission(doc);
+
+          case MissionType.debug:
+            print("debug");
+            return Mission.debugMission(doc);
+
+          case MissionType.multipleChoice:
+            print("multipleChoice");
+            return Mission.multipleChoice(doc);
+
+          case MissionType.ordering:
+            print("ordering");
+            return Mission.ordering(doc);
+
+          case MissionType.singleChoice:
+            print("singleChoice");
+            return Mission.singleChoice(doc);
+
+          case MissionType.test:
+            print("test");
+            return Mission.testMission(doc);
+        }
       }).toList();
     } catch (e) {
       debugPrint("Error fetching missions: $e");
