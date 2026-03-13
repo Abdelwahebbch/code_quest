@@ -144,7 +144,7 @@ class AppwriteService extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      await account.deleteSession(sessionId: 'current');
+     // await account.deleteSession(sessionId: 'current');
       await account.createEmailPasswordSession(
         email: email,
         password: password,
