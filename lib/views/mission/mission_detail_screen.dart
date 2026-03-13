@@ -25,8 +25,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _codeController = TextEditingController(
-        text: widget.mission.initialCode ?? "Write here ...");
+    _codeController = TextEditingController(text: widget.mission.initialCode);
   }
 
   @override
@@ -35,12 +34,14 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       appBar: AppBar(
         title: Text(widget.mission.title),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.restore_rounded, color: AppTheme.accentColor),
-            onPressed: () {
-                  _codeController.text = widget.mission.initialCode!.trim();
-            },
-          ),
+          if (widget.mission.type.name == "debug" ||widget.mission.type.name == "complete" )
+            IconButton(
+              icon: const Icon(Icons.restore_rounded,
+                  color: AppTheme.accentColor),
+              onPressed: () {
+                _codeController.text = widget.mission.initialCode!.trim();
+              },
+            ),
         ],
       ),
       body: Column(
@@ -75,7 +76,6 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               child: _buildChallengeInterface(),
             ),
           ),
-          
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -215,7 +215,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
         break;
       case MissionType.singleChoice:
-        isCorrect = _currentAnswer == widget.mission.solution;
+        isCorrect = _currentAnswer
+            .toString()
+            .contains(widget.mission.solution.toString());
         break;
       case MissionType.multipleChoice:
         if (_currentAnswer is List<String>) {
