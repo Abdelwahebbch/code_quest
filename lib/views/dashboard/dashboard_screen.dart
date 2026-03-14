@@ -53,19 +53,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       body: screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) => setState(() => _currentIndex = index),
         backgroundColor: AppTheme.cardColor,
-        selectedItemColor: AppTheme.primaryColor,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.group), label: "Party"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.emoji_events), label: "Badges"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: "Settings"),
+        indicatorColor: Colors.transparent,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: AppTheme.primaryColor,
+            );
+          }
+          return const TextStyle(color: Colors.grey);
+        }),
+        destinations: [
+          NavigationDestination(
+              icon: Icon(
+                Icons.dashboard,
+                color: _currentIndex == 0 ? AppTheme.primaryColor : Colors.grey,
+              ),
+              label: "Home"),
+          NavigationDestination(
+              icon: Icon(
+                Icons.sports_esports,
+                color: _currentIndex == 1 ? AppTheme.primaryColor : Colors.grey,
+              ),
+              label: "Party"),
+          NavigationDestination(
+              icon: Icon(
+                Icons.emoji_events,
+                color: _currentIndex == 2 ? AppTheme.primaryColor : Colors.grey,
+              ),
+              label: "Badges"),
+          NavigationDestination(
+              icon: Icon(
+                Icons.settings,
+                color: _currentIndex == 3 ? AppTheme.primaryColor : Colors.grey,
+              ),
+              label: "Settings"),
         ],
       ),
     );
