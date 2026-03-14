@@ -58,7 +58,7 @@ class AppwriteService extends ChangeNotifier {
         );
       }
     } catch (e) {
-      print("Aloo Aloo");
+      print("Error fi el registerNotificationDevice ");
     }
   }
 
@@ -225,27 +225,21 @@ class AppwriteService extends ChangeNotifier {
             .firstWhere((e) => e.name.contains(doc.data["type"]));
         switch (type) {
           case MissionType.complete:
-            print("complete");
             return Mission.completeMission(doc);
 
           case MissionType.debug:
-            print("debug");
             return Mission.debugMission(doc);
 
           case MissionType.multipleChoice:
-            print("multipleChoice");
             return Mission.multipleChoice(doc);
 
           case MissionType.ordering:
-            print("ordering");
             return Mission.ordering(doc);
 
           case MissionType.singleChoice:
-            print("singleChoice");
             return Mission.singleChoice(doc);
 
           case MissionType.test:
-            print("test");
             return Mission.testMission(doc);
         }
       }).toList();
@@ -331,6 +325,12 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> updateLanguageSelected(String languageSelected) async {
     try {
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "user_goals",
+        rowId: _user!.$id,
+        data: {'lang_goal': languageSelected},
+      );
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "user_profiles",
@@ -693,16 +693,17 @@ class AppwriteService extends ChangeNotifier {
             isReady: false);
         dbMembers.add(jsonEncode({"memberId": user?.$id, "isReady": false}));
         party = Party(
-            partyId: row.data["partyId"].toString(),
-            partyName: row.data["partyName"],
-            hostId: row.data["hostId"],
-            hostName: row.data["hostName"],
-            members: members,
-            maxMembers: row.data["maxMembers"],
-            difficulty: row.data["difficulty"],
-            gameMode: row.data["gameMode"],
-            totalRounds: row.data["totalRounds"],
-            isStarted: row.data["isStarted"]);
+          partyId: row.data["partyId"].toString(),
+          partyName: row.data["partyName"],
+          hostId: row.data["hostId"],
+          hostName: row.data["hostName"],
+          members: members,
+          maxMembers: row.data["maxMembers"],
+          difficulty: row.data["difficulty"],
+          gameMode: row.data["gameMode"],
+          totalRounds: row.data["totalRounds"],
+          isStarted: row.data["isStarted"],
+        );
         members.add(member);
         notifyListeners();
         await database.updateRow(
@@ -798,13 +799,11 @@ class AppwriteService extends ChangeNotifier {
       List<dynamic> dbMembers = [];
       for (int i = 0; i < party.memberCount; i++) {
         if (party.members[i].userId != user?.$id) {
-          
           dbMembers.add(jsonEncode({
             "memberId": party.members[i].userId,
             "isReady": party.members[i].isReady
           }));
-        }
-        else{
+        } else {
           party.members.removeAt(i);
         }
       }
@@ -817,7 +816,10 @@ class AppwriteService extends ChangeNotifier {
       var row = await database.listRows(
         databaseId: "6972adad002e2ba515f2",
         tableId: "party_member",
-        queries: [Query.equal("partyId", rowId), Query.equal("userId", user?.$id)],
+        queries: [
+          Query.equal("partyId", rowId),
+          Query.equal("userId", user?.$id)
+        ],
       );
       await database.deleteRow(
           databaseId: "6972adad002e2ba515f2",
@@ -847,7 +849,11 @@ class AppwriteService extends ChangeNotifier {
         databaseId: "6972adad002e2ba515f2",
         tableId: "party_member",
         rowId: row.rows[0].$id,
-        data: {'correctAnswers': correctAnwsers, "score": score,"totalAnswers":totalAnswers},
+        data: {
+          'correctAnswers': correctAnwsers,
+          "score": score,
+          "totalAnswers": totalAnswers
+        },
       );
       notifyListeners();
     } catch (e) {
@@ -856,7 +862,7 @@ class AppwriteService extends ChangeNotifier {
   }
 
   Future<void> updateMembersDetails(String rowId) async {
-    for(int i=0;i<party.memberCount;i++){
+    for (int i = 0; i < party.memberCount; i++) {
       var row = await database.listRows(
         databaseId: "6972adad002e2ba515f2",
         tableId: "party_member",
@@ -872,7 +878,5 @@ class AppwriteService extends ChangeNotifier {
     }
     notifyListeners();
     print("aaaa2");
-   
   }
-  
 }
