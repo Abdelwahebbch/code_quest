@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:pfe_test/models/message_model.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
@@ -89,12 +90,12 @@ class _AITutorChatState extends State<AITutorChat> {
                           isAI ? const Radius.circular(15) : Radius.zero,
                     ),
                   ),
-                  child: Text(msg.message,
-                      style: const TextStyle(color: Colors.white)),
+                  child: MarkdownBody(selectable: true, data:msg.message ),
+              
                 ),
               );
             },
-          ),
+          ),  
         ),
         Padding(
           padding: const EdgeInsets.all(16.0),
