@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
@@ -6,12 +9,9 @@ import 'package:provider/provider.dart';
 import 'party_quiz_screen.dart';
 
 class PartyLobbyScreen extends StatefulWidget {
-  final Party party;
+  final String rowId;
 
-  const PartyLobbyScreen({
-    super.key,
-    required this.party,
-  });
+  const PartyLobbyScreen(this.rowId, {super.key});
 
   @override
   State<PartyLobbyScreen> createState() => _PartyLobbyScreenState();
@@ -20,27 +20,81 @@ class PartyLobbyScreen extends StatefulWidget {
 class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   late Party _party;
   bool _isReady = false;
+  RealtimeSubscription? subscription;
+
+  @override
+  void dispose() {
+    subscription?.close();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
-    _party = widget.party;
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    _party = authService.party;
+    subscription = authService.realtime.subscribe([
+      Channel.tablesdb("6972adad002e2ba515f2").table("party").row(widget.rowId)
+    ]);
+    subscription?.stream.listen((response) async {
+      print(response.payload["members"]);
+      List<dynamic> dbMembers = response.payload["members"];
+      List<PartyMember> members = [];
+      for (int i = 0; i < dbMembers.length; i++) {
+        Map<String, dynamic> dbMember = jsonDecode(dbMembers[i]);
+        Map<String,dynamic> details =await authService.getMemberDetails(widget.rowId,dbMember["memberId"]);
+        PartyMember partyMember = PartyMember(
+            userId: details["userId"],
+            username: details["username"],
+            imageId: details["imageId"],
+            joinedAt:details["joinedAt"],
+            score: details["score"],
+            correctAnswers: details["correctAnswers"],
+            totalAnswers: details["totalAnswers"],
+            isReady: dbMember["isReady"]);
+        members.add(partyMember);
+      }
+      setState(() {
+        _party.members =members;
+      });
+      if (response.payload["isStarted"] == true) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PartyQuizScreen(rowId:widget.rowId),
+          ),
+        );
+      }
+      bool isHost = false;
+      String hostId = response.payload["hostId"];
+      for (int i = 0; i < members.length; i++) {
+        if (members[i].userId == hostId) {
+          isHost = true;
+        }
+      }
+      if (isHost == false) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('The owner just close the party'),
+          ),
+        );
+      }
+    });
   }
 
-  void _toggleReady() {
+  Future<void> _toggleReady() async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    await authService.toggleReady(widget.rowId);
     setState(() {
       _isReady = !_isReady;
     });
   }
 
-  void _startGame() {
+  void _startGame() async {
     if (_party.canStart) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PartyQuizScreen(party: _party),
-        ),
-      );
+      final authService = Provider.of<AppwriteService>(context, listen: false);
+      await authService.startParty(widget.rowId);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -63,21 +117,68 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Party Lobby'),
-        backgroundColor: AppTheme.primaryColor,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.content_copy),
-            onPressed: _copyPartyCode,
-            tooltip: 'Copy party code',
-          ),
-        ],
-      ),
       body: Column(
         children: [
-          // Party Info Header
+          Stack(
+            children: [
+              Container(
+                  height: 110,
+                  width: double.infinity,
+                  color: AppTheme.primaryColor),
+              Positioned(
+                  bottom: 2,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    children: [
+                      const SizedBox(
+                        width: 3,
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 25,
+                        ),
+                        onPressed: () async {
+                          await authService.quiteLobby(widget.rowId);
+                          Navigator.pop(context);
+                        },
+                      ),
+
+                      const SizedBox(width: 20),
+
+                      Text(
+                        "Party Lobby",
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                      ),
+
+                      const Spacer(),
+
+                      // Party code
+                      Text(
+                        "${_party.partyId.substring(0, 3)} ${_party.partyId.substring(3, 6)}",
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                      ),
+
+                      IconButton(
+                        icon:
+                            const Icon(Icons.content_copy, color: Colors.white),
+                        onPressed: _copyPartyCode,
+                        tooltip: 'Copy party code',
+                      ),
+                    ],
+                  ))
+            ],
+          ),
+
           Container(
             color: AppTheme.primaryColor.withValues(alpha: 0.1),
             padding: const EdgeInsets.all(20),
@@ -331,12 +432,11 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                 ),
                 const SizedBox(height: 10),
                 if (_party.hostId ==
-                   authService.user!.$id) // Check if current user is host
+                    authService.user!.$id) // Check if current user is host
                   SizedBox(
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                     
                       onPressed: _party.canStart ? _startGame : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.accentColor,
