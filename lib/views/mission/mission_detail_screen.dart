@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
@@ -22,12 +21,11 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   late TextEditingController _codeController;
   // ignore: prefer_typing_uninitialized_variables
   var _currentAnswer;
-  
+
   @override
   void initState() {
     super.initState();
-    _codeController =
-        TextEditingController(text: widget.mission.initialCode ?? "");
+    _codeController = TextEditingController(text: widget.mission.initialCode);
   }
 
   @override
@@ -36,12 +34,14 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       appBar: AppBar(
         title: Text(widget.mission.title),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.psychology, color: AppTheme.accentColor),
-            onPressed: () {
-              return _showAITutor(context);
-            },
-          ),
+          if (widget.mission.type.name == "debug" ||widget.mission.type.name == "complete" )
+            IconButton(
+              icon: const Icon(Icons.restore_rounded,
+                  color: AppTheme.accentColor),
+              onPressed: () {
+                _codeController.text = widget.mission.initialCode!.trim();
+              },
+            ),
         ],
       ),
       body: Column(
@@ -172,43 +172,52 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     final ai =
         Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     bool isCorrect = false;
-    double rate=0.0 ;
+    double rate = 0.0;
     switch (widget.mission.type) {
       case MissionType.debug:
       case MissionType.complete:
       case MissionType.test:
-
         showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) {
-                  return Center(
-                      child: Container(
-                    width: 150,
-                    height: 150,
-                    decoration: BoxDecoration(
-                        color: AppTheme.secondaryColor,
-                        borderRadius: BorderRadius.circular(12),
-                        ),
-                    child: const Column(
-                      children: [
-                        Padding(padding: EdgeInsets.only(top: 40,left:50,right: 50),child: CircularProgressIndicator(),),
-                        SizedBox(height: 15,),
-                        Text("Checking...",style: TextStyle(fontSize: 13,color: Colors.white),),
-                      ],
-                    ),
-                  ));
-                },
-              );
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return Center(
+                child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                color: AppTheme.secondaryColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(top: 40, left: 50, right: 50),
+                    child: CircularProgressIndicator(),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Text(
+                    "Checking...",
+                    style: TextStyle(fontSize: 13, color: Colors.white),
+                  ),
+                ],
+              ),
+            ));
+          },
+        );
         final List<dynamic> check = await ai.checkAnwser(
-        authService.progress, widget.mission, _codeController.text.trim());
+            authService.progress, widget.mission, _codeController.text.trim());
         Navigator.pop(context);
         isCorrect = check[0];
-        rate=check[1];
+        rate = check[1];
 
         break;
       case MissionType.singleChoice:
-        isCorrect = _currentAnswer == widget.mission.solution;
+        isCorrect = _currentAnswer
+            .toString()
+            .contains(widget.mission.solution.toString());
         break;
       case MissionType.multipleChoice:
         if (_currentAnswer is List<String>) {
@@ -239,7 +248,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               //debugPrint("XP = ${authService.progress.experience}");
               if (isCorrect) {
                 await authService.updateXp(widget.mission.points);
-                await authService.updateMissionStatus(widget.mission.id,rate);
+                await authService.updateMissionStatus(widget.mission.id, rate);
 
                 Navigator.pushAndRemoveUntil(
                     context,

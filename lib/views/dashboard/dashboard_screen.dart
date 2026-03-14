@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:provider/provider.dart';
 import '../../models/mission_model.dart';
 import '../../theme/app_theme.dart';
@@ -257,7 +258,12 @@ class DashboardHomeState extends State<DashboardHome> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          return authService.getUserInfo();
+          try {
+            await authService.getUserInfo();
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("No Internet connection !")));
+          }
         },
         child: SafeArea(
           child: CustomScrollView(
@@ -311,6 +317,13 @@ class DashboardHomeState extends State<DashboardHome> {
                       Text("Active Missions",
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 15),
+                      ElevatedButton(
+                          onPressed: () {
+                            Provider.of<AppwritecloudfunctionsService>(context,
+                                    listen: false)
+                                .createCustomMissions();
+                          },
+                          child: const Text("Genarate Missions"))
                     ],
                   ),
                 ),
@@ -323,15 +336,17 @@ class DashboardHomeState extends State<DashboardHome> {
     );
   }
 
-
   Widget checkMissionsAv() {
     switch (missions.isEmpty) {
       case true:
-        return  SliverToBoxAdapter(child: Row(
+        return SliverToBoxAdapter(
+            child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(padding: const EdgeInsets.all(16), child: const Text("There are no missions at the moment !")),
+            Container(
+                padding: const EdgeInsets.all(16),
+                child: const Text("There are no missions at the moment !")),
           ],
         ));
 

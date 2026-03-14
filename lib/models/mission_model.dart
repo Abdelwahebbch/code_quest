@@ -1,3 +1,5 @@
+import 'package:appwrite/models.dart';
+
 enum MissionType {
   debug,
   complete,
@@ -35,10 +37,97 @@ class Mission {
     this.options,
     this.correctOrder,
     this.isCompleted = false,
-    this.nbFailed =0,
-    this.aiPointsUsed=0,
-    this.conversation=const [],
+    this.nbFailed = 0,
+    this.aiPointsUsed = 0,
+    this.conversation = const [],
   });
 
-
+  factory Mission.completeMission(Row row) {
+    return Mission(
+        id: row.$id,
+        title: row.data['title'],
+        description: row.data['description'],
+        type: MissionType.complete,
+        points: row.data['points'],
+        difficulty: row.data['difficulty'],
+        nbFailed: row.data['nbFailed'],
+        aiPointsUsed: row.data['aiPointsUsed'],
+        isCompleted: row.data['isCompleted'],
+        conversation: List<String>.from(row.data['conversation'] ?? []),
+        initialCode: row.data["initialCode"]);
+  }
+  factory Mission.testMission(Row row) {
+    return Mission(
+        id: row.$id,
+        title: row.data['title'],
+        description: row.data['description'],
+        type: MissionType.test,
+        points: row.data['points'],
+        difficulty: row.data['difficulty'],
+        nbFailed: row.data['nbFailed'],
+        aiPointsUsed: row.data['aiPointsUsed'],
+        isCompleted: row.data['isCompleted'],
+        conversation: List<String>.from(row.data['conversation'] ?? []),
+        initialCode: row.data["initialCode"]);
+  }
+  factory Mission.debugMission(Row row) {
+    return Mission(
+        id: row.$id,
+        title: row.data['title'],
+        description: row.data['description'],
+        type: MissionType.debug,
+        points: row.data['points'],
+        difficulty: row.data['difficulty'],
+        nbFailed: row.data['nbFailed'],
+        aiPointsUsed: row.data['aiPointsUsed'],
+        isCompleted: row.data['isCompleted'],
+        conversation: List<String>.from(row.data['conversation'] ?? []),
+        initialCode: row.data["initialCode"]);
+  }
+  factory Mission.singleChoice(Row row) {
+    return Mission(
+        id: row.$id,
+        title: row.data['title'],
+        description: row.data['description'],
+        type: MissionType.singleChoice,
+        points: row.data['points'],
+        difficulty: row.data['difficulty'],
+        nbFailed: row.data['nbFailed'],
+        aiPointsUsed: row.data['aiPointsUsed'],
+        isCompleted: row.data['isCompleted'],
+        conversation: List<String>.from(row.data['conversation'] ?? []),
+        options: row.data["options"],
+        solution: row.data["solution"]);
+  }
+  factory Mission.multipleChoice(Row row) {
+    return Mission(
+        id: row.$id,
+        title: row.data['title'],
+        description: row.data['description'],
+        type: MissionType.multipleChoice,
+        points: row.data['points'],
+        difficulty: row.data['difficulty'],
+        nbFailed: row.data['nbFailed'],
+        aiPointsUsed: row.data['aiPointsUsed'],
+        isCompleted: row.data['isCompleted'],
+        conversation: List<String>.from(row.data['conversation'] ?? []),
+        options: row.data["options"],
+        solution: row.data["solution"]);
+  }
+  //mrigla
+  factory Mission.ordering(Row row) {
+    return Mission(
+        id: row.$id,
+        title: row.data['title'],
+        description: row.data['description'],
+        type: MissionType.ordering,
+        points: row.data['points'],
+        difficulty: row.data['difficulty'],
+        nbFailed: row.data['nbFailed'],
+        aiPointsUsed: row.data['aiPointsUsed'],
+        isCompleted: row.data['isCompleted'],
+        conversation: List<String>.from(row.data['conversation'] ?? []),
+        correctOrder: row.data["correctOrder"],
+        options: row.data["options"]);
+  }
 }

@@ -22,6 +22,8 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    Provider.of<AppwriteService>(context, listen: false)
+        .registerNotificationDevice();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -77,7 +79,6 @@ class _SplashScreenState extends State<SplashScreen>
                 width: 200,
                 image: AssetImage('assets/icon/icon.png'),
               ),
-             
               SizedBox(height: 8),
               Text(
                 "Master Software Engineering",
