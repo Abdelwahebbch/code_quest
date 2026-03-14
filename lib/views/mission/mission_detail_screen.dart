@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_code_editor/flutter_code_editor.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
@@ -8,6 +9,9 @@ import 'package:provider/provider.dart';
 import '../../models/mission_model.dart';
 import '../../theme/app_theme.dart';
 import '../chat/ai_tutor_chat.dart';
+import 'package:highlight/languages/java.dart';
+import 'package:highlight/languages/python.dart';
+import 'package:highlight/languages/Dart.dart';
 
 class MissionDetailScreen extends StatefulWidget {
   final Mission mission;
@@ -18,14 +22,15 @@ class MissionDetailScreen extends StatefulWidget {
 }
 
 class _MissionDetailScreenState extends State<MissionDetailScreen> {
-  late TextEditingController _codeController;
+  late CodeController _codeController;
   // ignore: prefer_typing_uninitialized_variables
   var _currentAnswer;
 
   @override
   void initState() {
     super.initState();
-    _codeController = TextEditingController(text: widget.mission.initialCode);
+    _codeController =
+        CodeController(text: widget.mission.initialCode, language: python);
   }
 
   @override
@@ -34,7 +39,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       appBar: AppBar(
         title: Text(widget.mission.title),
         actions: [
-          if (widget.mission.type.name == "debug" ||widget.mission.type.name == "complete" )
+          if (widget.mission.type.name == "debug" ||
+              widget.mission.type.name == "complete")
             IconButton(
               icon: const Icon(Icons.restore_rounded,
                   color: AppTheme.accentColor),
@@ -112,31 +118,74 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     switch (widget.mission.type) {
       case MissionType.debug:
       case MissionType.complete:
-      case MissionType.test:
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade800),
-          ),
-          child: TextField(
-            controller: _codeController,
-            maxLines: null,
-            style: const TextStyle(
-                fontFamily: 'monospace', color: Colors.greenAccent),
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.all(16),
-              border: InputBorder.none,
+        return SingleChildScrollView(
+          child: Container(
+            height: 500,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade800),
             ),
+            child: CodeField(controller: _codeController),
+          ),
+        );
+      case MissionType.test:
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("CODE",
+                  style: TextStyle(
+                      color: AppTheme.accentColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12)),
+              const SizedBox(height: 8),
+              Container(
+                height: 500,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade800),
+                ),
+                child: CodeField(controller: _codeController),
+              ),
+              const SizedBox(height: 8),
+              const Text("OUTPUT ",
+                  style: TextStyle(
+                      color: AppTheme.accentColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12)),
+              const SizedBox(height: 8),
+              TextField(
+                onChanged: (txt) {
+                  _currentAnswer = txt.trim();
+                },
+              )
+            ],
           ),
         );
       case MissionType.multipleChoice:
       case MissionType.singleChoice:
-        return ChoiceChallenge(
-            mission: widget.mission,
-            onAnswerChanged: (answer) {
-              return _currentAnswer = answer;
-            });
+      //TODO : mission hybride (e.g single choice + code )
+        if (widget.mission.initialCode == null) {
+          return ChoiceChallenge(
+              mission: widget.mission,
+              onAnswerChanged: (answer) {
+                return _currentAnswer = answer;
+              });
+        } else {
+          return Column(
+            children: [
+              const Text("Test"),
+              ChoiceChallenge(
+                  mission: widget.mission,
+                  onAnswerChanged: (answer) {
+                    return _currentAnswer = answer;
+                  }),
+            ],
+          );
+        }
+
       case MissionType.ordering:
         return OrderingChallenge(
             mission: widget.mission,
@@ -176,7 +225,6 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     switch (widget.mission.type) {
       case MissionType.debug:
       case MissionType.complete:
-      case MissionType.test:
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -232,6 +280,11 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
           isCorrect = _currentAnswer.length == correctOrder.length &&
               equals(_currentAnswer, correctOrder);
         }
+        break;
+      case MissionType.test:
+        isCorrect = _currentAnswer
+            .toString()
+            .contains(widget.mission.solution.toString());
         break;
     }
 
