@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
+import 'package:provider/provider.dart';
 
 class PartyResultsScreen extends StatefulWidget {
-  final Party party;
-
+  final String rowId;
   const PartyResultsScreen({
     super.key,
-    required this.party,
+    required this.rowId,
   });
 
   @override
@@ -19,21 +20,22 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
     with TickerProviderStateMixin {
   late List<PartyMember> _rankedMembers;
   late AnimationController _animationController;
+  bool _isLoading= true;
+
+  Future<void> updateMembers() async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    await authService.updateMembersDetails(widget.rowId);
+    _rankedMembers = List.from(authService.party.members)
+      ..sort((a, b) => b.score.compareTo(a.score));
+    setState(() {
+      _isLoading=false;
+    });
+    
+  }
 
   @override
   void initState() {
     super.initState();
-    // Sort members by score
-    /** 
-     * .. ma3neha cascade operator : fi 3oudh tnedi marra o5ra 3la _rankedMembers.sort(...)
-     * walli ta3mel ..sort(....)
-     * Ex blech (..) : 
-     *  _rankedMembers = List.from(widget.party.members) ;
-     * _rankedMembers.sort((a, b) => b.score.compareTo(a.score));
-     */
-    _rankedMembers = List.from(widget.party.members)
-      ..sort((a, b) => b.score.compareTo(a.score));
-
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -49,6 +51,14 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Game Results'),
@@ -304,7 +314,10 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          (_rankedMembers.fold<int>(0, (sum, m) => sum + m.score) / _rankedMembers.length).toStringAsFixed(0),
+                          (_rankedMembers.fold<int>(
+                                      0, (sum, m) => sum + m.score) /
+                                  _rankedMembers.length)
+                              .toStringAsFixed(0),
                           style: Theme.of(context)
                               .textTheme
                               .headlineSmall
@@ -323,7 +336,7 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${widget.party.totalRounds}',
+                          '${authService.party.totalRounds}',
                           style: Theme.of(context)
                               .textTheme
                               .headlineSmall
