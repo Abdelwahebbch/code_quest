@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:pfe_test/models/mission_model.dart';
 
 class PartyMember {
@@ -39,8 +41,8 @@ class PartyMember {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
+  String toJson() {
+    return jsonEncode({
       'userId': userId,
       'username': username,
       'imageId': imageId,
@@ -48,8 +50,8 @@ class PartyMember {
       'correctAnswers': correctAnswers,
       'totalAnswers': totalAnswers,
       'isReady': isReady,
-      'joinedAt': joinedAt.toIso8601String(),
-    };
+      'joinedAt': joinedAt.toString(),
+    });
   }
 }
 
@@ -64,7 +66,6 @@ class Party {
   int currentMissionIndex;
   bool isActive;
   bool isStarted;
-  DateTime createdAt;
   DateTime? startedAt;
   DateTime? endedAt;
   String difficulty; // beginner, intermediate, advanced
@@ -82,7 +83,6 @@ class Party {
     this.currentMissionIndex = 0,
     this.isActive = true,
     this.isStarted = false,
-    required this.createdAt,
     this.startedAt,
     this.endedAt,
     this.difficulty = 'intermediate',
@@ -92,7 +92,7 @@ class Party {
 
   bool get isFull => members.length >= maxMembers;
 
-  bool get canStart => members.length >= 2 && members.every((m) => m.isReady);
+  bool get canStart => members.length >=1 && members.every((m) => m.isReady);
 
   int get memberCount => members.length;
 
@@ -106,7 +106,7 @@ class Party {
 
   factory Party.fromJson(Map<String, dynamic> json) {
     return 
-    Party(partyId: "1", partyName: "partyName", hostId: "hostId", hostName: "hostName", createdAt: DateTime(2026));
+    Party(partyId: "1", partyName: "partyName", hostId: "hostId", hostName: "hostName");
   }
 
   Map<String, dynamic> toJson() {
@@ -121,7 +121,6 @@ class Party {
       'currentMissionIndex': 1,
       'isActive': true,
       'isStarted': true,
-      'createdAt': createdAt.toIso8601String(),
       'startedAt': startedAt?.toIso8601String(),
       'endedAt': endedAt?.toIso8601String(),
       'difficulty': difficulty,

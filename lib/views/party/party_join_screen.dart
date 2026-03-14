@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:provider/provider.dart';
 import 'party_lobby_screen.dart';
 
 class PartyJoinScreen extends StatefulWidget {
@@ -11,17 +14,17 @@ class PartyJoinScreen extends StatefulWidget {
 }
 
 class _PartyJoinScreenState extends State<PartyJoinScreen> {
-  final TextEditingController _partyCodeController = TextEditingController();
+  String code="";
   bool _isLoading = false;
 
-  // Mock available parties
+  // Mock available parties deleteted
   final List<Party> _availableParties = [
     Party(
       partyId: '1',
       partyName: 'Python Masters',
       hostId: 'host1',
       hostName: 'John Doe',
-      createdAt: DateTime.now(),
+  
       maxMembers: 6,
       difficulty: 'intermediate',
       gameMode: 'quiz',
@@ -45,7 +48,6 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
       partyName: 'JavaScript Challenge',
       hostId: 'host2',
       hostName: 'Alice Johnson',
-      createdAt: DateTime.now(),
       maxMembers: 4,
       difficulty: 'advanced',
       gameMode: 'missions',
@@ -59,36 +61,36 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
       ],
     ),
   ];
-
+  
   void _joinPartyWithCode() {
-    if (_partyCodeController.text.isEmpty) {
+    if (code.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a party code')),
       );
       return;
     }
-
+     final authService = Provider.of<AppwriteService>(context, listen: false);
     setState(() => _isLoading = true);
 
     // Simulate API call
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 1), () async {
       setState(() => _isLoading = false);
-
-      // Mock party join
-      final mockParty = Party(
-        partyId: _partyCodeController.text,
-        partyName: 'Mystery Party',
-        hostId: 'host_unknown',
-        hostName: 'Unknown Host',
-        createdAt: DateTime.now(),
-      );
-
+      String rowId= await authService.joinParty(int.parse(code));
+      if(rowId.isNotEmpty){
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PartyLobbyScreen(party: mockParty),
+          builder: (context) =>  PartyLobbyScreen(rowId),
         ),
-      );
+      );}
+      else{
+        ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Party not found!'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+      }
     });
   }
 
@@ -100,22 +102,18 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PartyLobbyScreen(party: party),
-      ),
-    );
+    
   }
 
   @override
   void dispose() {
-    _partyCodeController.dispose();
+    code="";
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+   
     return Scaffold(
       appBar: AppBar(
         title: const Text('Join Party'),
@@ -136,18 +134,27 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
                     ),
               ),
               const SizedBox(height: 15),
-              TextField(
-                controller: _partyCodeController,
-                decoration: InputDecoration(
-                  hintText: 'Enter party code',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.vpn_key),
-                  filled: true,
-                  fillColor: AppTheme.cardColor,
-                ),
+               Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: PinCodeTextField(
+              appContext: context,
+              length: 6,
+              keyboardType: TextInputType.number,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              textStyle: const TextStyle(color: Colors.white),
+              pinTheme: PinTheme(
+                shape: PinCodeFieldShape.box,
+                borderRadius: BorderRadius.circular(8),
+                fieldHeight: 40,
+                fieldWidth: 40,
+                inactiveColor: Colors.grey,
+                activeColor: Colors.grey,
               ),
+              onChanged: (value) {
+                code = value;
+              },
+            ),
+          ),
               const SizedBox(height: 15),
               SizedBox(
                 width: double.infinity,
@@ -181,7 +188,7 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
               ),
               const SizedBox(height: 40),
 
-              // Available Parties Section
+              // Available Parties Section deleted
               Text(
                 'Available Parties',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(

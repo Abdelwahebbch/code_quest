@@ -25,7 +25,7 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
     super.dispose();
   }
 
-  void _createParty() {
+  Future<void> _createParty() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     if (_partyNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -33,32 +33,38 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
       );
       return;
     }
-
+    final mainMember = PartyMember(
+        userId: authService.user!.$id,
+        username: authService.user!.name,
+        imageId: authService.progress.imageId,
+        joinedAt: DateTime.now(),
+        score:0,
+        correctAnswers: 0,
+        totalAnswers: 0,
+        isReady: false,
+        );
     // Create party object
+    String date=DateTime.now().millisecondsSinceEpoch.toString().substring(7);
+    while(date[0]=='0'){
+       date=DateTime.now().millisecondsSinceEpoch.toString().substring(7);
+    }
     final party = Party(
-        partyId: DateTime.now().millisecondsSinceEpoch.toString(),
-        partyName: _partyNameController.text,
-        hostId: authService.user!.$id,
-        hostName: authService.user!.name,
-        maxMembers: _maxMembers,
-        createdAt: DateTime.now(),
-        difficulty: _difficulty,
-        gameMode: _gameMode,
-        totalRounds: _totalRounds,
-        //TODO : just lel test 
-        members: ["Abdelwaheb", "9attous 1","9attous 2","9attous 3","9attous 4"].map((value) {
-          return PartyMember(
-              userId: "1",
-              username: value,
-              imageId: "imageId",
-              isReady: true,
-              joinedAt: DateTime.now());
-        }).toList());
-
+      partyId: date,
+      partyName: _partyNameController.text,
+      hostId: authService.user!.$id,
+      hostName: authService.user!.name,
+      maxMembers: _maxMembers,
+      difficulty: _difficulty,
+      gameMode: _gameMode,
+      totalRounds: _totalRounds,
+      members: [mainMember],
+      isStarted: false,
+    );
+    String rowId= await authService.createParty(party);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PartyLobbyScreen(party: party),
+        builder: (context) => PartyLobbyScreen(rowId),
       ),
     );
   }
@@ -68,7 +74,6 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Party'),
-        backgroundColor: AppTheme.primaryColor,
         elevation: 0,
       ),
       body: SingleChildScrollView(

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
+import 'package:provider/provider.dart';
 import 'party_results_screen.dart';
 
 class PartyQuizScreen extends StatefulWidget {
-  final Party party;
 
+  final String rowId;
   const PartyQuizScreen({
     super.key,
-    required this.party,
+    required this.rowId,
+    
   });
 
   @override
@@ -22,7 +25,8 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
   bool _answered = false;
   String? _selectedAnswer;
   late DateTime _roundStartTime;
-
+  int? answerIndex;
+  late int memberIndex;
   // Mock questions
   final List<Map<String, dynamic>> _questions = [
     {
@@ -53,17 +57,26 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
   @override
   void initState() {
     super.initState();
-    _party = widget.party;
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    _party = authService.party;
     _roundStartTime = DateTime.now();
+    for(int i=0;i<_party.memberCount;i++){
+      if(_party.members[i].userId==authService.user?.$id){
+        memberIndex=i;
+      }
+    }
     _startTimer();
   }
 
   void _startTimer() {
     Future.delayed(const Duration(seconds: 1), () {
-      if (mounted && !_answered) {
+      if (mounted ) {
         setState(() {
           _timeRemaining--;
           if (_timeRemaining <= 0) {
+            if(answerIndex != null){
+              _submitAnswer(answerIndex);
+            }
             _submitAnswer(null);
           } else {
             _startTimer();
@@ -74,15 +87,21 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
   }
 
   void _submitAnswer(int? answerIndex) {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
     setState(() {
       _answered = true;
+      this.answerIndex=answerIndex!;
     });
     // 7asben les point (local just pour le test ) 
+    if(_timeRemaining==0){
     bool isCorrect = answerIndex ==
         _questions[(_currentRound - 1) % _questions.length]['correct'];
-    _party.members[0].score += isCorrect? 10:0; 
+    
+    _party.members[memberIndex].score += isCorrect? 10:0; 
+    _party.members[memberIndex].correctAnswers += isCorrect? 1:0;
+    _party.members[memberIndex].totalAnswers += 1;
     print(isCorrect);
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () async {
       if (_currentRound < _party.totalRounds) {
         setState(() {
           _currentRound++;
@@ -94,14 +113,16 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
         _startTimer();
       } else {
         // Game finished
+        await authService.submitAnswer(widget.rowId,memberIndex,_party.members[memberIndex].score, _party.members[memberIndex].correctAnswers,_party.members[memberIndex].totalAnswers);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => PartyResultsScreen(party: _party),
+            builder: (context) => PartyResultsScreen(rowId:widget.rowId),
           ),
         );
       }
     });
+    }
   }
 
   @override
