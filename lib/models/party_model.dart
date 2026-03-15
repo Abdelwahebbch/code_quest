@@ -11,6 +11,7 @@ class PartyMember {
   int totalAnswers;
   bool isReady;
   DateTime joinedAt;
+  bool isSubmit;
 
   PartyMember({
     required this.userId,
@@ -21,6 +22,7 @@ class PartyMember {
     this.totalAnswers = 0,
     this.isReady = false,
     required this.joinedAt,
+    this.isSubmit =false
   });
 
   double get accuracy {
