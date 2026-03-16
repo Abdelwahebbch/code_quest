@@ -68,7 +68,8 @@ class Mission {
         aiPointsUsed: row.data['aiPointsUsed'],
         isCompleted: row.data['isCompleted'],
         conversation: List<String>.from(row.data['conversation'] ?? []),
-        initialCode: row.data["initialCode"]);
+        initialCode: row.data["initialCode"],
+        solution:row.data["solution"] );
   }
   factory Mission.debugMission(Row row) {
     return Mission(

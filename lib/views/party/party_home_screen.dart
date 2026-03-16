@@ -15,13 +15,14 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppTheme.primaryColor.withValues(alpha:0.1),
-              AppTheme.accentColor.withValues(alpha:0.1),
+              AppTheme.primaryColor.withValues(alpha: 0.1),
+              AppTheme.accentColor.withValues(alpha: 0.1),
             ],
           ),
         ),
@@ -69,13 +70,14 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                             gradient: LinearGradient(
                               colors: [
                                 AppTheme.primaryColor,
-                                AppTheme.primaryColor.withValues(alpha:0.7),
+                                AppTheme.primaryColor.withValues(alpha: 0.7),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.primaryColor.withValues(alpha:0.3),
+                                color: AppTheme.primaryColor
+                                    .withValues(alpha: 0.3),
                                 blurRadius: 15,
                                 offset: const Offset(0, 8),
                               ),
@@ -86,7 +88,7 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha:0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 padding: const EdgeInsets.all(20),
@@ -115,7 +117,8 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: Colors.white.withValues(alpha:0.9),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.9),
                                     ),
                               ),
                             ],
@@ -139,13 +142,14 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                             gradient: LinearGradient(
                               colors: [
                                 AppTheme.accentColor,
-                                AppTheme.accentColor.withValues(alpha:0.7),
+                                AppTheme.accentColor.withValues(alpha: 0.7),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.accentColor.withValues(alpha:0.3),
+                                color:
+                                    AppTheme.accentColor.withValues(alpha: 0.3),
                                 blurRadius: 15,
                                 offset: const Offset(0, 8),
                               ),
@@ -156,7 +160,7 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha:0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 padding: const EdgeInsets.all(20),
@@ -185,7 +189,8 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: Colors.white.withValues(alpha:0.9),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.9),
                                     ),
                               ),
                             ],
@@ -205,21 +210,28 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                       color: AppTheme.primaryColor.withValues(alpha:0.2),
                     ),
                   ),
-                  padding: const EdgeInsets.all(15),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        color: AppTheme.primaryColor,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.cardColor,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.2),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Compete with friends, earn XP together, and climb the party leaderboard!',
+                    ),
+                    padding: const EdgeInsets.all(15),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: AppTheme.primaryColor,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Compete with friends, earn XP together, \nand climb the party leaderboard!',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
