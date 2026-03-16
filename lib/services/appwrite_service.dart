@@ -603,9 +603,6 @@ class AppwriteService extends ChangeNotifier {
 
   Future<String> createParty(Party party) async {
     try {
-      List<String> partyMembers = [];
-      partyMembers.add(
-          jsonEncode({"memberId": party.members[0].userId, "isReady": false}));
       this.party = party;
       notifyListeners();
       final row = await database.createRow(
@@ -616,7 +613,6 @@ class AppwriteService extends ChangeNotifier {
           "partyName": party.partyName,
           "hostId": party.hostId,
           "hostName": party.hostName,
-          "members": partyMembers,
           "maxMembers": party.maxMembers,
           "difficulty": party.difficulty,
           "gameMode": party.gameMode,
@@ -636,7 +632,9 @@ class AppwriteService extends ChangeNotifier {
           "joinedAt": DateTime.now().toString(),
           "score": 0,
           "correctAnswers": 0,
-          "totalAnswers": 0
+          "totalAnswers": 0,
+          "isReady": false,
+          "isSubmit": false,
         },
         rowId: ID.unique(),
       );
@@ -657,30 +655,30 @@ class AppwriteService extends ChangeNotifier {
       );
       var row = result.rows[0];
       String rowId = result.rows[0].$id;
-      List<dynamic> dbMembers = List.from(result.rows[0].data["members"] ?? []);
+      print(rowId);
+      var result2 = await database.listRows(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "party_member",
+        queries: [
+          Query.equal("partyId", rowId),
+        ],
+      );
+      print(result2.rows);
       int maxMembers = result.rows[0].data["maxMembers"];
-      if (dbMembers.length < maxMembers) {
+      if (result2.rows.length < maxMembers) {
         List<PartyMember> members = [];
-
+        List<dynamic> dbMembers = result2.rows;
         for (int i = 0; i < dbMembers.length; i++) {
-          String memberId = jsonDecode(dbMembers[i])["memberId"];
-          var row = await database.listRows(
-            databaseId: "6972adad002e2ba515f2",
-            tableId: "party_member",
-            queries: [
-              Query.equal("partyId", rowId),
-              Query.equal("userId", memberId)
-            ],
-          );
           members.add(PartyMember(
-              userId: row.rows[0].data["userId"],
-              username: row.rows[0].data["username"],
-              imageId: row.rows[0].data["imageId"],
-              joinedAt: DateTime.parse(row.rows[0].data["joinedAt"]),
-              score: row.rows[0].data["score"],
-              correctAnswers: row.rows[0].data["correctAnswers"],
-              totalAnswers: row.rows[0].data["totalAnswers"],
-              isReady: false));
+              userId: dbMembers[i].data["userId"],
+              username: dbMembers[i].data["username"],
+              imageId: dbMembers[i].data["imageId"],
+              joinedAt: DateTime.parse(dbMembers[i].data["joinedAt"]),
+              score: dbMembers[i].data["score"],
+              correctAnswers: dbMembers[i].data["correctAnswers"],
+              totalAnswers: dbMembers[i].data["totalAnswers"],
+              isReady: dbMembers[i].data["isReady"],
+              isSubmit: dbMembers[i].data["isSubmit"]));
         }
         PartyMember member = PartyMember(
             userId: user!.$id,
@@ -690,8 +688,8 @@ class AppwriteService extends ChangeNotifier {
             score: 0,
             correctAnswers: 0,
             totalAnswers: 0,
-            isReady: false);
-        dbMembers.add(jsonEncode({"memberId": user?.$id, "isReady": false}));
+            isReady: false,
+            isSubmit: false);
         party = Party(
           partyId: row.data["partyId"].toString(),
           partyName: row.data["partyName"],
@@ -706,12 +704,6 @@ class AppwriteService extends ChangeNotifier {
         );
         members.add(member);
         notifyListeners();
-        await database.updateRow(
-          databaseId: "6972adad002e2ba515f2",
-          tableId: "party",
-          rowId: rowId,
-          data: {'members': dbMembers},
-        );
         await database.createRow(
           databaseId: "6972adad002e2ba515f2",
           tableId: "party_member",
@@ -725,6 +717,8 @@ class AppwriteService extends ChangeNotifier {
             "score": 0,
             "correctAnswers": 0,
             "totalAnswers": 0,
+            "isReady": false,
+            "isSubmit": false
           },
         );
         return rowId;
@@ -735,45 +729,28 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> getMemberDetails(
-      String rowId, var userId) async {
-    Map<String, dynamic> member = {};
-    var row = await database.listRows(
-      databaseId: "6972adad002e2ba515f2",
-      tableId: "party_member",
-      queries: [Query.equal("partyId", rowId), Query.equal("userId", userId)],
-    );
-    member.addAll({
-      "userId": row.rows[0].data["userId"],
-      "username": row.rows[0].data["username"],
-      "imageId": row.rows[0].data["imageId"],
-      "joinedAt": DateTime.parse(row.rows[0].data["joinedAt"]),
-      "score": row.rows[0].data["score"],
-      "correctAnswers": row.rows[0].data["correctAnswers"],
-      "totalAnswers": row.rows[0].data["totalAnswers"],
-    });
-    return member;
-  }
-
   Future<void> toggleReady(String rowId) async {
     try {
-      List<dynamic> jsonMembers = [];
+      bool isReady = false;
       for (int i = 0; i < party.members.length; i++) {
         if (party.members[i].username == user?.name) {
-          bool isReady = party.members[i].isReady;
+          isReady = party.members[i].isReady;
           party.members[i].isReady = !isReady;
         }
-        jsonMembers.add(jsonEncode({
-          "memberId": party.members[i].userId,
-          "isReady": party.members[i].isReady
-        }));
       }
-
+      var row = await database.listRows(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "party_member",
+        queries: [
+          Query.equal("partyId", rowId),
+          Query.equal("userId", user?.$id)
+        ],
+      );
       await database.updateRow(
         databaseId: "6972adad002e2ba515f2",
-        tableId: "party",
-        rowId: rowId,
-        data: {'members': jsonMembers},
+        tableId: "party_member",
+        rowId: row.rows[0].$id,
+        data: {'isReady': !isReady},
       );
     } catch (e) {
       rethrow;
@@ -796,23 +773,11 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> quiteLobby(String rowId) async {
     try {
-      List<dynamic> dbMembers = [];
       for (int i = 0; i < party.memberCount; i++) {
-        if (party.members[i].userId != user?.$id) {
-          dbMembers.add(jsonEncode({
-            "memberId": party.members[i].userId,
-            "isReady": party.members[i].isReady
-          }));
-        } else {
+        if (party.members[i].userId == user?.$id) {
           party.members.removeAt(i);
         }
       }
-      await database.updateRow(
-        databaseId: "6972adad002e2ba515f2",
-        tableId: "party",
-        rowId: rowId,
-        data: {'members': dbMembers},
-      );
       var row = await database.listRows(
         databaseId: "6972adad002e2ba515f2",
         tableId: "party_member",
@@ -852,7 +817,8 @@ class AppwriteService extends ChangeNotifier {
         data: {
           'correctAnswers': correctAnwsers,
           "score": score,
-          "totalAnswers": totalAnswers
+          "totalAnswers": totalAnswers,
+          "isSubmit": true
         },
       );
       notifyListeners();
@@ -862,21 +828,52 @@ class AppwriteService extends ChangeNotifier {
   }
 
   Future<void> updateMembersDetails(String rowId) async {
-    for (int i = 0; i < party.memberCount; i++) {
-      var row = await database.listRows(
+    print(party.memberCount);
+    bool isAllSubmit = false;
+    while (isAllSubmit == false) {
+      isAllSubmit = true;
+      await Future.delayed(const Duration(seconds: 2));
+      var rows = await database.listRows(
         databaseId: "6972adad002e2ba515f2",
         tableId: "party_member",
         queries: [
           Query.equal("partyId", rowId),
-          Query.equal("userId", party.members[i].userId)
         ],
       );
-      party.members[i].score = row.rows[0].data["score"];
-      party.members[i].correctAnswers = row.rows[0].data["correctAnswers"];
-      party.members[i].totalAnswers = row.rows[0].data["totalAnswers"];
-      print(row.rows[0].data["score"]);
+      for (int i = 0; i < rows.rows.length; i++) {
+        for (int j = 0; j < party.memberCount; j++) {
+          if (party.members[j].userId == rows.rows[i].data["userId"]) {
+            party.members[j].score = rows.rows[i].data["score"];
+            party.members[j].correctAnswers =
+                rows.rows[i].data["correctAnswers"];
+            party.members[j].totalAnswers = rows.rows[i].data["totalAnswers"];
+            party.members[j].isSubmit = rows.rows[i].data["isSubmit"];
+            if (!party.members[j].isSubmit) {
+              isAllSubmit=false;
+              break;
+            }
+          }
+        }
+        if(!isAllSubmit){
+          break;
+        }
+      }
+      notifyListeners();
     }
+  }
+
+  void addMember(PartyMember partyMember) {
+    party.members.add(partyMember);
     notifyListeners();
-    print("aaaa2");
+  }
+
+  void deleteMember(int memberIndex) {
+    party.members.removeAt(memberIndex);
+    notifyListeners();
+  }
+
+  void toggleReadyLocaly(int memberIndex, bool isReady) {
+    party.members[memberIndex].isReady = isReady;
+    notifyListeners();
   }
 }

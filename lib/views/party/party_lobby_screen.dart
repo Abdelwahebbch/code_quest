@@ -21,10 +21,11 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   late Party _party;
   bool _isReady = false;
   RealtimeSubscription? subscription;
-
+  RealtimeSubscription? subscription1;
   @override
   void dispose() {
     subscription?.close();
+    subscription1?.close;
     super.dispose();
   }
 
@@ -36,49 +37,72 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
     subscription = authService.realtime.subscribe([
       Channel.tablesdb("6972adad002e2ba515f2").table("party").row(widget.rowId)
     ]);
-    subscription?.stream.listen((response) async {
-      print(response.payload["members"]);
-      List<dynamic> dbMembers = response.payload["members"];
-      List<PartyMember> members = [];
-      for (int i = 0; i < dbMembers.length; i++) {
-        Map<String, dynamic> dbMember = jsonDecode(dbMembers[i]);
-        Map<String,dynamic> details =await authService.getMemberDetails(widget.rowId,dbMember["memberId"]);
-        PartyMember partyMember = PartyMember(
-            userId: details["userId"],
-            username: details["username"],
-            imageId: details["imageId"],
-            joinedAt:details["joinedAt"],
-            score: details["score"],
-            correctAnswers: details["correctAnswers"],
-            totalAnswers: details["totalAnswers"],
-            isReady: dbMember["isReady"]);
-        members.add(partyMember);
-      }
-      setState(() {
-        _party.members =members;
-      });
+    subscription?.stream.listen((response) {
       if (response.payload["isStarted"] == true) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PartyQuizScreen(rowId:widget.rowId),
+            builder: (context) => PartyQuizScreen(rowId: widget.rowId),
           ),
         );
       }
-      bool isHost = false;
-      String hostId = response.payload["hostId"];
-      for (int i = 0; i < members.length; i++) {
-        if (members[i].userId == hostId) {
-          isHost = true;
+    });
+    subscription1 = authService.realtime.subscribe(
+        [Channel.tablesdb("6972adad002e2ba515f2").table("party_member").row()],
+        queries: [Query.equal("partyId", widget.rowId)]);
+    subscription1?.stream.listen((response) {
+      print(response.payload);
+      Map<String, dynamic> row = response.payload;
+      if (response.events.first.contains("create")) {
+        PartyMember partyMember = PartyMember(
+            userId: row["userId"],
+            username: row["username"],
+            imageId: row["imageId"],
+            joinedAt: DateTime.parse(row["joinedAt"]),
+            score: row["score"],
+            correctAnswers: row["correctAnswers"],
+            totalAnswers: row["totalAnswers"],
+            isReady: row["isReady"],
+            isSubmit: row["isSubmit"]);
+       
+        setState(() {
+          authService.addMember(partyMember);
+        });
+      } else if (response.events.first.contains("delete")) {
+        bool isHost = false;
+        String hostId = _party.hostId;
+        int index=0;
+        for(int i=0;i<_party.members.length;i++){
+         if(_party.members[i].userId==row["userId"]) index=i;
         }
+         setState(() {
+           authService.deleteMember(index);
+         });
+        for (int i = 0; i < _party.members.length; i++) {
+          if (_party.members[i].userId == hostId) {
+            isHost = true;
+          }
+        }
+
+        if (isHost == false) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('The owner just close the party'),
+            ),
+          );
+        }
+        
       }
-      if (isHost == false) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('The owner just close the party'),
-          ),
-        );
+      if (response.events.first.contains("update")) {
+        for (int i = 0; i < _party.members.length; i++) {
+          if (row["userId"] == _party.members[i].userId) {
+            setState(() {
+              authService.toggleReadyLocaly(i,row["isReady"]);
+            });
+            
+          }
+        }
       }
     });
   }
