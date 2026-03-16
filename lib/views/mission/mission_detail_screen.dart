@@ -50,39 +50,35 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              color: AppTheme.cardColor,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("MISSION OBJECTIVE",
-                        style: TextStyle(
-                            color: AppTheme.accentColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12)),
-                    const SizedBox(height: 8),
-                    Text(widget.mission.description,
-                        style: const TextStyle(fontSize: 16)),
-                  ],
-                ),
-              ),
+      body: CustomScrollView(slivers: [
+        SliverToBoxAdapter(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            color: AppTheme.cardColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("MISSION OBJECTIVE",
+                    style: TextStyle(
+                        color: AppTheme.accentColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12)),
+                const SizedBox(height: 8),
+                Text(widget.mission.description,
+                    style: const TextStyle(fontSize: 16)),
+              ],
             ),
           ),
-          Expanded(
-            flex: 5,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: _buildChallengeInterface(),
-            ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _buildChallengeInterface(),
           ),
-          Padding(
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
@@ -109,8 +105,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               ],
             ),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 
@@ -118,55 +114,58 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     switch (widget.mission.type) {
       case MissionType.debug:
       case MissionType.complete:
-        return SingleChildScrollView(
-          child: Container(
-            height: 500,
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade800),
-            ),
-            child: CodeField(controller: _codeController),
+        return Container(
+          height: 500,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade800),
           ),
+          child: SingleChildScrollView(
+              child: CodeField(controller: _codeController)),
         );
       case MissionType.test:
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("CODE",
-                  style: TextStyle(
-                      color: AppTheme.accentColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12)),
-              const SizedBox(height: 8),
-              Container(
-                height: 500,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade800),
-                ),
-                child: CodeField(controller: _codeController),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "CODE",
+              style: TextStyle(
+                color: AppTheme.accentColor, // Ensure AppTheme is imported
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
               ),
-              const SizedBox(height: 8),
-              const Text("OUTPUT ",
-                  style: TextStyle(
-                      color: AppTheme.accentColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12)),
-              const SizedBox(height: 8),
-              TextField(
-                onChanged: (txt) {
-                  _currentAnswer = txt.trim();
-                },
-              )
-            ],
-          ),
+            ),
+             const SizedBox(height: 8),
+            Container(
+              height: 500,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade800),
+              ),
+              child: SingleChildScrollView(child: CodeField(minLines: 20, controller: _codeController)),
+            ),
+             const SizedBox(height: 8),
+            const Text(
+              "OUTPUT ",
+              style: TextStyle(
+                color: AppTheme.accentColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+            // const SizedBox(height: 8),
+            TextField(
+              onChanged: (txt) {
+                _currentAnswer = txt.trim();
+              },
+            ),
+          ],
         );
       case MissionType.multipleChoice:
       case MissionType.singleChoice:
-      //TODO : mission hybride (e.g single choice + code )
+        //TODO : mission hybride (e.g single choice + code )
         if (widget.mission.initialCode == null) {
           return ChoiceChallenge(
               mission: widget.mission,

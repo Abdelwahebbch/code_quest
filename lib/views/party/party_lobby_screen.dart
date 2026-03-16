@@ -145,9 +145,9 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                           Navigator.pop(context);
                         },
                       ),
-
+    
                       const SizedBox(width: 20),
-
+    
                       Text(
                         "Party Lobby",
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -155,9 +155,9 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                               color: Colors.white,
                             ),
                       ),
-
+    
                       const Spacer(),
-
+    
                       // Party code
                       Text(
                         "${_party.partyId.substring(0, 3)} ${_party.partyId.substring(3, 6)}",
@@ -167,7 +167,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                                   color: Colors.white,
                                 ),
                       ),
-
+    
                       IconButton(
                         icon:
                             const Icon(Icons.content_copy, color: Colors.white),
@@ -178,7 +178,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                   ))
             ],
           ),
-
+    
           Container(
             color: AppTheme.primaryColor.withValues(alpha: 0.1),
             padding: const EdgeInsets.all(20),
@@ -230,7 +230,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
               ],
             ),
           ),
-
+    
           // Members List
           Expanded(
             child: Padding(
@@ -274,7 +274,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                             itemBuilder: (context, index) {
                               final member = _party.members[index];
                               final isHost = member.userId == _party.hostId;
-
+    
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 decoration: BoxDecoration(
@@ -403,7 +403,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
               ),
             ),
           ),
-
+    
           // Bottom Actions
           Padding(
             padding: const EdgeInsets.all(20),

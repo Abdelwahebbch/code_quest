@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
@@ -34,19 +35,19 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
       return;
     }
     final mainMember = PartyMember(
-        userId: authService.user!.$id,
-        username: authService.user!.name,
-        imageId: authService.progress.imageId,
-        joinedAt: DateTime.now(),
-        score:0,
-        correctAnswers: 0,
-        totalAnswers: 0,
-        isReady: false,
-        );
+      userId: authService.user!.$id,
+      username: authService.user!.name,
+      imageId: authService.progress.imageId,
+      joinedAt: DateTime.now(),
+      score: 0,
+      correctAnswers: 0,
+      totalAnswers: 0,
+      isReady: false,
+    );
     // Create party object
-    String date=DateTime.now().millisecondsSinceEpoch.toString().substring(7);
-    while(date[0]=='0'){
-       date=DateTime.now().millisecondsSinceEpoch.toString().substring(7);
+    String date = DateTime.now().millisecondsSinceEpoch.toString().substring(7);
+    while (date[0] == '0') {
+      date = DateTime.now().millisecondsSinceEpoch.toString().substring(7);
     }
     final party = Party(
       partyId: date,
@@ -60,7 +61,7 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
       members: [mainMember],
       isStarted: false,
     );
-    String rowId= await authService.createParty(party);
+    String rowId = await authService.createParty(party);
     Navigator.push(
       context,
       MaterialPageRoute(

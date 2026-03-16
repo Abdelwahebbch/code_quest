@@ -13,6 +13,7 @@ class UserInfo {
   String imageId;
   String bio;
   String email;
+  String difficultySelected;
   List<Mission> missions;
   Map<String,dynamic> badgesProgress;
   List<String> showingBadges;
@@ -29,6 +30,7 @@ class UserInfo {
     this.imageId = "",
     this.bio = "",
     this.email = "",
+    this.difficultySelected = "",
     this.nbMissions = 0,
     this.rank = 0,
     this.missions= const [],

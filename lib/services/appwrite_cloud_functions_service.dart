@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:pfe_test/models/message_model.dart';
+import 'package:pfe_test/models/party_model.dart';
 import 'package:pfe_test/models/user_info_model.dart';
 
 import '../models/mission_model.dart';
@@ -62,6 +63,30 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
 
       return data;
     } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> requestForPartyQuizzes(
+      Party p, String difficulty) async {
+    try {
+      final res = await http.post(
+          Uri.parse('https://69b606670033bd00ed26.fra.appwrite.run/'),
+          body: jsonEncode({
+            "difficulty": difficulty,
+            "party_id": p.partyId,
+            "nb_rounds": p.totalRounds
+          }));
+
+     // List<dynamic> data = [];
+      final Map<String, dynamic> decoded = jsonDecode(res.body);
+      //final String responseString = decoded["response"];
+      //data = jsonDecode(responseString);
+      print(decoded);
+
+      //return data;
+    } catch (e) {
+      print("Error");
       rethrow;
     }
   }

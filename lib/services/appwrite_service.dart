@@ -88,6 +88,7 @@ class AppwriteService extends ChangeNotifier {
           'bio': "",
           'imageId': "",
           'nbMission': 0,
+          'difficulty': "intermediate",
           'badgesProgress': jsonEncode({
             "debug": 0,
             "complete": 0,
@@ -270,6 +271,7 @@ class AppwriteService extends ChangeNotifier {
         imageId: row.data["imageId"],
         email: user.email,
         rank: x,
+        difficultySelected: row.data["difficulty"] ?? "Intermediate",
         nbMissions: row.data["nbMission"] ?? 0,
         missions: await getMissions(),
         badgesProgress: jsonDecode(row.data["badgesProgress"]),
@@ -339,6 +341,27 @@ class AppwriteService extends ChangeNotifier {
       );
       progress.progLanguage = languageSelected;
       notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateDifficultySelected(String difficultySelected) async {
+    try {
+      progress.difficultySelected = difficultySelected;
+      notifyListeners();
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "user_goals",
+        rowId: _user!.$id,
+        data: {'difficulty': difficultySelected},
+      );
+      await database.updateRow(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "user_profiles",
+        rowId: _user!.$id,
+        data: {'difficulty': difficultySelected},
+      );
     } catch (e) {
       rethrow;
     }

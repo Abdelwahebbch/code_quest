@@ -16,7 +16,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
-  String _selectedDifficulty = 'Intermediate';
 
   @override
   Widget build(BuildContext context) {
@@ -90,8 +89,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (val) => themeManager.toggleTheme(val),
           ),
           ListTile(
-            title: const Text("AI Tutor Difficulty"),
-            subtitle: Text(_selectedDifficulty),
+            title: const Text("Missions Difficulty"),
+            subtitle: Text(authService.progress.difficultySelected),
             trailing: const Icon(Icons.chevron_right),
             onTap: _showDifficultyPicker,
           ),
@@ -117,16 +116,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       builder: (context) => const PrivacyPolicyScreen()));
             },
           ),
-          _buildSectionHeader("Feedback")
-          ,
-           _buildSettingTile(
+          _buildSectionHeader("Feedback"),
+          _buildSettingTile(
             icon: Icons.feedback_outlined,
             title: "Share your feedback with us !",
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>  const FeedbackBox()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const FeedbackBox()));
             },
           ),
           const SizedBox(height: 40),
@@ -193,7 +189,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             .map((level) => ListTile(
                   title: Text(level),
                   onTap: () {
-                    setState(() => _selectedDifficulty = level);
+                    setState(() {
+                      
+                      Provider.of<AppwriteService>(context, listen: false)
+                          .updateDifficultySelected(level);
+                    });
                     Navigator.pop(context);
                   },
                 ))
