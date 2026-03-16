@@ -6,12 +6,10 @@ import 'package:provider/provider.dart';
 import 'party_results_screen.dart';
 
 class PartyQuizScreen extends StatefulWidget {
-
   final String rowId;
   const PartyQuizScreen({
     super.key,
     required this.rowId,
-    
   });
 
   @override
@@ -60,9 +58,9 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     _party = authService.party;
     _roundStartTime = DateTime.now();
-    for(int i=0;i<_party.memberCount;i++){
-      if(_party.members[i].userId==authService.user?.$id){
-        memberIndex=i;
+    for (int i = 0; i < _party.memberCount; i++) {
+      if (_party.members[i].userId == authService.user?.$id) {
+        memberIndex = i;
       }
     }
     _startTimer();
@@ -70,11 +68,11 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
 
   void _startTimer() {
     Future.delayed(const Duration(seconds: 1), () {
-      if (mounted ) {
+      if (mounted) {
         setState(() {
           _timeRemaining--;
           if (_timeRemaining <= 0) {
-            if(answerIndex != null){
+            if (answerIndex != null) {
               _submitAnswer(answerIndex);
             }
             _submitAnswer(null);
@@ -90,38 +88,45 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     setState(() {
       _answered = true;
-      this.answerIndex=answerIndex!;
-    });
-    // 7asben les point (local just pour le test ) 
-    if(_timeRemaining==0){
-    bool isCorrect = answerIndex ==
-        _questions[(_currentRound - 1) % _questions.length]['correct'];
-    
-    _party.members[memberIndex].score += isCorrect? 10:0; 
-    _party.members[memberIndex].correctAnswers += isCorrect? 1:0;
-    _party.members[memberIndex].totalAnswers += 1;
-    print(isCorrect);
-    Future.delayed(const Duration(seconds: 2), () async {
-      if (_currentRound < _party.totalRounds) {
-        setState(() {
-          _currentRound++;
-          _timeRemaining = 30;
-          _answered = false;
-          _selectedAnswer = null;
-          _roundStartTime = DateTime.now();
-        });
-        _startTimer();
-      } else {
-        // Game finished
-        await authService.submitAnswer(widget.rowId,memberIndex,_party.members[memberIndex].score, _party.members[memberIndex].correctAnswers,_party.members[memberIndex].totalAnswers);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PartyResultsScreen(rowId:widget.rowId),
-          ),
-        );
+      if (answerIndex != null) {
+        this.answerIndex = answerIndex;
       }
     });
+    // 7asben les point (local just pour le test )
+    if (_timeRemaining == 0) {
+      bool isCorrect = answerIndex ==
+          _questions[(_currentRound - 1) % _questions.length]['correct'];
+
+      _party.members[memberIndex].score += isCorrect ? 10 : 0;
+      _party.members[memberIndex].correctAnswers += isCorrect ? 1 : 0;
+      _party.members[memberIndex].totalAnswers += 1;
+      print(isCorrect);
+      Future.delayed(const Duration(seconds: 2), () async {
+        if (_currentRound < _party.totalRounds) {
+          setState(() {
+            _currentRound++;
+            _timeRemaining = 30;
+            _answered = false;
+            _selectedAnswer = null;
+            _roundStartTime = DateTime.now();
+          });
+          _startTimer();
+        } else {
+          // Game finished
+          await authService.submitAnswer(
+              widget.rowId,
+              memberIndex,
+              _party.members[memberIndex].score,
+              _party.members[memberIndex].correctAnswers,
+              _party.members[memberIndex].totalAnswers);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PartyResultsScreen(rowId: widget.rowId),
+            ),
+          );
+        }
+      });
     }
   }
 
