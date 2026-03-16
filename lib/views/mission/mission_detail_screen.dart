@@ -122,7 +122,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             border: Border.all(color: Colors.grey.shade800),
           ),
           child: SingleChildScrollView(
-              child: CodeField(controller: _codeController)),
+              child: CodeField(minLines: 20, controller: _codeController)),
         );
       case MissionType.test:
         return Column(
