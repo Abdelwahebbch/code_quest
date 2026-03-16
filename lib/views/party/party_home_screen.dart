@@ -28,7 +28,7 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Column(
+            child:SingleChildScrollView(child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Header
@@ -50,8 +50,8 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                 const SizedBox(height: 40),
 
                 // Main Options
-                Expanded(
-                  child: Column(
+                
+                 Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Create Party Card
@@ -194,8 +194,8 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                       ),
                     ],
                   ),
-                ),
-
+                
+                const SizedBox(height: 10,),
                 // Info Section
                 Container(
                   decoration: BoxDecoration(
@@ -223,8 +223,9 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
+                
               ],
-            ),
+            )),
           ),
         ),
       ),
