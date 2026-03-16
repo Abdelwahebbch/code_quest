@@ -41,6 +41,7 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
       vsync: this,
     );
     _animationController.forward();
+    updateMembers();
   }
 
   @override
