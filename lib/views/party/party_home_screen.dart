@@ -26,33 +26,33 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
             ],
           ),
         ),
-        child: SingleChildScrollView(
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Header
-                  const SizedBox(height: 20),
-                  Text(
-                    'Party Mode',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Play quiz and missions with your friends!',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                  ),
-                  const SizedBox(height: 40),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child:SingleChildScrollView(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Header
+                const SizedBox(height: 20),
+                Text(
+                  'Party Mode',
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Play quiz and missions with your friends!',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                ),
+                const SizedBox(height: 40),
 
-                  // Main Options
-                  Column(
+                // Main Options
+                
+                 Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Create Party Card
@@ -199,8 +199,16 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 30,
+                
+                const SizedBox(height: 10,),
+                // Info Section
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardColor,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(
+                      color: AppTheme.primaryColor.withValues(alpha:0.2),
+                    ),
                   ),
                   Container(
                     decoration: BoxDecoration(
@@ -225,11 +233,11 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                       ],
                     ),
                   ),
-
-                  // Info Section
-                ],
-              ),
-            ),
+                ),
+                const SizedBox(height: 20),
+                
+              ],
+            )),
           ),
         ),
       ),
