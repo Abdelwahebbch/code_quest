@@ -85,9 +85,9 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
       );}
       else{
         ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Party not found!'),
-        duration: const Duration(seconds: 2),
+        duration: Duration(seconds: 2),
       ),
     );
       }
