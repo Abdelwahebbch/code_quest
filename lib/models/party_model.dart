@@ -59,6 +59,7 @@ class PartyMember {
 
 class Party {
   String partyId;
+  String partyCode;
   String partyName;
   String hostId;
   String hostName;
@@ -76,6 +77,7 @@ class Party {
 
   Party({
     required this.partyId,
+    required this.partyCode,
     required this.partyName,
     required this.hostId,
     required this.hostName,
@@ -94,7 +96,7 @@ class Party {
 
   bool get isFull => members.length >= maxMembers;
 
-  bool get canStart => members.length >=1 && members.every((m) => m.isReady);
+  bool get canStart => members.length >=2 && members.every((m) => m.isReady);
 
   int get memberCount => members.length;
 
@@ -108,7 +110,7 @@ class Party {
 
   factory Party.fromJson(Map<String, dynamic> json) {
     return 
-    Party(partyId: "1", partyName: "partyName", hostId: "hostId", hostName: "hostName");
+    Party(partyId: "1",partyCode: "AB123AS", partyName: "partyName", hostId: "hostId", hostName: "hostName");
   }
 
   Map<String, dynamic> toJson() {
