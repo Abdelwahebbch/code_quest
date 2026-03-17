@@ -14,7 +14,7 @@ class PartyJoinScreen extends StatefulWidget {
 }
 
 class _PartyJoinScreenState extends State<PartyJoinScreen> {
-  String code="";
+  String code = "";
   bool _isLoading = false;
 
   // Mock available parties deleteted
@@ -24,7 +24,6 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
       partyName: 'Python Masters',
       hostId: 'host1',
       hostName: 'John Doe',
-  
       maxMembers: 6,
       difficulty: 'intermediate',
       gameMode: 'quiz',
@@ -42,6 +41,7 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
           joinedAt: DateTime.now(),
         ),
       ],
+      partyCode: 'Abcd12',
     ),
     Party(
       partyId: '2',
@@ -59,9 +59,10 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
           joinedAt: DateTime.now(),
         ),
       ],
+      partyCode: 'zadzafd',
     ),
   ];
-  
+
   void _joinPartyWithCode() {
     if (code.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -69,27 +70,39 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
       );
       return;
     }
-     final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<AppwriteService>(context, listen: false);
     setState(() => _isLoading = true);
 
-    // Simulate API call
     Future.delayed(const Duration(seconds: 1), () async {
       setState(() => _isLoading = false);
-      String rowId= await authService.joinParty(int.parse(code));
-      if(rowId.isNotEmpty){
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>  PartyLobbyScreen(rowId),
-        ),
-      );}
-      else{
+      try {
+        String rowId = await authService.joinParty(code);
+        if (rowId.contains("Party is Full")) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Party is Full'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+        if (!mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PartyLobbyScreen(rowId),
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        print("Erreur fi join with code : $e");
         ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Party not found!'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+          const SnackBar(
+            content: Text('Party not found !'),
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
     });
   }
@@ -101,19 +114,16 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
       );
       return;
     }
-
-    
   }
 
   @override
   void dispose() {
-    code="";
+    code = "";
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-   
     return Scaffold(
       appBar: AppBar(
         title: const Text('Join Party'),
@@ -134,27 +144,28 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
                     ),
               ),
               const SizedBox(height: 15),
-               Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: PinCodeTextField(
-              appContext: context,
-              length: 6,
-              keyboardType: TextInputType.number,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              textStyle: const TextStyle(color: Colors.white),
-              pinTheme: PinTheme(
-                shape: PinCodeFieldShape.box,
-                borderRadius: BorderRadius.circular(8),
-                fieldHeight: 40,
-                fieldWidth: 40,
-                inactiveColor: Colors.grey,
-                activeColor: Colors.grey,
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: PinCodeTextField(
+                  appContext: context,
+                  length: 6,
+                  keyboardType: TextInputType.text,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  textStyle: const TextStyle(color: Colors.white),
+                  pinTheme: PinTheme(
+                    shape: PinCodeFieldShape.box,
+                    borderRadius: BorderRadius.circular(8),
+                    fieldHeight: 40,
+                    fieldWidth: 40,
+                    inactiveColor: Colors.grey,
+                    activeColor: Colors.grey,
+                  ),
+                  onChanged: (value) {
+                    code = value;
+                  },
+                ),
               ),
-              onChanged: (value) {
-                code = value;
-              },
-            ),
-          ),
               const SizedBox(height: 15),
               SizedBox(
                 width: double.infinity,
@@ -208,7 +219,7 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
                       color: AppTheme.cardColor,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AppTheme.primaryColor.withValues(alpha:0.2),
+                        color: AppTheme.primaryColor.withValues(alpha: 0.2),
                       ),
                     ),
                     child: Padding(
@@ -247,7 +258,8 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
                               ),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: AppTheme.primaryColor.withValues(alpha:0.1),
+                                  color: AppTheme.primaryColor
+                                      .withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 padding: const EdgeInsets.symmetric(
@@ -270,13 +282,13 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
                               Chip(
                                 label: Text(party.difficulty),
                                 backgroundColor:
-                                    AppTheme.accentColor.withValues(alpha:0.2),
+                                    AppTheme.accentColor.withValues(alpha: 0.2),
                               ),
                               const SizedBox(width: 8),
                               Chip(
                                 label: Text(party.gameMode),
-                                backgroundColor:
-                                    AppTheme.primaryColor.withValues(alpha:0.2),
+                                backgroundColor: AppTheme.primaryColor
+                                    .withValues(alpha: 0.2),
                               ),
                             ],
                           ),
