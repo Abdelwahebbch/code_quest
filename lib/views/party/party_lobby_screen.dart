@@ -9,9 +9,9 @@ import 'package:provider/provider.dart';
 import 'party_quiz_screen.dart';
 
 class PartyLobbyScreen extends StatefulWidget {
-  final String rowId;
+  final String partyid;
 
-  const PartyLobbyScreen(this.rowId, {super.key});
+  const PartyLobbyScreen(this.partyid, {super.key});
 
   @override
   State<PartyLobbyScreen> createState() => _PartyLobbyScreenState();
@@ -35,23 +35,23 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     _party = authService.party;
     subscription = authService.realtime.subscribe([
-      Channel.tablesdb("6972adad002e2ba515f2").table("party").row(widget.rowId)
+      Channel.tablesdb("6972adad002e2ba515f2").table("party").row(_party.partyId)
     ]);
     subscription?.stream.listen((response) {
       if (response.payload["isStarted"] == true) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PartyQuizScreen(rowId: widget.rowId),
+            builder: (context) => const PartyQuizScreen(),
           ),
         );
       }
     });
     subscription1 = authService.realtime.subscribe(
         [Channel.tablesdb("6972adad002e2ba515f2").table("party_member").row()],
-        queries: [Query.equal("partyId", widget.rowId)]);
+        queries: [Query.equal("partyId", _party.partyId)]);
     subscription1?.stream.listen((response) {
-      print(response.payload);
+      print("Realtime resp : ${response.payload}");
       Map<String, dynamic> row = response.payload;
       if (response.events.first.contains("create")) {
         PartyMember partyMember = PartyMember(
@@ -69,8 +69,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
           authService.addMember(partyMember);
         });
       } else if (response.events.first.contains("delete")) {
-        bool isHost = false;
-        String hostId = _party.hostId;
+        bool isHost = _party.hostId == authService.user!.$id;
         int index=0;
         for(int i=0;i<_party.members.length;i++){
          if(_party.members[i].userId==row["userId"]) index=i;
@@ -78,13 +77,9 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
          setState(() {
            authService.deleteMember(index);
          });
-        for (int i = 0; i < _party.members.length; i++) {
-          if (_party.members[i].userId == hostId) {
-            isHost = true;
-          }
-        }
+    
 
-        if (isHost == false) {
+        if (!isHost  && mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -109,7 +104,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
 
   Future<void> _toggleReady() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
-    await authService.toggleReady(widget.rowId);
+    await authService.toggleReady(_party.partyId);
     setState(() {
       _isReady = !_isReady;
     });
@@ -118,7 +113,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   void _startGame() async {
     if (_party.canStart) {
       final authService = Provider.of<AppwriteService>(context, listen: false);
-      await authService.startParty(widget.rowId);
+      await authService.startParty(_party.partyId);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -131,7 +126,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   void _copyPartyCode() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Party code copied: ${_party.partyId}'),
+        content: Text('Party code copied: ${_party.partyCode}'),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -165,7 +160,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                           size: 25,
                         ),
                         onPressed: () async {
-                          await authService.quiteLobby(widget.rowId);
+                          await authService.quiteLobby();
                           Navigator.pop(context);
                         },
                       ),
@@ -184,7 +179,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
     
                       // Party code
                       Text(
-                        "${_party.partyId.substring(0, 3)} ${_party.partyId.substring(3, 6)}",
+                        "${_party.partyCode.substring(0, 3)} ${_party.partyCode.substring(3, 6)}",
                         style:
                             Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
