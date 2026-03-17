@@ -1,3 +1,4 @@
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
@@ -34,40 +35,48 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
       );
       return;
     }
-    final mainMember = PartyMember(
-      userId: authService.user!.$id,
-      username: authService.user!.name,
-      imageId: authService.progress.imageId,
-      joinedAt: DateTime.now(),
-      score: 0,
-      correctAnswers: 0,
-      totalAnswers: 0,
-      isReady: false,
-    );
-    // Create party object
-    String date = DateTime.now().millisecondsSinceEpoch.toString().substring(7);
-    while (date[0] == '0') {
-      date = DateTime.now().millisecondsSinceEpoch.toString().substring(7);
+    try {
+      final mainMember = PartyMember(
+        userId: authService.user!.$id,
+        username: authService.user!.name,
+        imageId: authService.progress.imageId,
+        joinedAt: DateTime.now(),
+        score: 0,
+        correctAnswers: 0,
+        totalAnswers: 0,
+        isReady: false,
+      );
+
+      String partyID = ID.unique();
+      String partyCode = authService.user!.$id.toString().substring(1, 4) +
+          partyID.toString().substring(17, 20);
+      final party = Party(
+        partyId: partyID,
+        partyCode: partyCode,
+        partyName: _partyNameController.text,
+        hostId: authService.user!.$id,
+        hostName: authService.user!.name,
+        maxMembers: _maxMembers,
+        difficulty: _difficulty,
+        gameMode: _gameMode,
+        totalRounds: _totalRounds,
+        members: [mainMember],
+        isStarted: false,
+      );
+      await authService.createParty(partyID, party);
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PartyLobbyScreen(partyCode),
+        ),
+      );
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Ooops error :(")),
+      );
     }
-    final party = Party(
-      partyId: date,
-      partyName: _partyNameController.text,
-      hostId: authService.user!.$id,
-      hostName: authService.user!.name,
-      maxMembers: _maxMembers,
-      difficulty: _difficulty,
-      gameMode: _gameMode,
-      totalRounds: _totalRounds,
-      members: [mainMember],
-      isStarted: false,
-    );
-    String rowId = await authService.createParty(party);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PartyLobbyScreen(rowId),
-      ),
-    );
   }
 
   @override
