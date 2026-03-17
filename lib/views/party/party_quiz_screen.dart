@@ -6,10 +6,10 @@ import 'package:provider/provider.dart';
 import 'party_results_screen.dart';
 
 class PartyQuizScreen extends StatefulWidget {
-  final String rowId;
+
   const PartyQuizScreen({
     super.key,
-    required this.rowId,
+
   });
 
   @override
@@ -20,9 +20,9 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
   late Party _party;
   int _currentRound = 1;
   int _timeRemaining = 30;
-  bool _answered = false;
   String? _selectedAnswer;
   late DateTime _roundStartTime;
+  bool _answered = false;
   int? answerIndex;
   late int memberIndex;
   // Mock questions
@@ -114,7 +114,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
         } else {
           // Game finished
           await authService.submitAnswer(
-              widget.rowId,
+              _party.partyId,
               memberIndex,
               _party.members[memberIndex].score,
               _party.members[memberIndex].correctAnswers,
@@ -122,7 +122,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => PartyResultsScreen(rowId: widget.rowId),
+              builder: (context) => PartyResultsScreen(rowId: _party.partyId),
             ),
           );
         }
