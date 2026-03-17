@@ -624,15 +624,16 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<String> createParty(Party party) async {
+  Future<void> createParty(String id, Party party) async {
     try {
       this.party = party;
       notifyListeners();
-      final row = await database.createRow(
+      await database.createRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "party",
+        rowId: id,
         data: {
-          "partyId": int.parse(party.partyId),
+          "partyCode": party.partyCode,
           "partyName": party.partyName,
           "hostId": party.hostId,
           "hostName": party.hostName,
@@ -642,14 +643,13 @@ class AppwriteService extends ChangeNotifier {
           "totalRounds": party.totalRounds,
           "isStarted": party.isStarted
         },
-        rowId: ID.unique(),
       );
       await database.createRow(
         databaseId: "6972adad002e2ba515f2",
         tableId: "party_member",
         data: {
-          "partyId": row.$id,
-          "userId": user?.$id,
+          "partyId": id,
+          "userId": user!.$id,
           "username": user?.name,
           "imageId": progress.imageId,
           "joinedAt": DateTime.now().toString(),
@@ -659,50 +659,48 @@ class AppwriteService extends ChangeNotifier {
           "isReady": false,
           "isSubmit": false,
         },
-        rowId: ID.unique(),
+        rowId: user!.$id,
       );
-      return row.$id;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<String> joinParty(int code) async {
+  Future<String> joinParty(String code) async {
     try {
       var result = await database.listRows(
         databaseId: "6972adad002e2ba515f2",
         tableId: "party",
         queries: [
-          Query.equal("partyId", code),
+          Query.equal("partyCode", code),
         ],
       );
       var row = result.rows[0];
-      String rowId = result.rows[0].$id;
-      print(rowId);
-      var result2 = await database.listRows(
+      String rowId = row.$id;
+      print("ID de party $rowId");
+      var membersList = await database.listRows(
         databaseId: "6972adad002e2ba515f2",
         tableId: "party_member",
         queries: [
           Query.equal("partyId", rowId),
         ],
       );
-      print(result2.rows);
+      print("nb membres : ${membersList.rows.length}");
       int maxMembers = result.rows[0].data["maxMembers"];
-      if (result2.rows.length < maxMembers) {
-        List<PartyMember> members = [];
-        List<dynamic> dbMembers = result2.rows;
-        for (int i = 0; i < dbMembers.length; i++) {
-          members.add(PartyMember(
-              userId: dbMembers[i].data["userId"],
-              username: dbMembers[i].data["username"],
-              imageId: dbMembers[i].data["imageId"],
-              joinedAt: DateTime.parse(dbMembers[i].data["joinedAt"]),
-              score: dbMembers[i].data["score"],
-              correctAnswers: dbMembers[i].data["correctAnswers"],
-              totalAnswers: dbMembers[i].data["totalAnswers"],
-              isReady: dbMembers[i].data["isReady"],
-              isSubmit: dbMembers[i].data["isSubmit"]));
-        }
+      if (membersList.rows.length < maxMembers) {
+        List<PartyMember> members = membersList.rows
+            .map((m) => PartyMember(
+                userId: m.data["userId"],
+                username: m.data["username"],
+                imageId: m.data["imageId"],
+                joinedAt: DateTime.parse(m.data["joinedAt"]),
+                score: m.data["score"],
+                correctAnswers: m.data["correctAnswers"],
+                totalAnswers: m.data["totalAnswers"],
+                isReady: m.data["isReady"],
+                isSubmit: m.data["isSubmit"]))
+            .toList();
+
         PartyMember member = PartyMember(
             userId: user!.$id,
             username: user!.name,
@@ -713,8 +711,10 @@ class AppwriteService extends ChangeNotifier {
             totalAnswers: 0,
             isReady: false,
             isSubmit: false);
+
         party = Party(
-          partyId: row.data["partyId"].toString(),
+          partyId: row.$id,
+          partyCode: row.data["partyCode"],
           partyName: row.data["partyName"],
           hostId: row.data["hostId"],
           hostName: row.data["hostName"],
@@ -725,12 +725,15 @@ class AppwriteService extends ChangeNotifier {
           totalRounds: row.data["totalRounds"],
           isStarted: row.data["isStarted"],
         );
+
         members.add(member);
+
         notifyListeners();
         await database.createRow(
           databaseId: "6972adad002e2ba515f2",
           tableId: "party_member",
-          rowId: ID.unique(),
+          // kenet ID.unique
+          rowId: user!.$id,
           data: {
             "partyId": rowId,
             "userId": user!.$id,
@@ -745,8 +748,11 @@ class AppwriteService extends ChangeNotifier {
           },
         );
         return rowId;
+      } else if (membersList.rows.length == maxMembers) {
+        return "Party is Full";
+      } else {
+        throw Exception("Party not found");
       }
-      return "";
     } catch (e) {
       rethrow;
     }
@@ -794,18 +800,19 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<void> quiteLobby(String rowId) async {
+  Future<void> quiteLobby() async {
     try {
-      for (int i = 0; i < party.memberCount; i++) {
-        if (party.members[i].userId == user?.$id) {
-          party.members.removeAt(i);
-        }
+      if (party.hostId.contains(user!.$id)) {
+        var p = await database.deleteRow(
+            databaseId: "6972adad002e2ba515f2",
+            tableId: "party",
+            rowId: party.partyId);
       }
       var row = await database.listRows(
         databaseId: "6972adad002e2ba515f2",
         tableId: "party_member",
         queries: [
-          Query.equal("partyId", rowId),
+          Query.equal("partyId", party.partyId),
           Query.equal("userId", user?.$id)
         ],
       );
@@ -813,13 +820,21 @@ class AppwriteService extends ChangeNotifier {
           databaseId: "6972adad002e2ba515f2",
           tableId: "party_member",
           rowId: row.rows[0].$id);
+
+      for (int i = 0; i < party.memberCount; i++) {
+        if (party.members[i].userId == user?.$id) {
+          party.members.removeAt(i);
+        }
+      }
+
       notifyListeners();
     } catch (e) {
+      print("Erreur quite lobby $e");
       rethrow;
     }
   }
 
-  Future<void> submitAnswer(String rowId, int memberIndex, int score,
+  Future<void> submitAnswer(String partyId, int memberIndex, int score,
       int correctAnwsers, int totalAnswers) async {
     try {
       party.members[memberIndex].score = score;
@@ -829,7 +844,7 @@ class AppwriteService extends ChangeNotifier {
         databaseId: "6972adad002e2ba515f2",
         tableId: "party_member",
         queries: [
-          Query.equal("partyId", rowId),
+          Query.equal("partyId", partyId),
           Query.equal("userId", user?.$id)
         ],
       );
@@ -872,12 +887,12 @@ class AppwriteService extends ChangeNotifier {
             party.members[j].totalAnswers = rows.rows[i].data["totalAnswers"];
             party.members[j].isSubmit = rows.rows[i].data["isSubmit"];
             if (!party.members[j].isSubmit) {
-              isAllSubmit=false;
+              isAllSubmit = false;
               break;
             }
           }
         }
-        if(!isAllSubmit){
+        if (!isAllSubmit) {
           break;
         }
       }
