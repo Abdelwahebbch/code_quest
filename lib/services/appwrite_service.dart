@@ -909,7 +909,7 @@ class AppwriteService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> savePArtyHistory(List<PartyMember> rankedMembers) async {
+  Future<void> savePartyHistory(List<PartyMember> rankedMembers) async {
     List<String> jsonMembers=[];
     for(int i=0;i<rankedMembers.length;i++){
       jsonMembers.add(rankedMembers[i].toJson());
