@@ -27,10 +27,13 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
     await authService.updateMembersDetails(widget.rowId);
     _rankedMembers = List.from(authService.party.members)
       ..sort((a, b) => b.score.compareTo(a.score));
+    if (!mounted) return;
     setState(() {
       _isLoading=false;
     });
-    
+    if (authService.party.hostId==authService.user?.$id){
+    await authService.savePartyHistory(_rankedMembers);
+    }
   }
 
   @override
@@ -362,7 +365,8 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async{
+                        await authService.quiteLobby();
                         Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
                                 builder: (context) => const DashboardScreen()),
@@ -389,7 +393,7 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
                     height: 48,
                     child: OutlinedButton(
                       onPressed: () {
-                        // Implement play again functionality
+                        Navigator.pop(context);
                       },
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(
