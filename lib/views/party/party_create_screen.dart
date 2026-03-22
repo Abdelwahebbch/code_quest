@@ -63,12 +63,12 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
         members: [mainMember],
         isStarted: false,
       );
-      await authService.createParty(partyID, party);
+      await authService.createParty( party);
       if (!mounted) return;
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PartyLobbyScreen(partyCode),
+          builder: (context) => PartyLobbyScreen(),
         ),
       );
     } catch (e) {
