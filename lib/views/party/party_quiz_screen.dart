@@ -24,7 +24,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
   late DateTime _roundStartTime;
   bool _answered = false;
   int? answerIndex;
-  late int memberIndex;
+  late PartyMember partyMember;
   // Mock questions
   final List<Map<String, dynamic>> _questions = [
     {
@@ -58,11 +58,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     _party = authService.party;
     _roundStartTime = DateTime.now();
-    for (int i = 0; i < _party.memberCount; i++) {
-      if (_party.members[i].userId == authService.user?.$id) {
-        memberIndex = i;
-      }
-    }
+    partyMember = authService.partyMember;
     _startTimer();
   }
 
@@ -97,11 +93,12 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
       bool isCorrect = answerIndex ==
           _questions[(_currentRound - 1) % _questions.length]['correct'];
 
-      _party.members[memberIndex].score += isCorrect ? 10 : 0;
-      _party.members[memberIndex].correctAnswers += isCorrect ? 1 : 0;
-      _party.members[memberIndex].totalAnswers += 1;
+      partyMember.score += isCorrect ? 10 : 0;
+      partyMember.correctAnswers += isCorrect ? 1 : 0;
+      partyMember.totalAnswers += 1;
       print(isCorrect);
       Future.delayed(const Duration(seconds: 2), () async {
+        if (!mounted) return;
         if (_currentRound < _party.totalRounds) {
           setState(() {
             _currentRound++;
@@ -114,11 +111,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
         } else {
           // Game finished
           await authService.submitAnswer(
-              _party.partyId,
-              memberIndex,
-              _party.members[memberIndex].score,
-              _party.members[memberIndex].correctAnswers,
-              _party.members[memberIndex].totalAnswers);
+              partyMember);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
