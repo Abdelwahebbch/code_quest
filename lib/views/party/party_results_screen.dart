@@ -22,7 +22,7 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
   late AnimationController _animationController;
   bool _isLoading= true;
 
-  Future<void> updateMembers() async {
+  Future<void> checkWinner() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.updateMembersDetails(widget.rowId);
     _rankedMembers = List.from(authService.party.members)
@@ -34,6 +34,9 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
     if (authService.party.hostId==authService.user?.$id){
     await authService.savePartyHistory(_rankedMembers);
     }
+    if (authService.user?.$id == _rankedMembers[0].userId){
+    await authService.updateUserPoints(authService.partyMember.score);
+    }
   }
 
   @override
@@ -44,7 +47,7 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
       vsync: this,
     );
     _animationController.forward();
-    updateMembers();
+    checkWinner();
   }
 
   @override
