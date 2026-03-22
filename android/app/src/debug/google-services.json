@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "984696599234",
+    "project_id": "code-quest-7150f",
+    "storage_bucket": "code-quest-7150f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:984696599234:android:c987c04534d4ac9e39c15b",
+        "android_client_info": {
+          "package_name": "com.fsg.pfe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNajzwXFcpRxPW93MQIXpgGDq14dwUlZw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
