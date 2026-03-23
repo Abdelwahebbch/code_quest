@@ -9,9 +9,7 @@ import 'package:provider/provider.dart';
 import '../../models/mission_model.dart';
 import '../../theme/app_theme.dart';
 import '../chat/ai_tutor_chat.dart';
-import 'package:highlight/languages/java.dart';
 import 'package:highlight/languages/python.dart';
-import 'package:highlight/languages/Dart.dart';
 
 class MissionDetailScreen extends StatefulWidget {
   final Mission mission;
