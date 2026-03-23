@@ -91,7 +91,7 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PartyLobbyScreen(rowId),
+            builder: (context) => PartyLobbyScreen(),
           ),
         );
       } catch (e) {

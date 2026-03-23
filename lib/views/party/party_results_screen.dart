@@ -22,15 +22,21 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
   late AnimationController _animationController;
   bool _isLoading= true;
 
-  Future<void> updateMembers() async {
+  Future<void> checkWinner() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.updateMembersDetails(widget.rowId);
     _rankedMembers = List.from(authService.party.members)
       ..sort((a, b) => b.score.compareTo(a.score));
+    if (!mounted) return;
     setState(() {
       _isLoading=false;
     });
-    
+    if (authService.party.hostId==authService.user?.$id){
+    await authService.savePartyHistory(_rankedMembers);
+    }
+    if (authService.user?.$id == _rankedMembers[0].userId){
+    await authService.updateUserPoints(authService.partyMember.score);
+    }
   }
 
   @override
@@ -41,7 +47,7 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
       vsync: this,
     );
     _animationController.forward();
-    updateMembers();
+    checkWinner();
   }
 
   @override
@@ -362,7 +368,8 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async{
+                        await authService.quiteLobby();
                         Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
                                 builder: (context) => const DashboardScreen()),
@@ -389,7 +396,7 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
                     height: 48,
                     child: OutlinedButton(
                       onPressed: () {
-                        // Implement play again functionality
+                        Navigator.pop(context);
                       },
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(

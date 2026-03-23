@@ -9,9 +9,7 @@ import 'package:provider/provider.dart';
 import 'party_quiz_screen.dart';
 
 class PartyLobbyScreen extends StatefulWidget {
-  final String partyid;
-
-  const PartyLobbyScreen(this.partyid, {super.key});
+  const PartyLobbyScreen({super.key});
 
   @override
   State<PartyLobbyScreen> createState() => _PartyLobbyScreenState();
@@ -25,17 +23,19 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   @override
   void dispose() {
     subscription?.close();
-    subscription1?.close;
+    subscription1?.close();
     super.dispose();
   }
-
+  
   @override
   void initState() {
     super.initState();
     final authService = Provider.of<AppwriteService>(context, listen: false);
     _party = authService.party;
     subscription = authService.realtime.subscribe([
-      Channel.tablesdb("6972adad002e2ba515f2").table("party").row(_party.partyId)
+      Channel.tablesdb("6972adad002e2ba515f2")
+          .table("party")
+          .row(_party.partyId)
     ]);
     subscription?.stream.listen((response) {
       if (response.payload["isStarted"] == true) {
@@ -64,22 +64,17 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
             totalAnswers: row["totalAnswers"],
             isReady: row["isReady"],
             isSubmit: row["isSubmit"]);
-       
+
         setState(() {
           authService.addMember(partyMember);
         });
       } else if (response.events.first.contains("delete")) {
         bool isHost = _party.hostId == authService.user!.$id;
-        int index=0;
-        for(int i=0;i<_party.members.length;i++){
-         if(_party.members[i].userId==row["userId"]) index=i;
-        }
-         setState(() {
-           authService.deleteMember(index);
-         });
-    
-
-        if (!isHost  && mounted) {
+        setState(() {
+          authService.deleteMember(row["userId"]);
+        });
+        if (!isHost && row["userId"] == _party.hostId && mounted) {
+          deleteAllMembers();
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -87,21 +82,23 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
             ),
           );
         }
-        
       }
       if (response.events.first.contains("update")) {
         for (int i = 0; i < _party.members.length; i++) {
           if (row["userId"] == _party.members[i].userId) {
             setState(() {
-              authService.toggleReadyLocaly(i,row["isReady"]);
+              authService.toggleReadyLocaly(i, row["isReady"]);
             });
-            
           }
         }
       }
     });
   }
-
+  Future<void> deleteAllMembers() async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    await authService.deleteAllMembers();
+  }
+  
   Future<void> _toggleReady() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.toggleReady(_party.partyId);
@@ -164,9 +161,9 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                           Navigator.pop(context);
                         },
                       ),
-    
+
                       const SizedBox(width: 20),
-    
+
                       Text(
                         "Party Lobby",
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -174,9 +171,9 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                               color: Colors.white,
                             ),
                       ),
-    
+
                       const Spacer(),
-    
+
                       // Party code
                       Text(
                         "${_party.partyCode.substring(0, 3)} ${_party.partyCode.substring(3, 6)}",
@@ -186,7 +183,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                                   color: Colors.white,
                                 ),
                       ),
-    
+
                       IconButton(
                         icon:
                             const Icon(Icons.content_copy, color: Colors.white),
@@ -197,7 +194,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                   ))
             ],
           ),
-    
+
           Container(
             color: AppTheme.primaryColor.withValues(alpha: 0.1),
             padding: const EdgeInsets.all(20),
@@ -249,7 +246,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
               ],
             ),
           ),
-    
+
           // Members List
           Expanded(
             child: Padding(
@@ -293,7 +290,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                             itemBuilder: (context, index) {
                               final member = _party.members[index];
                               final isHost = member.userId == _party.hostId;
-    
+
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 decoration: BoxDecoration(
@@ -422,7 +419,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
               ),
             ),
           ),
-    
+
           // Bottom Actions
           Padding(
             padding: const EdgeInsets.all(20),
