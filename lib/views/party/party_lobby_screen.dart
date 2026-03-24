@@ -18,6 +18,7 @@ class PartyLobbyScreen extends StatefulWidget {
 class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   late Party _party;
   bool _isReady = false;
+  bool isStarting = false;
   RealtimeSubscription? subscription;
   RealtimeSubscription? subscription1;
   @override
@@ -114,10 +115,17 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   }
 
   void _startGame() async {
+    
     final ai = Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     if (_party.canStart) {
+      setState(() {
+      isStarting= true;
+    });
       await ai.requestForPartyQuizzes(_party, _party.difficulty);
       final authService = Provider.of<AppwriteService>(context, listen: false);
+      setState(() {
+      isStarting= false;
+    });
       await authService.startParty(_party.partyId);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -472,7 +480,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
+                      child: isStarting ? const CircularProgressIndicator() :  const Text(
                         'Start Game',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
