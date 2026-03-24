@@ -958,4 +958,33 @@ class AppwriteService extends ChangeNotifier {
       },
     );
   }
+
+  Future<List<Map<String, dynamic>>> getQuiz() async {
+    try {
+      List<Map<String, dynamic>> quizs = [];
+      var rows = await database.listRows(
+        databaseId: "6972adad002e2ba515f2",
+        tableId: "quizzes",
+        queries: [
+          Query.equal("partyId", party.partyId),
+        ],
+      );
+      for (int i =0 ;i<rows.rows.length;i++){
+        final row = await database.getRow(
+          databaseId: "6972adad002e2ba515f2",
+          tableId: "quizzes",
+          rowId: rows.rows[i].$id);
+        quizs.add({
+          'question' : row.data['question'],
+          'options' : row.data['options'],
+          'correct' : row.data['correct'],
+          'category' : row.data['category']
+        });
+      }
+      return quizs;
+    } catch (e) {
+      rethrow;
+    }
+
+  }
 }
