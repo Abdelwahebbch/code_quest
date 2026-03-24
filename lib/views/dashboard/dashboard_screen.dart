@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:provider/provider.dart';
 import '../../models/mission_model.dart';
 import '../../theme/app_theme.dart';
@@ -335,13 +334,7 @@ class DashboardHomeState extends State<DashboardHome> {
                       Text("Active Missions",
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 15),
-                      ElevatedButton(
-                          onPressed: () {
-                            Provider.of<AppwritecloudfunctionsService>(context,
-                                    listen: false)
-                                .createCustomMissions();
-                          },
-                          child: const Text("Genarate Missions"))
+                   
                     ],
                   ),
                 ),
