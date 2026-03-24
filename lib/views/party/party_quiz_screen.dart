@@ -46,8 +46,9 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
           if (_timeRemaining <= 0) {
             if (answerIndex != null) {
               _submitAnswer(answerIndex);
-            }
+            }else{
             _submitAnswer(null);
+            }
           } else {
             _startTimer();
           }
