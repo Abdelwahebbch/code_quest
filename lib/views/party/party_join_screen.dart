@@ -87,19 +87,29 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
           );
           return;
         }
+        if (rowId.contains("Party not found")) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Party not found'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+
         if (!mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PartyLobbyScreen(),
+            builder: (context) => const PartyLobbyScreen(),
           ),
         );
       } catch (e) {
         if (!mounted) return;
-        print("Erreur fi join with code : $e");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Party not found !'),
+            content: Text('Famma Error'),
             duration: Duration(seconds: 2),
           ),
         );
