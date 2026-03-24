@@ -6,8 +6,10 @@ import 'package:provider/provider.dart';
 import 'party_results_screen.dart';
 
 class PartyQuizScreen extends StatefulWidget {
+  final questions;
   const PartyQuizScreen({
-    super.key,
+    super.key, this.questions,
+
   });
 
   @override
@@ -24,31 +26,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
   int? answerIndex;
   late PartyMember partyMember;
   // Mock questions
-  final List<Map<String, dynamic>> _questions = [
-    {
-      'question': 'What is the output of print(2 ** 3) in Python?',
-      'options': ['6', '8', '9', '5'],
-      'correct': 1,
-      'category': 'Python Basics',
-    },
-    {
-      'question': 'Which keyword is used to declare a variable in JavaScript?',
-      'options': ['var', 'variable', 'declare', 'let'],
-      'correct': 0,
-      'category': 'JavaScript',
-    },
-    {
-      'question': 'What does API stand for?',
-      'options': [
-        'Application Programming Interface',
-        'Application Process Integration',
-        'Advanced Programming Interface',
-        'Application Protocol Interface'
-      ],
-      'correct': 0,
-      'category': 'General',
-    },
-  ];
+  List<Map<String, dynamic>> _questions = [];
 
   @override
   void initState() {
@@ -125,6 +103,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _questions=widget.questions;
     final currentQuestion = _questions[(_currentRound - 1) % _questions.length];
 
     return Scaffold(
