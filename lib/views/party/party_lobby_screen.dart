@@ -1,5 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
@@ -36,12 +37,13 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
           .table("party")
           .row(_party.partyId)
     ]);
-    subscription?.stream.listen((response) {
+    subscription?.stream.listen((response) async {
       if (response.payload["isStarted"] == true) {
-        Navigator.pushReplacement(
+        List<Map<String, dynamic>> quizs = await getQuiz();
+        Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PartyQuizScreen(),
+            builder: (context) => PartyQuizScreen(questions :quizs),
           ),
         );
       }
@@ -93,6 +95,11 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
       }
     });
   }
+  Future <List<Map<String, dynamic>>> getQuiz() async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    List<Map<String, dynamic>> quizs = await authService.getQuiz();
+    return quizs;
+  }
   Future<void> deleteAllMembers() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.deleteAllMembers();
@@ -107,7 +114,9 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   }
 
   void _startGame() async {
+    final ai = Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     if (_party.canStart) {
+      await ai.requestForPartyQuizzes(_party, _party.difficulty);
       final authService = Provider.of<AppwriteService>(context, listen: false);
       await authService.startParty(_party.partyId);
     } else {
