@@ -1,6 +1,5 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
