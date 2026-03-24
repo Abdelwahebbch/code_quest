@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/user_info_model.dart';
+import '../models/learning_path_model.dart';
 import '../theme/app_theme.dart';
+import '../views/learning_path/learning_path_screen.dart';
 
 class ProgressCard extends StatelessWidget {
   final UserInfo user;
@@ -9,71 +11,85 @@ class ProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Level",
-                      style: TextStyle(color: Colors.white70, fontSize: 14)),
-                  Text("${user.userLevel}",
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold)),
-                ],
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text("${user.totalPoints} pts",
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: user.progressToNextLevel,
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-              minHeight: 10,
+    return GestureDetector(
+      onTap: () {
+        final learningPath = LearningPathSampleData.getSamplePythonPath();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LearningPathScreen(
+              learningPath: learningPath,
             ),
           ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                  "${(user.progressToNextLevel * 100).toInt()}% to Level ${user.userLevel + 1}",
-                  style: const TextStyle(color: Colors.white70, fontSize: 12)),
-              const Text("Next Badge: Code Ninja",
-                  style: TextStyle(color: Colors.white70, fontSize: 12)),
-            ],
-          ),
-        ],
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryColor.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Level",
+                        style: TextStyle(color: Colors.white70, fontSize: 14)),
+                    Text("${user.userLevel}",
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text("${user.totalPoints} pts",
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: user.progressToNextLevel,
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                minHeight: 10,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                    "${(user.progressToNextLevel * 100).toInt()}% to Level ${user.userLevel + 1}",
+                    style:
+                        const TextStyle(color: Colors.white70, fontSize: 12)),
+                const Text("Tap to view learning path",
+                    style: TextStyle(color: Colors.white70, fontSize: 12)),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
