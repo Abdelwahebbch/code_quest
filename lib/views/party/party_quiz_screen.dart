@@ -6,10 +6,8 @@ import 'package:provider/provider.dart';
 import 'party_results_screen.dart';
 
 class PartyQuizScreen extends StatefulWidget {
-
   const PartyQuizScreen({
     super.key,
-
   });
 
   @override
@@ -21,7 +19,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
   int _currentRound = 1;
   int _timeRemaining = 30;
   String? _selectedAnswer;
-  late DateTime _roundStartTime;
+  late DateTime roundStartTime;
   bool _answered = false;
   int? answerIndex;
   late PartyMember partyMember;
@@ -57,7 +55,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
     super.initState();
     final authService = Provider.of<AppwriteService>(context, listen: false);
     _party = authService.party;
-    _roundStartTime = DateTime.now();
+    roundStartTime = DateTime.now();
     partyMember = authService.partyMember;
     _startTimer();
   }
@@ -96,22 +94,24 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
       partyMember.score += isCorrect ? 10 : 0;
       partyMember.correctAnswers += isCorrect ? 1 : 0;
       partyMember.totalAnswers += 1;
-      print(isCorrect);
+      print("isCorrect $isCorrect");
       Future.delayed(const Duration(seconds: 2), () async {
         if (!mounted) return;
         if (_currentRound < _party.totalRounds) {
           setState(() {
+            print("_currentRound   : $_currentRound");
             _currentRound++;
+            print("_currentRound incermented  : $_currentRound");
             _timeRemaining = 30;
             _answered = false;
             _selectedAnswer = null;
-            _roundStartTime = DateTime.now();
+            roundStartTime = DateTime.now();
           });
           _startTimer();
         } else {
           // Game finished
-          await authService.submitAnswer(
-              partyMember);
+          await authService.submitAnswer(partyMember);
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
