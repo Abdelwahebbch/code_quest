@@ -1,3 +1,4 @@
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
@@ -20,8 +21,8 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
     with TickerProviderStateMixin {
   late List<PartyMember> _rankedMembers;
   late AnimationController _animationController;
-  bool _isLoading= true;
-
+  bool _isLoading = true;
+  late bool isHost;
   Future<void> checkWinner() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.updateMembersDetails(widget.rowId);
@@ -29,14 +30,23 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
       ..sort((a, b) => b.score.compareTo(a.score));
     if (!mounted) return;
     setState(() {
-      _isLoading=false;
+      _isLoading = false;
     });
-    if (authService.party.hostId==authService.user?.$id){
-    await authService.savePartyHistory(_rankedMembers);
+    if (authService.party.hostId == authService.user?.$id) {
+      await authService.savePartyHistory(_rankedMembers);
     }
-    if (authService.user?.$id == _rankedMembers[0].userId){
-    await authService.updateUserPoints(authService.partyMember.score);
+    if (authService.user?.$id == _rankedMembers[0].userId) {
+      await authService.updateUserPoints(authService.partyMember.score);
     }
+  }
+
+  void exit() async {
+    await Provider.of<AppwriteService>(context, listen: false).quiteLobby();
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        (route) => false);
   }
 
   @override
@@ -48,6 +58,30 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
     );
     _animationController.forward();
     checkWinner();
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    var party = authService.party;
+    isHost = party.hostId == authService.user!.$id;
+    var subscriptionParty = authService.realtime.subscribe([
+      Channel.tablesdb("6972adad002e2ba515f2").table("party").row(party.partyId)
+    ]);
+    if (!isHost) {
+      subscriptionParty.stream.listen((response) {
+        Map<String, dynamic> row = response.payload;
+        if (response.events.first.contains("delete")) {
+          if (!isHost && row["\$id"] == party.partyId && mounted) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const DashboardScreen()));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('The owner just close the party'),
+              ),
+            );
+          }
+        }
+      });
+    }
   }
 
   @override
@@ -368,12 +402,8 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () async{
-                        await authService.quiteLobby();
-                        Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (context) => const DashboardScreen()),
-                            (route) => false);
+                      onPressed: () {
+                        exit();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryColor,
@@ -391,6 +421,7 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
                     ),
                   ),
                   const SizedBox(height: 10),
+                  if(isHost)
                   SizedBox(
                     width: double.infinity,
                     height: 48,

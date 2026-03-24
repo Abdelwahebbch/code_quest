@@ -1,10 +1,9 @@
-import 'dart:convert';
-
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
+import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import 'party_quiz_screen.dart';
 
@@ -26,7 +25,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
     subscription1?.close();
     super.dispose();
   }
-  
+
   @override
   void initState() {
     super.initState();
@@ -39,7 +38,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
     ]);
     subscription?.stream.listen((response) {
       if (response.payload["isStarted"] == true) {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => const PartyQuizScreen(),
@@ -51,7 +50,6 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
         [Channel.tablesdb("6972adad002e2ba515f2").table("party_member").row()],
         queries: [Query.equal("partyId", _party.partyId)]);
     subscription1?.stream.listen((response) {
-      print("Realtime resp : ${response.payload}");
       Map<String, dynamic> row = response.payload;
       if (response.events.first.contains("create")) {
         PartyMember partyMember = PartyMember(
@@ -68,14 +66,15 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
         setState(() {
           authService.addMember(partyMember);
         });
-      } else if (response.events.first.contains("delete")) {
+      }
+      if (response.events.first.contains("delete")) {
         bool isHost = _party.hostId == authService.user!.$id;
         setState(() {
-          authService.deleteMember(row["userId"]);
+          authService.deleteMemberFromLocal(row["userId"]);
         });
         if (!isHost && row["userId"] == _party.hostId && mounted) {
-          deleteAllMembers();
-          Navigator.pop(context);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => const DashboardScreen()));
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('The owner just close the party'),
@@ -98,7 +97,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.deleteAllMembers();
   }
-  
+
   Future<void> _toggleReady() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.toggleReady(_party.partyId);
@@ -158,7 +157,11 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                         ),
                         onPressed: () async {
                           await authService.quiteLobby();
-                          Navigator.pop(context);
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const DashboardScreen()));
                         },
                       ),
 
