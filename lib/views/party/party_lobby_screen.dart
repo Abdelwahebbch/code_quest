@@ -17,6 +17,7 @@ class PartyLobbyScreen extends StatefulWidget {
 
 class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   late Party _party;
+  late final authService ; 
   bool _isReady = false;
   bool isStarting = false;
   RealtimeSubscription? subscription;
@@ -31,7 +32,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   @override
   void initState() {
     super.initState();
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+     authService = Provider.of<AppwriteService>(context, listen: false);
     _party = authService.party;
     subscription = authService.realtime.subscribe([
       Channel.tablesdb("6972adad002e2ba515f2")
@@ -41,6 +42,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
     subscription?.stream.listen((response) async {
       if (response.payload["isStarted"] == true) {
         List<Map<String, dynamic>> quizs = await getQuiz();
+        if(!mounted)return ; 
         Navigator.push(
           context,
           MaterialPageRoute(
