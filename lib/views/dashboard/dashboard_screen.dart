@@ -10,7 +10,6 @@ import '../settings/settings_screen.dart';
 import '../party/party_home_screen.dart';
 import '../../services/appwrite_service.dart';
 
-// big probleme
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -20,9 +19,8 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
-
+  late String username;
   Future<void> showNotif(List<String> badges) async {
-    //print(badges);
     if (badges.isNotEmpty) {
       for (int i = 0; i < badges.length; i++) {
         await showMissionCompleted(context, badges[i]);
@@ -34,6 +32,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     final authservice = Provider.of<AppwriteService>(context, listen: false);
+    username = authservice.user!.name;
     List<String> badges = authservice.progress.showingBadges;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showNotif(badges);
@@ -45,7 +44,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final List<Widget> screens = [
       const DashboardHome(),
-      const PartyHomeScreen(),
+      PartyHomeScreen(
+        username: username,
+      ),
       const BadgesScreen(),
       const SettingsScreen(),
     ];
@@ -334,7 +335,6 @@ class DashboardHomeState extends State<DashboardHome> {
                       Text("Active Missions",
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 15),
-                   
                     ],
                   ),
                 ),

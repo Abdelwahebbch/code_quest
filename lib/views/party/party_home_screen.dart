@@ -4,7 +4,8 @@ import 'party_create_screen.dart';
 import 'party_join_screen.dart';
 
 class PartyHomeScreen extends StatefulWidget {
-  const PartyHomeScreen({super.key});
+  final String username;
+  const PartyHomeScreen({super.key, required this.username});
 
   @override
   State<PartyHomeScreen> createState() => _PartyHomeScreenState();
@@ -62,7 +63,9 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const PartyCreateScreen(),
+                            builder: (context) => PartyCreateScreen(
+                              username: widget.username,
+                            ),
                           ),
                         );
                       },

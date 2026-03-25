@@ -7,7 +7,8 @@ import 'package:provider/provider.dart';
 import 'party_lobby_screen.dart';
 
 class PartyCreateScreen extends StatefulWidget {
-  const PartyCreateScreen({super.key});
+  final String username;
+   const PartyCreateScreen({super.key, required this.username});
 
   @override
   State<PartyCreateScreen> createState() => _PartyCreateScreenState();
@@ -19,6 +20,12 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
   String _difficulty = 'intermediate';
   String _gameMode = 'quiz';
   int _totalRounds = 5;
+  bool isPublic = false;
+  @override
+  void initState() {
+    super.initState();
+    _partyNameController.text = "${widget.username}'s party";
+  }
 
   @override
   void dispose() {
@@ -50,24 +57,24 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
       String partyCode = authService.user!.$id.toString().substring(1, 4) +
           partyID.toString().substring(17, 20);
       final party = Party(
-        partyId: partyID,
-        partyCode: partyCode,
-        partyName: _partyNameController.text,
-        hostId: authService.user!.$id,
-        hostName: authService.user!.name,
-        maxMembers: _maxMembers,
-        difficulty: _difficulty,
-        gameMode: _gameMode,
-        totalRounds: _totalRounds,
-        members: [mainMember],
-        isStarted: false,
-      );
-      await authService.createParty( party);
+          partyId: partyID,
+          partyCode: partyCode,
+          partyName: _partyNameController.text,
+          hostId: authService.user!.$id,
+          hostName: authService.user!.name,
+          maxMembers: _maxMembers,
+          difficulty: _difficulty,
+          gameMode: _gameMode,
+          totalRounds: _totalRounds,
+          members: [mainMember],
+          isStarted: false,
+          isPublic: isPublic);
+      await authService.createParty(party);
       if (!mounted) return;
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PartyLobbyScreen(),
+          builder: (context) => const PartyLobbyScreen(),
         ),
       );
     } catch (e) {
@@ -232,6 +239,17 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
                   setState(() => _totalRounds = value.toInt());
                 },
               ),
+              const SizedBox(
+                height: 10,
+              ),
+              SwitchListTile(
+                  title: const Text("Make it public"),
+                  value: isPublic,
+                  onChanged: (x) {
+                    setState(() {
+                      isPublic = !isPublic;
+                    });
+                  }),
               const SizedBox(height: 40),
 
               // Create Button
