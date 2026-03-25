@@ -13,17 +13,16 @@ class PartyMember {
   DateTime joinedAt;
   bool isSubmit;
 
-  PartyMember({
-    required this.userId,
-    required this.username,
-    required this.imageId,
-    this.score = 0,
-    this.correctAnswers = 0,
-    this.totalAnswers = 0,
-    this.isReady = false,
-    required this.joinedAt,
-    this.isSubmit =false
-  });
+  PartyMember(
+      {required this.userId,
+      required this.username,
+      required this.imageId,
+      this.score = 0,
+      this.correctAnswers = 0,
+      this.totalAnswers = 0,
+      this.isReady = false,
+      required this.joinedAt,
+      this.isSubmit = false});
 
   double get accuracy {
     if (totalAnswers == 0) return 0;
@@ -39,7 +38,8 @@ class PartyMember {
       correctAnswers: json['correctAnswers'] ?? 0,
       totalAnswers: json['totalAnswers'] ?? 0,
       isReady: json['isReady'] ?? false,
-      joinedAt: DateTime.parse(json['joinedAt'] ?? DateTime.now().toIso8601String()),
+      joinedAt:
+          DateTime.parse(json['joinedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -69,34 +69,37 @@ class Party {
   int currentMissionIndex;
   bool isActive;
   bool isStarted;
+  bool isPublic;
   DateTime? startedAt;
   DateTime? endedAt;
   String difficulty; // beginner, intermediate, advanced
   String gameMode; // quiz, missions, mixed
   int totalRounds;
+  int nbMembers;
 
-  Party({
-    required this.partyId,
-    required this.partyCode,
-    required this.partyName,
-    required this.hostId,
-    required this.hostName,
-    this.members = const [],
-    this.missions = const [],
-    this.maxMembers = 8,
-    this.currentMissionIndex = 0,
-    this.isActive = true,
-    this.isStarted = false,
-    this.startedAt,
-    this.endedAt,
-    this.difficulty = 'intermediate',
-    this.gameMode = 'quiz',
-    this.totalRounds = 5,
-  });
+  Party(
+      {required this.partyId,
+      required this.partyCode,
+      required this.partyName,
+      required this.hostId,
+      required this.hostName,
+      this.members = const [],
+      this.missions = const [],
+      this.maxMembers = 8,
+      this.currentMissionIndex = 0,
+      this.isActive = true,
+      this.isStarted = false,
+      this.startedAt,
+      this.endedAt,
+      this.difficulty = 'intermediate',
+      this.gameMode = 'quiz',
+      this.totalRounds = 5,
+      this.isPublic = false,
+      this.nbMembers = 1});
 
-  bool get isFull => members.length >= maxMembers;
+  bool get isFull => (members.length >= maxMembers || nbMembers >= maxMembers);
 
-  bool get canStart => members.length >=2 && members.every((m) => m.isReady);
+  bool get canStart => members.length >= 2 && members.every((m) => m.isReady);
 
   int get memberCount => members.length;
 
@@ -109,8 +112,12 @@ class Party {
   }
 
   factory Party.fromJson(Map<String, dynamic> json) {
-    return 
-    Party(partyId: "1",partyCode: "AB123AS", partyName: "partyName", hostId: "hostId", hostName: "hostName");
+    return Party(
+        partyId: "1",
+        partyCode: "AB123AS",
+        partyName: "partyName",
+        hostId: "hostId",
+        hostName: "hostName");
   }
 
   Map<String, dynamic> toJson() {
@@ -119,8 +126,8 @@ class Party {
       'partyName': "partyName",
       'hostId': "hostId",
       'hostName': "hostName",
-      'members':["1","2"],
-      'missions': ["1","2"],
+      'members': ["1", "2"],
+      'missions': ["1", "2"],
       'maxMembers': 10,
       'currentMissionIndex': 1,
       'isActive': true,
