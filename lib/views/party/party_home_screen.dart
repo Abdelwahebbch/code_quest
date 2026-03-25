@@ -203,7 +203,7 @@ class _PartyHomeScreenState extends State<PartyHomeScreen> {
                 ),
 
                 const SizedBox(
-                  height: 10,
+                  height: 20,
                 ),
                 // Info Section
                 Container(
