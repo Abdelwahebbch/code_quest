@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
+import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import 'party_results_screen.dart';
 
 class PartyQuizScreen extends StatefulWidget {
   final questions;
   const PartyQuizScreen({
-    super.key, this.questions,
-
+    super.key,
+    this.questions,
   });
 
   @override
@@ -46,8 +47,8 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
           if (_timeRemaining <= 0) {
             if (answerIndex != null) {
               _submitAnswer(answerIndex);
-            }else{
-            _submitAnswer(null);
+            } else {
+              _submitAnswer(null);
             }
           } else {
             _startTimer();
@@ -104,224 +105,273 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _questions=widget.questions;
+    _questions = widget.questions;
     final currentQuestion = _questions[(_currentRound - 1) % _questions.length];
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    return PopScope(
+        canPop: false,
+        child: Scaffold(
+          body: Column(
+            children: [
+              Stack(
+                children: [
+                  Container(
+                      height: 110,
+                      width: double.infinity,
+                      color: AppTheme.primaryColor),
+                  Positioned(
+                      bottom: 2,
+                      left: 0,
+                      right: 0,
+                      child: Row(
+                        children: [
+                          const SizedBox(
+                            width: 3,
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                              size: 25,
+                            ),
+                            onPressed: () async {
+                              await authService.quiteLobby();
+                              Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const DashboardScreen()),
+                            (route) => false,
+                          );
+                            },
+                          ),
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-            '${_party.partyName} - Round $_currentRound/${_party.totalRounds}'),
-        backgroundColor: AppTheme.primaryColor,
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          // Timer and Score Header
-          Container(
-            color: AppTheme.primaryColor.withValues(alpha: 0.1),
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(width: 20),
+
+                          Text(
+            '${_party.partyName} - Round $_currentRound/${_party.totalRounds}',style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),),
+
+                    
+                        ],
+                      ))
+                ],
+              ),
+              // Timer and Score Header
+              Container(
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Time Remaining',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      '$_timeRemaining s',
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Time Remaining',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '$_timeRemaining s',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: _timeRemaining <= 10
                                     ? Colors.red
                                     : AppTheme.primaryColor,
                               ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Players Online',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      '${_party.memberCount}/${_party.maxMembers}',
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Players Online',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '${_party.memberCount}/${_party.maxMembers}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          // Question
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppTheme.accentColor.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    child: Text(
-                      currentQuestion['category'],
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.accentColor,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    currentQuestion['question'],
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+              // Question
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppTheme.accentColor.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                  ),
-                  const SizedBox(height: 30),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        child: Text(
+                          currentQuestion['category'],
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.accentColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        currentQuestion['question'],
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                      const SizedBox(height: 30),
 
-                  // Answer Options
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: currentQuestion['options'].length,
-                      itemBuilder: (context, index) {
-                        final option = currentQuestion['options'][index];
-                        final isSelected = _selectedAnswer == option;
-                        final isCorrect = index == currentQuestion['correct'];
-                        final showResult = _answered;
+                      // Answer Options
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: currentQuestion['options'].length,
+                          itemBuilder: (context, index) {
+                            final option = currentQuestion['options'][index];
+                            final isSelected = _selectedAnswer == option;
+                            final isCorrect =
+                                index == currentQuestion['correct'];
+                            final showResult = _answered;
 
-                        Color backgroundColor;
-                        if (!showResult) {
-                          backgroundColor = isSelected
-                              ? AppTheme.primaryColor.withValues(alpha: 0.2)
-                              : AppTheme.cardColor;
-                        } else {
-                          if (isCorrect) {
-                            backgroundColor =
-                                Colors.green.withValues(alpha: 0.2);
-                          } else if (isSelected && !isCorrect) {
-                            backgroundColor = Colors.red.withValues(alpha: 0.2);
-                          } else {
-                            backgroundColor = AppTheme.cardColor;
-                          }
-                        }
+                            Color backgroundColor;
+                            if (!showResult) {
+                              backgroundColor = isSelected
+                                  ? AppTheme.primaryColor.withValues(alpha: 0.2)
+                                  : AppTheme.cardColor;
+                            } else {
+                              if (isCorrect) {
+                                backgroundColor =
+                                    Colors.green.withValues(alpha: 0.2);
+                              } else if (isSelected && !isCorrect) {
+                                backgroundColor =
+                                    Colors.red.withValues(alpha: 0.2);
+                              } else {
+                                backgroundColor = AppTheme.cardColor;
+                              }
+                            }
 
-                        return GestureDetector(
-                          onTap: _answered
-                              ? null
-                              : () {
-                                  setState(() {
-                                    _selectedAnswer = option;
-                                  });
-                                  _submitAnswer(index);
-                                },
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color: backgroundColor,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isSelected
-                                    ? AppTheme.primaryColor
-                                    : Colors.grey.withValues(alpha: 0.2),
-                                width: isSelected ? 2 : 1,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(16),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.primaryColor
-                                        .withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(8),
+                            return GestureDetector(
+                              onTap: _answered
+                                  ? null
+                                  : () {
+                                      setState(() {
+                                        _selectedAnswer = option;
+                                      });
+                                      _submitAnswer(index);
+                                    },
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  color: backgroundColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppTheme.primaryColor
+                                        : Colors.grey.withValues(alpha: 0.2),
+                                    width: isSelected ? 2 : 1,
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      String.fromCharCode(65 + index),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                                ),
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryColor
+                                            .withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          String.fromCharCode(65 + index),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Text(
+                                        option,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                    ),
+                                    if (showResult)
+                                      Icon(
+                                        isCorrect ? Icons.check : Icons.close,
+                                        color: isCorrect
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                  ],
                                 ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Text(
-                                    option,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                  ),
-                                ),
-                                if (showResult)
-                                  Icon(
-                                    isCorrect ? Icons.check : Icons.close,
-                                    color:
-                                        isCorrect ? Colors.green : Colors.red,
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
 
-          // Progress Bar
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Progress',
-                  style: Theme.of(context).textTheme.bodySmall,
+              // Progress Bar
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Progress',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: _currentRound / _party.totalRounds,
+                        minHeight: 8,
+                        backgroundColor: Colors.grey[300],
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppTheme.primaryColor),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: _currentRound / _party.totalRounds,
-                    minHeight: 8,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                        AppTheme.primaryColor),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }
