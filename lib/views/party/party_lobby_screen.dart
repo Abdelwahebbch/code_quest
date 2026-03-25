@@ -42,11 +42,11 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
     subscription?.stream.listen((response) async {
       if (response.payload["isStarted"] == true) {
         List<Map<String, dynamic>> quizs = await getQuiz();
-        if(!mounted)return ; 
+        if (!mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PartyQuizScreen(questions :quizs),
+            builder: (context) => PartyQuizScreen(questions: quizs),
           ),
         );
       }
@@ -78,8 +78,11 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
           authService.deleteMemberFromLocal(row["userId"]);
         });
         if (!isHost && row["userId"] == _party.hostId && mounted) {
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => const DashboardScreen()));
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            (route) => false,
+          );
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('The owner just close the party'),
@@ -98,11 +101,13 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
       }
     });
   }
-  Future <List<Map<String, dynamic>>> getQuiz() async {
+
+  Future<List<Map<String, dynamic>>> getQuiz() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     List<Map<String, dynamic>> quizs = await authService.getQuiz();
     return quizs;
   }
+
   Future<void> deleteAllMembers() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.deleteAllMembers();
@@ -117,17 +122,17 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   }
 
   void _startGame() async {
-    
-    final ai = Provider.of<AppwritecloudfunctionsService>(context, listen: false);
+    final ai =
+        Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     if (_party.canStart) {
       setState(() {
-      isStarting= true;
-    });
+        isStarting = true;
+      });
       await ai.requestForPartyQuizzes(_party, _party.difficulty);
       final authService = Provider.of<AppwriteService>(context, listen: false);
       setState(() {
-      isStarting= false;
-    });
+        isStarting = false;
+      });
       await authService.startParty(_party.partyId);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -176,11 +181,14 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                         ),
                         onPressed: () async {
                           await authService.quiteLobby();
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const DashboardScreen()));
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const DashboardScreen()),
+                            (route) => false,
+                          );
+                          subscription?.close();
+                          subscription1?.close();
                         },
                       ),
 
@@ -482,13 +490,22 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: isStarting ? const CircularProgressIndicator() :  const Text(
-                        'Start Game',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: isStarting
+                          ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ))
+                          : const Text(
+                              'Start Game',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
               ],
