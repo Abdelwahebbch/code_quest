@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/enums.dart';
 import 'package:appwrite/models.dart' as models;
@@ -106,7 +105,7 @@ class AppwriteService extends ChangeNotifier {
         ],
       );
     } catch (e) {
-      debugPrint("Error : $e");
+      debugPrint("Error fi create new row: $e");
       rethrow;
     }
   }
@@ -163,7 +162,7 @@ class AppwriteService extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      debugPrint("Error : $e");
+      debugPrint("Error  fi login : $e");
       rethrow;
     }
   }
@@ -174,14 +173,23 @@ class AppwriteService extends ChangeNotifier {
       await account.createOAuth2Session(
         provider: OAuthProvider.google,
       );
-
       _user = await account.get();
-      _isLoading = false;
+      try {
+        await createNewRow();
+      } on AppwriteException catch (e) {
+        if (e.code == 409) {
+          print("User row already exists. Skipping creation.");
+        } else {
+          rethrow;
+        }
+      }
       await getUserInfo();
+      _isLoading = false;
       notifyListeners();
     } on AppwriteException catch (e) {
       print("Appwrite Auth Error: ${e.message}");
-      rethrow;
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -874,7 +882,7 @@ class AppwriteService extends ChangeNotifier {
   }
 
   Future<void> submitAnswer(PartyMember partyMember) async {
-    try { 
+    try {
       this.partyMember.score = partyMember.score;
       this.partyMember.correctAnswers = partyMember.correctAnswers;
       this.partyMember.totalAnswers = partyMember.totalAnswers;
@@ -933,7 +941,7 @@ class AppwriteService extends ChangeNotifier {
   Future<void> kickMember(String userId) async {
     try {
       await database.deleteRow(
-            databaseId: dbID, tableId: "party_member", rowId: userId);
+          databaseId: dbID, tableId: "party_member", rowId: userId);
     } catch (e) {
       rethrow;
     }
@@ -944,7 +952,7 @@ class AppwriteService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeIsStartedLocaly(){
+  void changeIsStartedLocaly() {
     party.isStarted = true;
     notifyListeners();
   }
@@ -1077,11 +1085,10 @@ class AppwriteService extends ChangeNotifier {
     try {
       final m = await database.getRow(
           databaseId: dbID, tableId: "party_member", rowId: user!.$id);
-      await database.deleteRow(databaseId: dbID, tableId: "party_member", rowId: user!.$id);
+      await database.deleteRow(
+          databaseId: dbID, tableId: "party_member", rowId: user!.$id);
     } catch (e) {
       null;
     }
   }
-
-  
 }
