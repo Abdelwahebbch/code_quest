@@ -41,7 +41,7 @@ class _PartyResultsScreenState extends State<PartyResultsScreen>
   }
 
   void exit() async {
-    await Provider.of<AppwriteService>(context, listen: false).quiteLobby();
+    await Provider.of<AppwriteService>(context, listen: false).quiteLobby(null);
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
         context,

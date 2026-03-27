@@ -17,7 +17,7 @@ class PartyLobbyScreen extends StatefulWidget {
 
 class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   late Party _party;
-  late final authService ; 
+  late final authService;
   bool _isReady = false;
   bool isStarting = false;
   RealtimeSubscription? subscription;
@@ -32,21 +32,23 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   @override
   void initState() {
     super.initState();
-     authService = Provider.of<AppwriteService>(context, listen: false);
+    authService = Provider.of<AppwriteService>(context, listen: false);
     _party = authService.party;
+
     subscription = authService.realtime.subscribe([
       Channel.tablesdb("6972adad002e2ba515f2")
           .table("party")
           .row(_party.partyId)
     ]);
     subscription?.stream.listen((response) async {
-      if (response.payload["isStarted"] == true) {
+      if (response.payload["isStarted"] == true && _party.isStarted == false) {
+        authService.changeIsStartedLocaly();
         List<Map<String, dynamic>> quizs = await getQuiz();
-        if(!mounted)return ; 
+        if (!mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PartyQuizScreen(questions :quizs),
+            builder: (context) => PartyQuizScreen(questions: quizs),
           ),
         );
       }
@@ -74,15 +76,20 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
       }
       if (response.events.first.contains("delete")) {
         bool isHost = _party.hostId == authService.user!.$id;
+        if (!mounted) return;
+        
         setState(() {
           authService.deleteMemberFromLocal(row["userId"]);
         });
-        if (!isHost && row["userId"] == _party.hostId && mounted) {
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => const DashboardScreen()));
+        if (((!isHost && row["userId"] == _party.hostId) || row["userId"]== authService.user!.$id )&& mounted ) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            (route) => false,
+          );
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('The owner just close the party'),
+            SnackBar(
+              content: row["userId"] == _party.hostId ?const Text('The owner just close the party'):const Text('The owner just kicked you from the party') ,
             ),
           );
         }
@@ -90,6 +97,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
       if (response.events.first.contains("update")) {
         for (int i = 0; i < _party.members.length; i++) {
           if (row["userId"] == _party.members[i].userId) {
+            if (!mounted) return;
             setState(() {
               authService.toggleReadyLocaly(i, row["isReady"]);
             });
@@ -98,11 +106,13 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
       }
     });
   }
-  Future <List<Map<String, dynamic>>> getQuiz() async {
+
+  Future<List<Map<String, dynamic>>> getQuiz() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     List<Map<String, dynamic>> quizs = await authService.getQuiz();
     return quizs;
   }
+
   Future<void> deleteAllMembers() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.deleteAllMembers();
@@ -117,17 +127,17 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   }
 
   void _startGame() async {
-    
-    final ai = Provider.of<AppwritecloudfunctionsService>(context, listen: false);
+    final ai =
+        Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     if (_party.canStart) {
       setState(() {
-      isStarting= true;
-    });
+        isStarting = true;
+      });
       await ai.requestForPartyQuizzes(_party, _party.difficulty);
       final authService = Provider.of<AppwriteService>(context, listen: false);
       setState(() {
-      isStarting= false;
-    });
+        isStarting = false;
+      });
       await authService.startParty(_party.partyId);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -176,12 +186,15 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                             size: 25,
                           ),
                           onPressed: () async {
-                            await authService.quiteLobby();
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const DashboardScreen()));
+                            await authService.quiteLobby(null);
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const DashboardScreen()),
+                              (route) => false,
+                            );
+                            subscription?.close();
+                            subscription1?.close();
                           },
                         ),
       
@@ -431,6 +444,24 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                                             ),
                                           ),
                                         ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        if (authService.user?.$id == _party.hostId && member.userId != _party.hostId)
+                                          Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.red.shade900,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: IconButton(
+                                                  onPressed: () async {
+                                                    await authService.kickMember(member.userId);
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.logout,
+                                                    size: 20,
+                                                  ))),
                                       ],
                                     ),
                                   ),
@@ -483,13 +514,22 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: isStarting ? const CircularProgressIndicator() :  const Text(
-                          'Start Game',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: isStarting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor:
+                                      AlwaysStoppedAnimation<Color>(Colors.white),
+                                ))
+                            : const Text(
+                                'Start Game',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                 ],

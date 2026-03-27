@@ -81,14 +81,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   builder: (context) {
                     return Center(
                         child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
                           color: AppTheme.secondaryColor,
                           borderRadius: BorderRadius.circular(12),
                           ),
-                      child: const Padding(padding: EdgeInsets.all(30),child: CircularProgressIndicator(),),
-                    ));
+                            child: const Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                            )));
                   },
                 );
                 await authService.updateProfile(

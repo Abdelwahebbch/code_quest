@@ -117,6 +117,7 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
     setState(() => _isLoading = true);
 
     try {
+      await authService.checkExistingPartyMember();
       String rowId = await authService.joinParty(code);
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -163,6 +164,7 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
     setState(() => _isLoading = true);
 
     try {
+      await authService.checkExistingPartyMember();
       String rowId = await authService.joinParty(party.partyCode);
       if (!mounted) return;
       setState(() => _isLoading = false);
