@@ -68,82 +68,84 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       isPickedPath = false;
       isDataBasePickedPath = false;
     }
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit Profile"),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) {
-                  return Center(
-                      child: Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                        color: AppTheme.secondaryColor,
-                        borderRadius: BorderRadius.circular(12),
-                        ),
-                    child: const Padding(padding: EdgeInsets.all(30),child: CircularProgressIndicator(),),
-                  ));
-                },
-              );
-              await authService.updateProfile(
-                  pickedPath, _userNameController.text, _bioController.text);
-              Navigator.pop(context);
-              //it handle in appservice function to not make tow function
-              // ignore: use_build_context_synchronously
-              Navigator.pop(context);
-            },
-            child: const Text("SAVE",
-                style: TextStyle(
-                    color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: AppTheme.primaryColor,
-                  backgroundImage: isPickedPath
-                      ? backgroundImage
-                      : (isDataBasePickedPath ? dataBaseImage : null),
-                  child: (isDataBasePickedPath && isPickedPath) ? null : icon,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 35,
-                    height: 35,
-                    padding: const EdgeInsets.all(0),
-                    decoration: const BoxDecoration(
-                        color: AppTheme.accentColor, shape: BoxShape.circle),
-                    child: IconButton(
-                        onPressed: () {
-                          _pickImage();
-                        },
-                        icon: const Icon(Icons.camera_alt,
-                            size: 20, color: Colors.white)),
-                  ),
-                ),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Edit Profile"),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) {
+                    return Center(
+                        child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                          color: AppTheme.secondaryColor,
+                          borderRadius: BorderRadius.circular(12),
+                          ),
+                      child: const Padding(padding: EdgeInsets.all(30),child: CircularProgressIndicator(),),
+                    ));
+                  },
+                );
+                await authService.updateProfile(
+                    pickedPath, _userNameController.text, _bioController.text);
+                Navigator.pop(context);
+                //it handle in appservice function to not make tow function
+                // ignore: use_build_context_synchronously
+                Navigator.pop(context);
+              },
+              child: const Text("SAVE",
+                  style: TextStyle(
+                      color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
             ),
-            const SizedBox(height: 32),
-            _buildEditField(context, "Username", _userNameController, true),
-            const SizedBox(height: 16),
-            _buildEditField(context, "Email", _emailController, true),
-            const SizedBox(height: 16),
-            _buildEditField(context, "Bio", _bioController, false),
           ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: AppTheme.primaryColor,
+                    backgroundImage: isPickedPath
+                        ? backgroundImage
+                        : (isDataBasePickedPath ? dataBaseImage : null),
+                    child: (isDataBasePickedPath && isPickedPath) ? null : icon,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 35,
+                      height: 35,
+                      padding: const EdgeInsets.all(0),
+                      decoration: const BoxDecoration(
+                          color: AppTheme.accentColor, shape: BoxShape.circle),
+                      child: IconButton(
+                          onPressed: () {
+                            _pickImage();
+                          },
+                          icon: const Icon(Icons.camera_alt,
+                              size: 20, color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              _buildEditField(context, "Username", _userNameController, true),
+              const SizedBox(height: 16),
+              _buildEditField(context, "Email", _emailController, true),
+              const SizedBox(height: 16),
+              _buildEditField(context, "Bio", _bioController, false),
+            ],
+          ),
         ),
       ),
     );

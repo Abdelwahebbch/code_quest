@@ -81,45 +81,47 @@ class _BadgesScreenState extends State<BadgesScreen> {
         }
       }
 
-    }); return Scaffold(
-      
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(
-              height: 40,
-            ),
-            const Text(
-              "Your Achievements",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            _buildSummaryCard(allBadges),
-            const SizedBox(height: 24),
-            Text("All Badges", style: Theme.of(context).textTheme.titleLarge),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.85,
-                ),
-                itemCount: allBadges.length,
-                itemBuilder: (context, index) {
-                  final badge = allBadges[index];
-                  return _buildBadgeCard(badge);
-                },
+    }); return SafeArea(
+      child: Scaffold(
+        
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 40,
               ),
-            ),
-          ],
+              const Text(
+                "Your Achievements",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              _buildSummaryCard(allBadges),
+              const SizedBox(height: 24),
+              Text("All Badges", style: Theme.of(context).textTheme.titleLarge),
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.85,
+                  ),
+                  itemCount: allBadges.length,
+                  itemBuilder: (context, index) {
+                    final badge = allBadges[index];
+                    return _buildBadgeCard(badge);
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

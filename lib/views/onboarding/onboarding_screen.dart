@@ -205,57 +205,59 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final progress = _history.length / (_questions.length - 1);
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (_history.isNotEmpty)
-                    IconButton(
-                      onPressed: _goBack,
-                      icon: const Icon(Icons.arrow_back),
+    return SafeArea(
+      child: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (_history.isNotEmpty)
+                      IconButton(
+                        onPressed: _goBack,
+                        icon: const Icon(Icons.arrow_back),
+                      ),
+                    GestureDetector(
+                      onTap: _skip,
+                      child: const Text("Skip"),
                     ),
-                  GestureDetector(
-                    onTap: _skip,
-                    child: const Text("Skip"),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              LinearProgressIndicator(
-                value: progress,
-              ),
-              const SizedBox(
-                height: 40,
-              ),
-              Column(
-                key: ValueKey(_currentQuestion.id),
-                children: [
-                  Text(
-                    _currentQuestion.question,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _currentQuestion.options.length,
-                      itemBuilder: (context, idx) {
-                        return _buildOptionCard(_currentQuestion.options[idx]);
-                      })
-                ],
-              )
-            ],
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                LinearProgressIndicator(
+                  value: progress,
+                ),
+                const SizedBox(
+                  height: 40,
+                ),
+                Column(
+                  key: ValueKey(_currentQuestion.id),
+                  children: [
+                    Text(
+                      _currentQuestion.question,
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _currentQuestion.options.length,
+                        itemBuilder: (context, idx) {
+                          return _buildOptionCard(_currentQuestion.options[idx]);
+                        })
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),

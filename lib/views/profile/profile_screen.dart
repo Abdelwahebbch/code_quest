@@ -15,62 +15,64 @@ class ProfileScreen extends StatelessWidget {
     NetworkImage dataBaseImage = NetworkImage(
         'https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/$userImage/view?project=697295e70021593c3438&mode=admin');
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Profile"),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                        builder: (context) => const LoginScreen()),
-                    (route) => false);
-              }
-              await authService.logout();
-            },
-          )
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: AppTheme.primaryColor,
-              backgroundImage: userImage.isEmpty ? null : dataBaseImage,
-              child: userImage.isEmpty
-                  ? const Icon(Icons.person, color: Colors.white)
-                  : null,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              user?.name ?? "Guest",
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              user?.email ?? "",
-              style: const TextStyle(color: Colors.grey),
-            ),
-            Text(
-              authService.progress.bio,
-              style: const TextStyle(color: AppTheme.accentColor),
-            ),
-            const SizedBox(height: 32),
-            _buildStatRow(context),
-            const SizedBox(height: 32),
-            _buildSectionTitle(context, "Earned Badges"),
-            const SizedBox(height: 16),
-            _buildBadgeGrid(context),
-            const SizedBox(height: 16),
-            _buildSectionTitle(context, "Learning Progress"),
-            const SizedBox(height: 16),
-            _buildProgressList(context),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Profile"),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () async {
+                if (context.mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (context) => const LoginScreen()),
+                      (route) => false);
+                }
+                await authService.logout();
+              },
+            )
           ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 60,
+                backgroundColor: AppTheme.primaryColor,
+                backgroundImage: userImage.isEmpty ? null : dataBaseImage,
+                child: userImage.isEmpty
+                    ? const Icon(Icons.person, color: Colors.white)
+                    : null,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                user?.name ?? "Guest",
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                user?.email ?? "",
+                style: const TextStyle(color: Colors.grey),
+              ),
+              Text(
+                authService.progress.bio,
+                style: const TextStyle(color: AppTheme.accentColor),
+              ),
+              const SizedBox(height: 32),
+              _buildStatRow(context),
+              const SizedBox(height: 32),
+              _buildSectionTitle(context, "Earned Badges"),
+              const SizedBox(height: 16),
+              _buildBadgeGrid(context),
+              const SizedBox(height: 16),
+              _buildSectionTitle(context, "Learning Progress"),
+              const SizedBox(height: 16),
+              _buildProgressList(context),
+            ],
+          ),
         ),
       ),
     );

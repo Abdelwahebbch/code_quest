@@ -87,194 +87,196 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Party'),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Party Name
-              Text(
-                'Party Name',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _partyNameController,
-                decoration: InputDecoration(
-                  hintText: 'Enter party name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.group),
-                  filled: true,
-                  fillColor: AppTheme.cardColor,
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Max Members
-              Text(
-                'Maximum Members: $_maxMembers',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 10),
-              Slider(
-                value: _maxMembers.toDouble(),
-                min: 2,
-                max: 8,
-                divisions: 6,
-                label: _maxMembers.toString(),
-                onChanged: (value) {
-                  setState(() => _maxMembers = value.toInt());
-                },
-              ),
-              const SizedBox(height: 30),
-
-              // Difficulty
-              Text(
-                'Difficulty Level',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: DropdownButton<String>(
-                  value: _difficulty,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  items: ['beginner', 'intermediate', 'advanced']
-                      .map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text(
-                          value.toUpperCase(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Create Party'),
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Party Name
+                Text(
+                  'Party Name',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      setState(() => _difficulty = newValue);
-                    }
-                  },
                 ),
-              ),
-              const SizedBox(height: 30),
-
-              // Game Mode
-              Text(
-                'Game Mode',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: DropdownButton<String>(
-                  value: _gameMode,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  items: ['quiz', 'missions', 'mixed'].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text(
-                          value.toUpperCase(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      setState(() => _gameMode = newValue);
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Total Rounds
-              Text(
-                'Total Rounds: $_totalRounds',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 10),
-              Slider(
-                value: _totalRounds.toDouble(),
-                min: 3,
-                max: 10,
-                divisions: 7,
-                label: _totalRounds.toString(),
-                onChanged: (value) {
-                  setState(() => _totalRounds = value.toInt());
-                },
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              SwitchListTile(
-                  title: const Text("Make it public"),
-                  value: isPublic,
-                  onChanged: (x) {
-                    setState(() {
-                      isPublic = !isPublic;
-                    });
-                  }),
-              const SizedBox(height: 40),
-
-              // Create Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _createParty,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    shape: RoundedRectangleBorder(
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _partyNameController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter party name',
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    prefixIcon: const Icon(Icons.group),
+                    filled: true,
+                    fillColor: AppTheme.cardColor,
                   ),
-                  child: const Text(
-                    'Create Party',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                ),
+                const SizedBox(height: 30),
+      
+                // Max Members
+                Text(
+                  'Maximum Members: $_maxMembers',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                Slider(
+                  value: _maxMembers.toDouble(),
+                  min: 2,
+                  max: 8,
+                  divisions: 6,
+                  label: _maxMembers.toString(),
+                  onChanged: (value) {
+                    setState(() => _maxMembers = value.toInt());
+                  },
+                ),
+                const SizedBox(height: 30),
+      
+                // Difficulty
+                Text(
+                  'Difficulty Level',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButton<String>(
+                    value: _difficulty,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    items: ['beginner', 'intermediate', 'advanced']
+                        .map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            value.toUpperCase(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() => _difficulty = newValue);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 30),
+      
+                // Game Mode
+                Text(
+                  'Game Mode',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButton<String>(
+                    value: _gameMode,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    items: ['quiz', 'missions', 'mixed'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            value.toUpperCase(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() => _gameMode = newValue);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 30),
+      
+                // Total Rounds
+                Text(
+                  'Total Rounds: $_totalRounds',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                Slider(
+                  value: _totalRounds.toDouble(),
+                  min: 3,
+                  max: 10,
+                  divisions: 7,
+                  label: _totalRounds.toString(),
+                  onChanged: (value) {
+                    setState(() => _totalRounds = value.toInt());
+                  },
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                SwitchListTile(
+                    title: const Text("Make it public"),
+                    value: isPublic,
+                    onChanged: (x) {
+                      setState(() {
+                        isPublic = !isPublic;
+                      });
+                    }),
+                const SizedBox(height: 40),
+      
+                // Create Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _createParty,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Create Party',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

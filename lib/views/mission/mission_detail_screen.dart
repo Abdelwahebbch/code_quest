@@ -33,78 +33,80 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.mission.title),
-        actions: [
-          if (widget.mission.type.name == "debug" ||
-              widget.mission.type.name == "complete")
-            IconButton(
-              icon: const Icon(Icons.restore_rounded,
-                  color: AppTheme.accentColor),
-              onPressed: () {
-                _codeController.text = widget.mission.initialCode!.trim();
-              },
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.mission.title),
+          actions: [
+            if (widget.mission.type.name == "debug" ||
+                widget.mission.type.name == "complete")
+              IconButton(
+                icon: const Icon(Icons.restore_rounded,
+                    color: AppTheme.accentColor),
+                onPressed: () {
+                  _codeController.text = widget.mission.initialCode!.trim();
+                },
+              ),
+          ],
+        ),
+        body: CustomScrollView(slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              color: AppTheme.cardColor,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("MISSION OBJECTIVE",
+                      style: TextStyle(
+                          color: AppTheme.accentColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12)),
+                  const SizedBox(height: 8),
+                  Text(widget.mission.description,
+                      style: const TextStyle(fontSize: 16)),
+                ],
+              ),
             ),
-        ],
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildChallengeInterface(),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        widget.mission.solution = _codeController.text.trim();
+                        _showAITutor(context);
+                      },
+                      icon: const Icon(Icons.lightbulb_outline),
+                      label: const Text("Ask me"),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        _checkAnswer();
+                      },
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text("Submit"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ]),
       ),
-      body: CustomScrollView(slivers: [
-        SliverToBoxAdapter(
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            color: AppTheme.cardColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("MISSION OBJECTIVE",
-                    style: TextStyle(
-                        color: AppTheme.accentColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12)),
-                const SizedBox(height: 8),
-                Text(widget.mission.description,
-                    style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _buildChallengeInterface(),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      widget.mission.solution = _codeController.text.trim();
-                      _showAITutor(context);
-                    },
-                    icon: const Icon(Icons.lightbulb_outline),
-                    label: const Text("Ask me"),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      _checkAnswer();
-                    },
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text("Submit"),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ]),
     );
   }
 

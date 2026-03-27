@@ -56,56 +56,58 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context);
 
-    return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Image(
-              height: 170,
-              width: 170,
-              image: AssetImage('assets/icon/icon.png'),
-            ),
-            Text(
-              "Create Account",
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.bold,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Image(
+                height: 170,
+                width: 170,
+                image: AssetImage('assets/icon/icon.png'),
+              ),
+              Text(
+                "Create Account",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 32),
+              _buildTextField("Full Name", Icons.person_outline, _nameController),
+              const SizedBox(height: 16),
+              _buildTextField("Email", Icons.email_outlined, _emailController),
+              const SizedBox(height: 16),
+              _buildTextField("Password", Icons.lock_outline, _passwordController,
+                  obscure: true),
+              const SizedBox(height: 16),
+              _buildTextField("Confirm Password", Icons.lock_reset,
+                  _confirmPasswordController,
+                  obscure: true),
+              const SizedBox(height: 32),
+              authService.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                      onPressed: _handleSignup,
+                      child: const Text("SIGN UP"),
+                    ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Already have an account?"),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Login"),
                   ),
-            ),
-            const SizedBox(height: 32),
-            _buildTextField("Full Name", Icons.person_outline, _nameController),
-            const SizedBox(height: 16),
-            _buildTextField("Email", Icons.email_outlined, _emailController),
-            const SizedBox(height: 16),
-            _buildTextField("Password", Icons.lock_outline, _passwordController,
-                obscure: true),
-            const SizedBox(height: 16),
-            _buildTextField("Confirm Password", Icons.lock_reset,
-                _confirmPasswordController,
-                obscure: true),
-            const SizedBox(height: 32),
-            authService.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: _handleSignup,
-                    child: const Text("SIGN UP"),
-                  ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("Already have an account?"),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Login"),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

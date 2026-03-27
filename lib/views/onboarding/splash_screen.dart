@@ -66,30 +66,32 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      body: Center(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image(
-                height: 200,
-                width: 200,
-                image: AssetImage('assets/icon/icon.png'),
-              ),
-              SizedBox(height: 8),
-              Text(
-                "Master Software Engineering",
-                style: TextStyle(color: Colors.grey, letterSpacing: 1.2),
-              ),
-              SizedBox(height: 48),
-              CircularProgressIndicator(
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
-              ),
-            ],
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: AppTheme.backgroundColor,
+        body: Center(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image(
+                  height: 200,
+                  width: 200,
+                  image: AssetImage('assets/icon/icon.png'),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "Master Software Engineering",
+                  style: TextStyle(color: Colors.grey, letterSpacing: 1.2),
+                ),
+                SizedBox(height: 48),
+                CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                ),
+              ],
+            ),
           ),
         ),
       ),

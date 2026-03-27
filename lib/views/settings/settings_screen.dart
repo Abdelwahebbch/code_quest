@@ -23,129 +23,131 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final themeManager = Provider.of<ThemeManager>(context);
 
     final isDark = themeManager.themeMode == ThemeMode.dark;
-    return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const SizedBox(
-            height: 40,
-          ),
-          const Text(
-            "Settings",
-            style: TextStyle(
-                color: Colors.white, fontSize: 21, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          _buildSectionHeader("Account"),
-          _buildSettingTile(
-            icon: Icons.person_outline,
-            title: "Edit Profile",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const EditProfileScreen()),
-              );
-            },
-          ),
-          _buildSettingTile(
-            icon: Icons.language,
-            title: "Change Learning Language",
-            subtitle: "Current: ${authService.progress.progLanguage}",
-            onTap: () {
-              Navigator.push(
+    return SafeArea(
+      child: Scaffold(
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const SizedBox(
+              height: 40,
+            ),
+            const Text(
+              "Settings",
+              style: TextStyle(
+                  color: Colors.white, fontSize: 21, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            _buildSectionHeader("Account"),
+            _buildSettingTile(
+              icon: Icons.person_outline,
+              title: "Edit Profile",
+              onTap: () {
+                Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const EditProgLangScreen()));
-            },
-          ),
-          const SizedBox(height: 24),
-          _buildSectionHeader("Preferences"),
-          SwitchListTile(
-            title: const Text("Push Notifications"),
-            subtitle: const Text("Get mission reminders"),
-            value: _notificationsEnabled,
-            activeTrackColor: AppTheme.primaryColor,
-            onChanged: (val) {
-              //=> setState(() => _notificationsEnabled = val)
-
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return const AlertDialog(
-                      title: Text("Coming Soon"),
-                      content: Text(
-                          "This feature is not yet available. It will be released in a future update."),
-                    );
-                  });
-            },
-          ),
-          SwitchListTile(
-            title: const Text("Dark Mode"),
-            value: isDark,
-            activeTrackColor: AppTheme.primaryColor,
-            onChanged: (val) => themeManager.toggleTheme(val),
-          ),
-          ListTile(
-            title: const Text("Missions Difficulty"),
-            subtitle: Text(authService.progress.difficultySelected),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _showDifficultyPicker,
-          ),
-          const SizedBox(height: 24),
-          _buildSectionHeader("Support"),
-          _buildSettingTile(
-            icon: Icons.help_outline,
-            title: "Help Center",
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const HelpCenterScreen()));
-            },
-          ),
-          _buildSettingTile(
-            icon: Icons.privacy_tip_outlined,
-            title: "Privacy Policy",
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const PrivacyPolicyScreen()));
-            },
-          ),
-          _buildSectionHeader("Feedback"),
-          _buildSettingTile(
-            icon: Icons.feedback_outlined,
-            title: "Share your feedback with us !",
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const FeedbackBox()));
-            },
-          ),
-          const SizedBox(height: 40),
-          ElevatedButton(
-            onPressed: () async {
-              await authService.logout();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
+                      builder: (context) => const EditProfileScreen()),
+                );
+              },
+            ),
+            _buildSettingTile(
+              icon: Icons.language,
+              title: "Change Learning Language",
+              subtitle: "Current: ${authService.progress.progLanguage}",
+              onTap: () {
+                Navigator.push(
+                    context,
                     MaterialPageRoute(
-                        builder: (context) => const LoginScreen()),
-                    (route) => false);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.withValues(alpha: 0.8)),
-            child: const Text("LOGOUT"),
-          ),
-          const SizedBox(height: 20),
-          const Center(
-            child: Text("Version 2.0.0",
-                style: TextStyle(color: Colors.grey, fontSize: 12)),
-          ),
-        ],
+                        builder: (context) => const EditProgLangScreen()));
+              },
+            ),
+            const SizedBox(height: 24),
+            _buildSectionHeader("Preferences"),
+            SwitchListTile(
+              title: const Text("Push Notifications"),
+              subtitle: const Text("Get mission reminders"),
+              value: _notificationsEnabled,
+              activeTrackColor: AppTheme.primaryColor,
+              onChanged: (val) {
+                //=> setState(() => _notificationsEnabled = val)
+      
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return const AlertDialog(
+                        title: Text("Coming Soon"),
+                        content: Text(
+                            "This feature is not yet available. It will be released in a future update."),
+                      );
+                    });
+              },
+            ),
+            SwitchListTile(
+              title: const Text("Dark Mode"),
+              value: isDark,
+              activeTrackColor: AppTheme.primaryColor,
+              onChanged: (val) => themeManager.toggleTheme(val),
+            ),
+            ListTile(
+              title: const Text("Missions Difficulty"),
+              subtitle: Text(authService.progress.difficultySelected),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _showDifficultyPicker,
+            ),
+            const SizedBox(height: 24),
+            _buildSectionHeader("Support"),
+            _buildSettingTile(
+              icon: Icons.help_outline,
+              title: "Help Center",
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const HelpCenterScreen()));
+              },
+            ),
+            _buildSettingTile(
+              icon: Icons.privacy_tip_outlined,
+              title: "Privacy Policy",
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const PrivacyPolicyScreen()));
+              },
+            ),
+            _buildSectionHeader("Feedback"),
+            _buildSettingTile(
+              icon: Icons.feedback_outlined,
+              title: "Share your feedback with us !",
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const FeedbackBox()));
+              },
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () async {
+                await authService.logout();
+                if (context.mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (context) => const LoginScreen()),
+                      (route) => false);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.withValues(alpha: 0.8)),
+              child: const Text("LOGOUT"),
+            ),
+            const SizedBox(height: 20),
+            const Center(
+              child: Text("Version 2.0.0",
+                  style: TextStyle(color: Colors.grey, fontSize: 12)),
+            ),
+          ],
+        ),
       ),
     );
   }

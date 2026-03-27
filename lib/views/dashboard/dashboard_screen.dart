@@ -45,46 +45,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final List<Widget> screens = [
       const DashboardHome(),
       PartyHomeScreen(
-        username: username,
+        username: username.split(' ').first,
       ),
       const BadgesScreen(),
       const SettingsScreen(),
     ];
 
-    return Scaffold(
-      body: screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        backgroundColor: Colors.amberAccent,
-        onTap: (value) {
-          setState(() {
-            _currentIndex = value;
-          });
-        },
-        selectedItemColor: AppTheme.primaryColor,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.dashboard,
-              ),
-              label: "Home"),
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.sports_esports,
-              ),
-              label: "Party"),
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.emoji_events,
-              ),
-              label: "Badges"),
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.settings,
-              ),
-              label: "Settings"),
-        ],
+    return SafeArea(
+      child: Scaffold(
+        body: screens[_currentIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          backgroundColor: Colors.amberAccent,
+          onTap: (value) {
+            setState(() {
+              _currentIndex = value;
+            });
+          },
+          selectedItemColor: AppTheme.primaryColor,
+          unselectedItemColor: Colors.grey,
+          items: const [
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.dashboard,
+                ),
+                label: "Home"),
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.sports_esports,
+                ),
+                label: "Party"),
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.emoji_events,
+                ),
+                label: "Badges"),
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.settings,
+                ),
+                label: "Settings"),
+          ],
+        ),
       ),
     );
   }
@@ -273,17 +275,17 @@ class DashboardHomeState extends State<DashboardHome> {
     NetworkImage dataBaseImage = NetworkImage(
         'https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/$userImage/view?project=697295e70021593c3438&mode=admin');
 
-    return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: () async {
-          try {
-            await authService.getUserInfo();
-          } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("No Internet connection !")));
-          }
-        },
-        child: SafeArea(
+    return SafeArea(
+      child: Scaffold(
+        body: RefreshIndicator(
+          onRefresh: () async {
+            try {
+              await authService.getUserInfo();
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("No Internet connection !")));
+            }
+          },
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
@@ -301,7 +303,7 @@ class DashboardHomeState extends State<DashboardHome> {
                               Text("Welcome back,",
                                   style:
                                       Theme.of(context).textTheme.bodyMedium),
-                              Text(user.username,
+                              Text(user.username.split(' ').first,
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineMedium),

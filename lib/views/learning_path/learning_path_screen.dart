@@ -39,28 +39,30 @@ class _LearningPathScreenState extends State<LearningPathScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.learningPath.language} Learning Path'),
-        backgroundColor: AppTheme.primaryColor,
-        elevation: 0,
-        bottom: TabBar(
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('${widget.learningPath.language} Learning Path'),
+          backgroundColor: AppTheme.primaryColor,
+          elevation: 0,
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: Colors.white,
+            tabs: const [
+              Tab(text: 'Overview'),
+              Tab(text: 'Milestones'),
+              Tab(text: 'Concepts'),
+            ],
+          ),
+        ),
+        body: TabBarView(
           controller: _tabController,
-          indicatorColor: Colors.white,
-          tabs: const [
-            Tab(text: 'Overview'),
-            Tab(text: 'Milestones'),
-            Tab(text: 'Concepts'),
+          children: [
+            _buildOverviewTab(),
+            _buildMilestonesTab(),
+            _buildConceptsTab(),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildOverviewTab(),
-          _buildMilestonesTab(),
-          _buildConceptsTab(),
-        ],
       ),
     );
   }
