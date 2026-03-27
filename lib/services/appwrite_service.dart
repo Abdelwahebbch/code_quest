@@ -255,7 +255,6 @@ class AppwriteService extends ChangeNotifier {
       final row = await database.getRow(
           databaseId: dbID, tableId: "user_profiles", rowId: user.$id);
       int x = await getRank();
-
       isFirstLogin = row.data["isFirstLogin"] ?? true;
       notifyListeners();
       progress = UserInfo(
@@ -619,6 +618,24 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
+  Future<String> checkExistingParty() async {
+    print('aa4');
+    var row = await database.listRows(
+      databaseId: dbID,
+      tableId: "party",
+      queries: [
+        Query.equal("hostId", user?.$id),
+      ],
+    );
+
+    if (!row.rows.isEmpty) {
+      print("aaaaa");
+      return row.rows[0].$id;
+    }
+    print("aaaa1");
+    return "";
+  }
+
   Future<void> createParty(Party party) async {
     try {
       this.party = party;
@@ -797,7 +814,6 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> startParty(String rowId) async {
     try {
-      party.isStarted = true;
       await database.updateRow(
         databaseId: dbID,
         tableId: "party",
@@ -809,17 +825,23 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<void> quiteLobby() async {
+  Future<void> quiteLobby(String? row) async {
     try {
-      if (party.hostId.contains(user!.$id)) {
-        await database.deleteRow(
-            databaseId: dbID, tableId: "party", rowId: party.partyId);
-        deleteAllMembers();
+      if (row == null) {
+        if (party.hostId.contains(user!.$id)) {
+          await database.deleteRow(
+              databaseId: dbID, tableId: "party", rowId: party.partyId);
+          deleteAllMembers();
+        } else {
+          await database.deleteRow(
+              databaseId: dbID, tableId: "party_member", rowId: user!.$id);
+        }
       } else {
+        await database.deleteRow(
+            databaseId: dbID, tableId: "party", rowId: row);
         await database.deleteRow(
             databaseId: dbID, tableId: "party_member", rowId: user!.$id);
       }
-
       //notifyListeners();
     } catch (e) {
       print("Erreur quite lobby $e");
@@ -852,11 +874,10 @@ class AppwriteService extends ChangeNotifier {
   }
 
   Future<void> submitAnswer(PartyMember partyMember) async {
-    try {
+    try { 
       this.partyMember.score = partyMember.score;
       this.partyMember.correctAnswers = partyMember.correctAnswers;
       this.partyMember.totalAnswers = partyMember.totalAnswers;
-
       await database.updateRow(
         databaseId: dbID,
         tableId: "party_member",
@@ -909,8 +930,22 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
+  Future<void> kickMember(String userId) async {
+    try {
+      await database.deleteRow(
+            databaseId: dbID, tableId: "party_member", rowId: userId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   void addMember(PartyMember partyMember) {
     party.members.add(partyMember);
+    notifyListeners();
+  }
+
+  void changeIsStartedLocaly(){
+    party.isStarted = true;
     notifyListeners();
   }
 
@@ -974,4 +1009,79 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> GotToExisteParty(String partyIdDb) async {
+    try {
+      final partyRow = await database.getRow(
+          databaseId: dbID, tableId: "party", rowId: partyIdDb);
+      final membersResult = await database.listRows(
+        databaseId: dbID,
+        tableId: "party_member",
+        queries: [
+          Query.equal("partyId", partyIdDb),
+        ],
+      );
+      final List<PartyMember> members = membersResult.rows
+          .map((m) => PartyMember(
+              userId: m.data["userId"],
+              username: m.data["username"],
+              imageId: m.data["imageId"],
+              joinedAt: DateTime.parse(m.data["joinedAt"]),
+              score: m.data["score"],
+              correctAnswers: m.data["correctAnswers"],
+              totalAnswers: m.data["totalAnswers"],
+              isReady: m.data["isReady"],
+              isSubmit: m.data["isSubmit"]))
+          .toList();
+      partyMember = PartyMember(
+          userId: user!.$id,
+          username: user!.name,
+          imageId: progress.imageId,
+          joinedAt: DateTime.now(),
+          score: 0,
+          correctAnswers: 0,
+          totalAnswers: 0,
+          isReady: false,
+          isSubmit: false);
+      final m = await database.getRow(
+          databaseId: dbID, tableId: "party_member", rowId: user!.$id);
+      partyMember = PartyMember(
+          userId: m.data["userId"],
+          username: m.data["username"],
+          imageId: m.data["imageId"],
+          joinedAt: DateTime.parse(m.data["joinedAt"]),
+          score: m.data["score"],
+          correctAnswers: m.data["correctAnswers"],
+          totalAnswers: m.data["totalAnswers"],
+          isReady: m.data["isReady"],
+          isSubmit: m.data["isSubmit"]);
+      party = Party(
+        partyId: partyRow.$id,
+        partyCode: partyRow.data["partyCode"],
+        partyName: partyRow.data["partyName"],
+        hostId: partyRow.data["hostId"],
+        hostName: partyRow.data["hostName"],
+        members: members,
+        maxMembers: partyRow.data["maxMembers"],
+        difficulty: partyRow.data["difficulty"],
+        gameMode: partyRow.data["gameMode"],
+        totalRounds: partyRow.data["totalRounds"],
+        isStarted: partyRow.data["isStarted"],
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> checkExistingPartyMember() async {
+    try {
+      final m = await database.getRow(
+          databaseId: dbID, tableId: "party_member", rowId: user!.$id);
+      await database.deleteRow(databaseId: dbID, tableId: "party_member", rowId: user!.$id);
+    } catch (e) {
+      null;
+    }
+  }
+
+  
 }
