@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/onboarding_model.dart';
 import '../dashboard/dashboard_screen.dart';
+import 'questions.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -13,135 +14,34 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _SmartOnboardingScreenState extends State<OnboardingScreen> {
-  final List<OnboardingQuestion> _questions = [
-    // --- GATEKEEPER ---
-    OnboardingQuestion(
-      id: 'persona',
-      question: "How would you describe your profile?",
-      options: [
-        OnboardingOption(
-            id: 'student',
-            label: "Student (Exams/Coursework)",
-            nextQuestionId: 'level'),
-        OnboardingOption(
-            id: 'dev_pro',
-            label: "Developer (Mastering a language)",
-            nextQuestionId: 'lang_goal'),
-        OnboardingOption(
-            id: 'curious',
-            label: "Beginner (Discovering concepts)",
-            nextQuestionId: 'curiosity_path'),
-      ],
-    ),
-
-    // --- PATH: STUDENT ---
-    OnboardingQuestion(
-      id: 'level',
-      question: "What is your current level?",
-      options: [
-        OnboardingOption(
-            id: 'lycee', label: "High School", nextQuestionId: 'exam_deadline'),
-        OnboardingOption(
-            id: 'licence',
-            label: "Bachelor's / Undergrad",
-            nextQuestionId: 'exam_deadline'),
-        OnboardingOption(
-            id: 'master',
-            label: "Master's / Engineering",
-            nextQuestionId: 'exam_deadline'),
-      ],
-    ),
-    OnboardingQuestion(
-      id: 'exam_deadline',
-      question: "When is your next major exam?",
-      options: [
-        OnboardingOption(
-            id: 'urgent', label: "Less than 2 weeks", nextQuestionId: 'rythme'),
-        OnboardingOption(
-            id: 'chill', label: "Select range", nextQuestionId: 'rythme'),
-        OnboardingOption(
-            id: 'none', label: "Just reviewing", nextQuestionId: 'rythme'),
-      ],
-    ),
-
-    // --- PATH: LANGUAGE MASTER ---
-    OnboardingQuestion(
-      id: 'lang_goal',
-      question: "Which language do you want to master?",
-      options: [
-        OnboardingOption(
-            id: 'py', label: "Python (Data/AI)", nextQuestionId: 'current_exp'),
-        OnboardingOption(
-            id: 'dart',
-            label: "Dart (Flutter/Mobile)",
-            nextQuestionId: 'current_exp'),
-        OnboardingOption(
-            id: 'java',
-            label: "Java (Enterprise/Backend)",
-            nextQuestionId: 'current_exp'),
-        OnboardingOption(
-            id: 'js', label: "JavaScript (Web)", nextQuestionId: 'current_exp'),
-      ],
-    ),
-    OnboardingQuestion(
-      id: 'current_exp',
-      question: "What is your experience with this language?",
-      options: [
-        OnboardingOption(
-            id: 'none',
-            label: "Zero (Starting from scratch)",
-            nextQuestionId: 'rythme'),
-        OnboardingOption(
-            id: 'inter',
-            label: "Intermediate (I know the syntax)",
-            nextQuestionId: 'rythme'),
-        OnboardingOption(
-            id: 'expert',
-            label: "Advanced (I want to optimize)",
-            nextQuestionId: 'rythme'),
-      ],
-    ),
-
-    // --- PATH: BEGINNER CONCEPTS ---
-    OnboardingQuestion(
-      id: 'curiosity_path',
-      question: "What interests you the most?",
-      options: [
-        OnboardingOption(
-            id: 'logic',
-            label: "Pure Logic (Algorithms)",
-            nextQuestionId: 'rythme'),
-        OnboardingOption(
-            id: 'visual',
-            label: "Visuals (Building an App)",
-            nextQuestionId: 'rythme'),
-        OnboardingOption(
-            id: 'ai', label: "AI (How it thinks)", nextQuestionId: 'rythme'),
-      ],
-    ),
-
-    // --- FINAL: COMMITMENT (Universal) ---
-    OnboardingQuestion(
-      id: 'rythme',
-      question: "How much time can you commit per day?",
-      options: [
-        OnboardingOption(id: 'casual', label: "☕ 10 min (Zen Mode)"),
-        OnboardingOption(id: 'serious', label: "⚡ 30 min (Focus Mode)"),
-        OnboardingOption(id: 'intense', label: "🔥 1h+ (Hardcore Mode)"),
-      ],
-    ),
-  ];
-
   late String _currentQuesId;
   final List<String> _history = [];
   final Map<String, String> _answers = {};
+  DateTime? startDate;
+  DateTime? endDate;
+  int questionsLen = 1;
   @override
   void initState() {
     super.initState();
-    _currentQuesId = _questions.first.id;
+    _currentQuesId = questions.first.id;
   }
 
   void _handleOptionSelect(OnboardingOption option) async {
+    switch (option.id) {
+      case "hs_student":
+        questionsLen = 6;
+        break;
+      case "uni_student":
+        questionsLen = 6;
+        break;
+      case "professional":
+        questionsLen = 4;
+        break;
+      case "explorer":
+        questionsLen = 4;
+        break;
+      default:
+    }
     if (option.label.contains("Select range")) {
       final DateTimeRange? selectedRange = await showDateRangePicker(
         context: context,
@@ -152,16 +52,13 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
         return;
       }
 
-      final DateTime startDate = selectedRange.start;
-      final DateTime endDate = selectedRange.end;
-      //TODO : save to DB
-      print("Start Date: $startDate");
-      print("End Date: $endDate");
+      startDate = selectedRange.start;
+      endDate = selectedRange.end;
     }
 
     setState(() {
       _history.add(_currentQuesId);
-      _answers.addEntries({MapEntry(_currentQuestion.id, option.label)});
+      _answers.addEntries({MapEntry(_currentQuestion.question, option.label)});
 
       if (option.nextQuestionId != null) {
         _currentQuesId = option.nextQuestionId!;
@@ -172,7 +69,7 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   }
 
   OnboardingQuestion get _currentQuestion =>
-      _questions.firstWhere((q) => q.id == _currentQuesId);
+      questions.firstWhere((q) => q.id == _currentQuesId);
 
   void _goBack() {
     if (_history.isNotEmpty) {
@@ -192,19 +89,27 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _saveUserChoices() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     try {
+      _answers.addEntries({
+        MapEntry("exam_start",
+            startDate != null ? startDate!.toIso8601String() : "undefined")
+      });
+      _answers.addEntries({
+        MapEntry("exam_end",
+            endDate != null ? endDate!.toIso8601String() : "undefined")
+      });
       authService.completeOnboarding(_answers);
       if (mounted) {
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => const DashboardScreen()));
       }
     } catch (e) {
-      debugPrint("Errir when saving choices");
+      debugPrint("Error when saving choices");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final progress = _history.length / (_questions.length - 1);
+    final progress = _history.length / questionsLen;
     return SafeArea(
       child: Scaffold(
         body: SafeArea(
@@ -240,9 +145,10 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
                   children: [
                     Text(
                       _currentQuestion.question,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     const SizedBox(
                       height: 30,
@@ -252,7 +158,8 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: _currentQuestion.options.length,
                         itemBuilder: (context, idx) {
-                          return _buildOptionCard(_currentQuestion.options[idx]);
+                          return _buildOptionCard(
+                              _currentQuestion.options[idx]);
                         })
                   ],
                 )
@@ -278,16 +185,19 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
             borderRadius: BorderRadius.circular(15),
             border: Border.all(color: Colors.white10),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                option.label,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-              const Icon(Icons.chevron_right, color: AppTheme.primaryColor),
-            ],
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  option.label,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                const Icon(Icons.chevron_right, color: AppTheme.primaryColor),
+              ],
+            ),
           ),
         ),
       ),

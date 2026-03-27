@@ -211,7 +211,7 @@ class AppwriteService extends ChangeNotifier {
           databaseId: dbID,
           tableId: "user_goals",
           rowId: user!.$id,
-          data: data);
+          data: {"username": user!.name, "prompt": data.toString()});
       updateIsFirstLogin();
       await AppwritecloudfunctionsService().createCustomMissions();
     } catch (e) {
