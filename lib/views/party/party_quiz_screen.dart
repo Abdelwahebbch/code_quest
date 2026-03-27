@@ -36,6 +36,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
     _party = authService.party;
     roundStartTime = DateTime.now();
     partyMember = authService.partyMember;
+    _questions = widget.questions;
     _startTimer();
   }
 
@@ -105,7 +106,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _questions = widget.questions;
+    
     final currentQuestion = _questions[(_currentRound - 1) % _questions.length];
     final authService = Provider.of<AppwriteService>(context, listen: false);
     return PopScope(
@@ -135,7 +136,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
                               size: 25,
                             ),
                             onPressed: () async {
-                              await authService.quiteLobby();
+                              await authService.quiteLobby(null);
                               Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
