@@ -8,7 +8,7 @@ import 'party_lobby_screen.dart';
 
 class PartyCreateScreen extends StatefulWidget {
   final String username;
-   const PartyCreateScreen({super.key, required this.username});
+  const PartyCreateScreen({super.key, required this.username});
 
   @override
   State<PartyCreateScreen> createState() => _PartyCreateScreenState();
@@ -21,6 +21,7 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
   String _gameMode = 'quiz';
   int _totalRounds = 5;
   bool isPublic = false;
+  bool isStarting = false;
   @override
   void initState() {
     super.initState();
@@ -35,6 +36,48 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
 
   Future<void> _createParty() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
+    final mainMember = PartyMember(
+      userId: authService.user!.$id,
+      username: authService.user!.name,
+      imageId: authService.progress.imageId,
+      joinedAt: DateTime.now(),
+      score: 0,
+      correctAnswers: 0,
+      totalAnswers: 0,
+      isReady: false,
+    );
+
+    String partyID = ID.unique();
+    String partyCode = authService.user!.$id.toString().substring(1, 4) +
+        partyID.toString().substring(17, 20);
+    final party = Party(
+        partyId: partyID,
+        partyCode: partyCode,
+        partyName: _partyNameController.text,
+        hostId: authService.user!.$id,
+        hostName: authService.user!.name,
+        maxMembers: _maxMembers,
+        difficulty: _difficulty,
+        gameMode: _gameMode,
+        totalRounds: _totalRounds,
+        members: [mainMember],
+        isStarted: false,
+        isPublic: isPublic);
+    await authService.createParty(party);
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PartyLobbyScreen(),
+      ),
+    );
+    setState(() {
+      isStarting = false;
+    });
+  }
+
+  Future<void> _checkParty() async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
     if (_partyNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a party name')),
@@ -42,43 +85,74 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
       return;
     }
     try {
-      final mainMember = PartyMember(
-        userId: authService.user!.$id,
-        username: authService.user!.name,
-        imageId: authService.progress.imageId,
-        joinedAt: DateTime.now(),
-        score: 0,
-        correctAnswers: 0,
-        totalAnswers: 0,
-        isReady: false,
-      );
-
-      String partyID = ID.unique();
-      String partyCode = authService.user!.$id.toString().substring(1, 4) +
-          partyID.toString().substring(17, 20);
-      final party = Party(
-          partyId: partyID,
-          partyCode: partyCode,
-          partyName: _partyNameController.text,
-          hostId: authService.user!.$id,
-          hostName: authService.user!.name,
-          maxMembers: _maxMembers,
-          difficulty: _difficulty,
-          gameMode: _gameMode,
-          totalRounds: _totalRounds,
-          members: [mainMember],
-          isStarted: false,
-          isPublic: isPublic);
-      await authService.createParty(party);
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const PartyLobbyScreen(),
-        ),
-      );
+      setState(() {
+        isStarting = true;
+      });
+      String partyIdDb = await authService.checkExistingParty();
+      if (partyIdDb.isEmpty) {
+        await authService.checkExistingPartyMember();
+        _createParty();
+      } else {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return Center(
+              child: Material(
+                borderRadius: BorderRadius.circular(15),
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  width: 300,
+                  decoration: BoxDecoration(
+                    color: AppTheme.backgroundColor,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("You're already hosting a party!",
+                          style: TextStyle(fontSize: 18)),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              await authService.GotToExisteParty(partyIdDb);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PartyLobbyScreen(),
+                                ),
+                              );
+                              setState(() {
+                                isStarting = false;
+                              });
+                            },
+                            child: Text("Go to Party"),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              await authService.quiteLobby(partyIdDb);
+                              await _createParty();
+                            },
+                            child: Text("Create New"),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }
     } catch (e) {
-      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Ooops error :(")),
       );
@@ -257,21 +331,29 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _createParty,
+                  onPressed: !isStarting ? _checkParty : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Create Party',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: isStarting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.grey,
+                          ))
+                      : const Text(
+                          'Create Party',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ],
