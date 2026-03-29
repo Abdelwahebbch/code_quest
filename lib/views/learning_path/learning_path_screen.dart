@@ -64,6 +64,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
           bottom: TabBar(
             controller: _tabController,
             indicatorColor: Colors.white,
+            labelColor: const Color.fromARGB(255, 189, 175, 175),
             tabs: const [
               Tab(text: 'Overview'),
               Tab(text: 'Milestones'),
