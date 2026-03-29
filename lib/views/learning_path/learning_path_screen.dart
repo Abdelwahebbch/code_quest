@@ -20,6 +20,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
   late TabController _tabController;
   late AnimationController _progressAnimationController; // ADD
   late Animation<double> _progressAnimation;
+  // not used
   int selectedTab = 0;
 
   @override
@@ -118,7 +119,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
                           SizedBox(
                             width: 150,
                             height: 150,
-                            child: CircularProgressIndicator(
+                            child: CircularProgressIndicator( year2023: false,
                               value: _progressAnimation.value,
                               strokeWidth: 8,
                               backgroundColor:
