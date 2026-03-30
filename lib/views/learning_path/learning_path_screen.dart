@@ -58,7 +58,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('${widget.learningPath.language} Learning Path'),
+          title: Text('${widget.learningPath.topic} Learning Path'),
           backgroundColor: AppTheme.primaryColor,
           elevation: 0,
           bottom: TabBar(
@@ -120,7 +120,8 @@ class _LearningPathScreenState extends State<LearningPathScreen>
                           SizedBox(
                             width: 150,
                             height: 150,
-                            child: CircularProgressIndicator( year2023: false,
+                            child: CircularProgressIndicator(
+                              year2023: false,
                               value: _progressAnimation.value,
                               strokeWidth: 8,
                               backgroundColor:
@@ -649,11 +650,11 @@ class _LearningPathScreenState extends State<LearningPathScreen>
     );
   }
 
+// TODO: thabbet fi el condition  c.completionPercentage != 0 &&
   Widget _buildNextStepCard() {
     final nextConcept = widget.learningPath.concepts.firstWhere(
       (c) =>
           !c.isCompleted &&
-          c.completionPercentage == 0 &&
           (c.prerequisites.isEmpty ||
               c.prerequisites.every((id) => widget.learningPath.concepts
                   .firstWhere((concept) => concept.id == id)

@@ -131,8 +131,7 @@ class _AITutorChatState extends State<AITutorChat> {
 
   void _sendMessage() async { 
     final authservice = Provider.of<AppwriteService>(context, listen: false);
-    final ai =
-        Provider.of<AppwritecloudfunctionsService>(context, listen: false);
+
     if (_messageController.text.isEmpty) return;
     Message m = Message(
         userInfo: authservice.progress,
@@ -144,7 +143,7 @@ class _AITutorChatState extends State<AITutorChat> {
     });
     _messageController.clear();
       _scrollToBottom();
-    final data = await ai.sendMessage(m);
+    final data = await AppwritecloudfunctionsService.sendMessage(m);
     setState(() {
       _messages.add(Message(role: "bot", message: data["response"]));
     });

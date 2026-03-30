@@ -217,8 +217,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   Future<void> _checkAnswer() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
-    final ai =
-        Provider.of<AppwritecloudfunctionsService>(context, listen: false);
+   
     bool isCorrect = false;
     double rate = 0.0;
     switch (widget.mission.type) {
@@ -254,7 +253,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             ));
           },
         );
-        final List<dynamic> check = await ai.checkAnwser(
+        final List<dynamic> check = await AppwritecloudfunctionsService.checkAnwser(
             authService.progress, widget.mission, _codeController.text.trim());
         Navigator.pop(context);
         isCorrect = check[0];

@@ -16,7 +16,7 @@ class OnboardingScreen extends StatefulWidget {
 class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   late String _currentQuesId;
   final List<String> _history = [];
-  final Map<String, String> _answers = {};
+  final Map<String, String?> _answers = {};
   DateTime? startDate;
   DateTime? endDate;
   int questionsLen = 1;
@@ -29,14 +29,12 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   void _handleOptionSelect(OnboardingOption option) async {
     switch (option.id) {
       case "hs_student":
-        questionsLen = 6;
+        questionsLen = 5;
         break;
       case "uni_student":
-        questionsLen = 6;
+        questionsLen = 5;
         break;
-      case "professional":
-        questionsLen = 4;
-        break;
+    
       case "explorer":
         questionsLen = 4;
         break;
@@ -58,7 +56,7 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
 
     setState(() {
       _history.add(_currentQuesId);
-      _answers.addEntries({MapEntry(_currentQuestion.question, option.label)});
+      _answers.addEntries({MapEntry(_currentQuestion.id, option.label)});
 
       if (option.nextQuestionId != null) {
         _currentQuesId = option.nextQuestionId!;
