@@ -4,7 +4,9 @@ import 'package:appwrite/enums.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:pfe_test/models/learning_path_model.dart';
 import 'package:pfe_test/models/party_model.dart';
+import 'package:pfe_test/models/resolve_user_profile.dart';
 import 'package:pfe_test/models/user_info_model.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import '../models/mission_model.dart';
@@ -17,6 +19,7 @@ class AppwriteService extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  late LearningPath path;
   late Account account;
   late TablesDB database;
   late Storage storage;
@@ -203,17 +206,19 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-//TODO : nzidou les dates mte3 les exams haka3lech Map<String, --> dynamic <---- >
-  ///to get user info
-  void completeOnboarding(Map<String, dynamic> data) async {
+  void completeOnboarding(Map<String, String?> data) async {
     try {
-      await database.createRow(
-          databaseId: dbID,
-          tableId: "user_goals",
-          rowId: user!.$id,
-          data: {"username": user!.name, "prompt": data.toString()});
+      // await database.createRow(
+      //     databaseId: dbID,
+      //     tableId: "user_goals",
+      //     rowId: user!.$id,
+      //     data: {"username": user!.name, "prompt": data.toString()});
       updateIsFirstLogin();
-      await AppwritecloudfunctionsService().createCustomMissions();
+      ResolvedProfile profile =
+          ProfileResolver.resolve(userId: user!.$id, answers: data);
+
+      await AppwritecloudfunctionsService.createLearningPath(
+          profile, user!.$id);
     } catch (e) {
       rethrow;
     }
@@ -257,6 +262,18 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
+  Future<LearningPath> getLearningPath() async {
+    try {
+      final row = await database.getRow(
+          databaseId: dbID, tableId: "learnig_paths", rowId: user!.$id);
+
+      return LearningPath.fromJson(row);
+    } catch (e) {
+      debugPrint("Error fetching learning path : $e");
+      rethrow;
+    }
+  }
+
   Future<void> getUserInfo() async {
     try {
       models.User user = await account.get();
@@ -285,6 +302,7 @@ class AppwriteService extends ChangeNotifier {
         totalFailures: row.data["totalFailures"] ?? 0,
         totalAIQuestions: row.data["totalAIQuestions"] ?? 0,
       );
+      path = await getLearningPath();
 
       notifyListeners();
     } catch (e) {
@@ -636,7 +654,7 @@ class AppwriteService extends ChangeNotifier {
       ],
     );
 
-    if (!row.rows.isEmpty) {
+    if (row.rows.isNotEmpty) {
       print("aaaaa");
       return row.rows[0].$id;
     }
@@ -1083,7 +1101,7 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> checkExistingPartyMember() async {
     try {
-      final m = await database.getRow(
+      await database.getRow(
           databaseId: dbID, tableId: "party_member", rowId: user!.$id);
       await database.deleteRow(
           databaseId: dbID, tableId: "party_member", rowId: user!.$id);
