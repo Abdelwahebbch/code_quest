@@ -20,6 +20,7 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   DateTime? startDate;
   DateTime? endDate;
   int questionsLen = 1;
+  bool _isLoading = false;
   @override
   void initState() {
     super.initState();
@@ -97,7 +98,11 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
         MapEntry("exam_end",
             endDate != null ? endDate!.toIso8601String() : "undefined")
       });
-      authService.completeOnboarding(_answers);
+      setState(() {
+        _isLoading=true;
+      });
+      await authService.completeOnboarding(_answers);
+      await authService.getUserInfo();
       if (mounted) {
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => const DashboardScreen()));
@@ -110,6 +115,17 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final progress = _history.length / questionsLen;
+    if (_isLoading) {
+      return const SafeArea(
+          child: Center(
+              child: SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ))));
+    }
     return SafeArea(
       child: Scaffold(
         body: SafeArea(

@@ -205,7 +205,7 @@ class AppwriteService extends ChangeNotifier {
 
 //TODO : nzidou les dates mte3 les exams haka3lech Map<String, --> dynamic <---- >
   ///to get user info
-  void completeOnboarding(Map<String, dynamic> data) async {
+  Future<void> completeOnboarding(Map<String, dynamic> data) async {
     try {
       await database.createRow(
           databaseId: dbID,
@@ -213,7 +213,34 @@ class AppwriteService extends ChangeNotifier {
           rowId: user!.$id,
           data: {"username": user!.name, "prompt": data.toString()});
       updateIsFirstLogin();
-      await AppwritecloudfunctionsService().createCustomMissions();
+      var rows = await database
+          .listRows(databaseId: dbID, tableId: "mock_mission", queries: [
+        Query.equal("user_category",
+            data["What best describes your current journey?"].toString()),
+      ]);
+      for (var row in rows.rows) {
+        await database.createRow(
+            databaseId: dbID,
+            tableId: "missions",
+            rowId: ID.unique(),
+            data: {
+              "user_id": user!.$id,
+              "title": row.data["title"],
+              "type": row.data["type"],
+              "difficulty": row.data["difficulty"],
+              "initialCode": row.data["initialCode"],
+              "solution": row.data["solution"],
+              "options": row.data["options"],
+              "correctOrder": row.data["correctOrder"],
+              "points": row.data["points"],
+              "isCompleted": false,
+              "description": row.data["description"],
+              "nbFailed": 0,
+              "aiPointsUsed": 0,
+              "conversation": [],
+              "rate": 0,
+            });
+      }
     } catch (e) {
       rethrow;
     }
@@ -221,13 +248,33 @@ class AppwriteService extends ChangeNotifier {
 
   Future<List<Mission>> getMissions() async {
     try {
-      final response = await database
-          .listRows(databaseId: dbID, tableId: "missions", queries: [
-        !isFirstLogin
-            ? Query.equal("user_id", user!.$id)
-            : Query.equal("user_id", "mock_miss"),
-      ]);
+      late models.RowList response;
+      String date = DateTime.now().toUtc().toIso8601String().split('T').first;
+      print(date);
 
+      response = await database
+          .listRows(databaseId: dbID, tableId: "missions", queries: [
+        Query.equal("user_id", user!.$id),
+        Query.createdAfter("${date}T00:00:00Z"),
+        Query.createdBefore("${date}T23:59:59Z")
+      ]);
+ 
+      if (response.rows.isEmpty) {
+        date = DateTime.now()
+            .toUtc()
+            .subtract(const Duration(days: 1))
+            .toIso8601String()
+            .split('T')
+            .first;
+        print(date);
+        response = await database
+            .listRows(databaseId: dbID, tableId: "missions", queries: [
+          Query.equal("user_id", user!.$id),
+          Query.createdAfter("${date}T00:00:00Z"),
+          Query.createdBefore("${date}T23:59:59Z")
+        ]);
+      }
+      print(response.rows);
       return response.rows.map((doc) {
         final MissionType type = MissionType.values
             .firstWhere((e) => e.name.contains(doc.data["type"]));
@@ -953,7 +1000,7 @@ class AppwriteService extends ChangeNotifier {
   }
 
   void changeIsStartedLocaly() {
-    party.isStarted = true;
+    party.isStarted = !party.isStarted;
     notifyListeners();
   }
 
@@ -1089,6 +1136,19 @@ class AppwriteService extends ChangeNotifier {
           databaseId: dbID, tableId: "party_member", rowId: user!.$id);
     } catch (e) {
       null;
+    }
+  }
+
+  Future<void> partyPlayAgain() async {
+    try {
+      await database.updateRow(
+        databaseId: dbID,
+        tableId: "party",
+        rowId: party.partyId,
+        data: {'isStarted': false},
+      );
+    } catch (e) {
+      rethrow;
     }
   }
 }
