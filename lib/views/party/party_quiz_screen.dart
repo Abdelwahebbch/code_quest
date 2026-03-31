@@ -112,13 +112,22 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
     return SafeArea(
       child: PopScope(
           canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('To leave the quiz, tap the back arrow in the top-left corner.'),
+            ),
+          );
+        },
           child: Scaffold(
             body: Column(
               children: [
                 Stack(
                   children: [
                     Container(
-                        height: 110,
+                        height: 70,
                         width: double.infinity,
                         color: AppTheme.primaryColor),
                     Positioned(
