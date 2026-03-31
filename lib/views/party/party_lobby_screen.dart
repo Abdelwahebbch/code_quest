@@ -42,17 +42,39 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
     ]);
     subscription?.stream.listen((response) async {
       if (response.payload["isStarted"] == true && _party.isStarted == false) {
-        authService.changeIsStartedLocaly();
         List<Map<String, dynamic>> quizs = await getQuiz();
+        if (quizs.isNotEmpty) {
+          if (!mounted) return;
+          authService.changeIsStartedLocaly();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PartyQuizScreen(questions: quizs),
+            ),
+          );
+        }
+        else{
+          await  authService.partyPlayAgain();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Oops! Something went wrong while preparing your quiz. Please try again or later.'),
+            ),
+          );
+        }
+      }
+      if (response.payload["isStarted"] == false && _party.isStarted == true) {
+        authService.changeIsStartedLocaly();
         if (!mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PartyQuizScreen(questions: quizs),
+            builder: (context) => const PartyLobbyScreen(),
           ),
         );
       }
     });
+
     subscription1 = authService.realtime.subscribe(
         [Channel.tablesdb("6972adad002e2ba515f2").table("party_member").row()],
         queries: [Query.equal("partyId", _party.partyId)]);
@@ -77,11 +99,13 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
       if (response.events.first.contains("delete")) {
         bool isHost = _party.hostId == authService.user!.$id;
         if (!mounted) return;
-        
+
         setState(() {
           authService.deleteMemberFromLocal(row["userId"]);
         });
-        if (((!isHost && row["userId"] == _party.hostId) || row["userId"]== authService.user!.$id )&& mounted ) {
+        if (((!isHost && row["userId"] == _party.hostId) ||
+                row["userId"] == authService.user!.$id) &&
+            mounted) {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const DashboardScreen()),
@@ -89,7 +113,9 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
           );
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: row["userId"] == _party.hostId ?const Text('The owner just close the party'):const Text('The owner just kicked you from the party') ,
+              content: row["userId"] == _party.hostId
+                  ? const Text('The owner just close the party')
+                  : const Text('The owner just kicked you from the party'),
             ),
           );
         }
@@ -159,381 +185,414 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     return SafeArea(
-      child: Scaffold(
-        body: Column(
-          children: [
-            Stack(
-              children: [
-                Container(
-                    height: 110,
-                    width: double.infinity,
-                    color: AppTheme.primaryColor),
-                Positioned(
-                    bottom: 2,
-                    left: 0,
-                    right: 0,
-                    child: Row(
-                      children: [
-                        const SizedBox(
-                          width: 3,
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                            size: 25,
-                          ),
-                          onPressed: () async {
-                            await authService.quiteLobby(null);
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const DashboardScreen()),
-                              (route) => false,
-                            );
-                            subscription?.close();
-                            subscription1?.close();
-                          },
-                        ),
-      
-                        const SizedBox(width: 20),
-      
-                        Text(
-                          "Party Lobby",
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                        ),
-      
-                        const Spacer(),
-      
-                        // Party code
-                        Text(
-                          "${_party.partyCode.substring(0, 3)} ${_party.partyCode.substring(3, 6)}",
-                          style:
-                              Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                        ),
-      
-                        IconButton(
-                          icon:
-                              const Icon(Icons.content_copy, color: Colors.white),
-                          onPressed: _copyPartyCode,
-                          tooltip: 'Copy party code',
-                        ),
-                      ],
-                    ))
-              ],
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'To leave the party, tap the back arrow in the top-left corner.'),
             ),
-      
-            Container(
-              color: AppTheme.primaryColor.withValues(alpha: 0.1),
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          );
+        },
+        child: Scaffold(
+          body: Column(
+            children: [
+              Stack(
                 children: [
-                  Text(
-                    _party.partyName,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        'Host: ${_party.hostName}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Chip(
-                        label: Text('${_party.memberCount}/${_party.maxMembers}'),
-                        backgroundColor:
-                            AppTheme.primaryColor.withValues(alpha: 0.2),
-                      ),
-                      const SizedBox(width: 8),
-                      Chip(
-                        label: Text(_party.difficulty),
-                        backgroundColor:
-                            AppTheme.accentColor.withValues(alpha: 0.2),
-                      ),
-                      const SizedBox(width: 8),
-                      Chip(
-                        label: Text(_party.gameMode),
-                        backgroundColor: Colors.green.withValues(alpha: 0.2),
-                      ),
-                    ],
-                  ),
+                  Container(
+                      height: 70,
+                      width: double.infinity,
+                      color: AppTheme.primaryColor),
+                  Positioned(
+                      bottom: 2,
+                      left: 0,
+                      right: 0,
+                      child: Row(
+                        children: [
+                          const SizedBox(
+                            width: 3,
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                              size: 25,
+                            ),
+                            onPressed: () async {
+                              subscription?.close();
+                              subscription1?.close();
+                              await authService.quiteLobby(null);
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const DashboardScreen()),
+                                (route) => false,
+                              );
+                            },
+                          ),
+
+                          const SizedBox(width: 20),
+
+                          Text(
+                            "Party Lobby",
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                          ),
+
+                          const Spacer(),
+
+                          // Party code
+                          Text(
+                            "${_party.partyCode.substring(0, 3)} ${_party.partyCode.substring(3, 6)}",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                          ),
+
+                          IconButton(
+                            icon: const Icon(Icons.content_copy,
+                                color: Colors.white),
+                            onPressed: _copyPartyCode,
+                            tooltip: 'Copy party code',
+                          ),
+                        ],
+                      ))
                 ],
               ),
-            ),
-      
-            // Members List
-            Expanded(
-              child: Padding(
+
+              Container(
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Players (${_party.memberCount}/${_party.maxMembers})',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 15),
-                    Expanded(
-                      child: _party.members.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.people_outline,
-                                    size: 48,
-                                    color: Colors.grey[400],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'Waiting for players...',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Colors.grey[600],
-                                        ),
-                                  ),
-                                ],
+                      _party.partyName,
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                            )
-                          : ListView.builder(
-                              itemCount: _party.members.length,
-                              itemBuilder: (context, index) {
-                                final member = _party.members[index];
-                                final isHost = member.userId == _party.hostId;
-      
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.cardColor,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: member.isReady
-                                          ? Colors.green.withValues(alpha: 0.3)
-                                          : Colors.grey.withValues(alpha: 0.2),
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor: AppTheme.primaryColor
-                                              .withValues(alpha: 0.2),
-                                          child: Text(
-                                            member.username[0].toUpperCase(),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    member.username,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleSmall
-                                                        ?.copyWith(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                  ),
-                                                  if (isHost)
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              left: 8),
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                          color: AppTheme
-                                                              .primaryColor
-                                                              .withValues(
-                                                                  alpha: 0.2),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(4),
-                                                        ),
-                                                        padding: const EdgeInsets
-                                                            .symmetric(
-                                                          horizontal: 6,
-                                                          vertical: 2,
-                                                        ),
-                                                        child: Text(
-                                                          'HOST',
-                                                          style: Theme.of(context)
-                                                              .textTheme
-                                                              .labelSmall
-                                                              ?.copyWith(
-                                                                color: AppTheme
-                                                                    .primaryColor,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                'Joined ${member.joinedAt.difference(DateTime.now()).inMinutes.abs()} min ago',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodySmall
-                                                    ?.copyWith(
-                                                      color: Colors.grey[600],
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: member.isReady
-                                                ? Colors.green
-                                                    .withValues(alpha: .2)
-                                                : Colors.orange
-                                                    .withValues(alpha: .2),
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 6,
-                                          ),
-                                          child: Text(
-                                            member.isReady
-                                                ? '✓ Ready'
-                                                : 'Waiting',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: member.isReady
-                                                  ? Colors.green
-                                                  : Colors.orange,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                        if (authService.user?.$id == _party.hostId && member.userId != _party.hostId)
-                                          Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.red.shade900,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: IconButton(
-                                                  onPressed: () async {
-                                                    await authService.kickMember(member.userId);
-                                                  },
-                                                  icon: const Icon(
-                                                    Icons.logout,
-                                                    size: 20,
-                                                  ))),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.person,
+                          size: 16,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Host: ${_party.hostName}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Chip(
+                          label: Text(
+                              '${_party.memberCount}/${_party.maxMembers}'),
+                          backgroundColor:
+                              AppTheme.primaryColor.withValues(alpha: 0.2),
+                        ),
+                        const SizedBox(width: 8),
+                        Chip(
+                          label: Text(_party.difficulty),
+                          backgroundColor:
+                              AppTheme.accentColor.withValues(alpha: 0.2),
+                        ),
+                        const SizedBox(width: 8),
+                        Chip(
+                          label: Text(_party.gameMode),
+                          backgroundColor: Colors.green.withValues(alpha: 0.2),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ),
-      
-            // Bottom Actions
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: _toggleReady,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            _isReady ? Colors.green : AppTheme.primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+
+              // Members List
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Players (${_party.memberCount}/${_party.maxMembers})',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
-                      child: Text(
-                        _isReady ? '✓ Ready' : 'Mark as Ready',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                      const SizedBox(height: 15),
+                      Expanded(
+                        child: _party.members.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.people_outline,
+                                      size: 48,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Waiting for players...',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: Colors.grey[600],
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: _party.members.length,
+                                itemBuilder: (context, index) {
+                                  final member = _party.members[index];
+                                  final isHost = member.userId == _party.hostId;
+
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.cardColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: member.isReady
+                                            ? Colors.green
+                                                .withValues(alpha: 0.3)
+                                            : Colors.grey
+                                                .withValues(alpha: 0.2),
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Row(
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: AppTheme
+                                                .primaryColor
+                                                .withValues(alpha: 0.2),
+                                            child: Text(
+                                              member.username[0].toUpperCase(),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      member.username,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .titleSmall
+                                                          ?.copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                    ),
+                                                    if (isHost)
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(left: 8),
+                                                        child: Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: AppTheme
+                                                                .primaryColor
+                                                                .withValues(
+                                                                    alpha: 0.2),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4),
+                                                          ),
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                            horizontal: 6,
+                                                            vertical: 2,
+                                                          ),
+                                                          child: Text(
+                                                            'HOST',
+                                                            style: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .labelSmall
+                                                                ?.copyWith(
+                                                                  color: AppTheme
+                                                                      .primaryColor,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  'Joined ${member.joinedAt.difference(DateTime.now()).inMinutes.abs()} min ago',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.copyWith(
+                                                        color: Colors.grey[600],
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: member.isReady
+                                                  ? Colors.green
+                                                      .withValues(alpha: .2)
+                                                  : Colors.orange
+                                                      .withValues(alpha: .2),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            child: Text(
+                                              member.isReady
+                                                  ? '✓ Ready'
+                                                  : 'Waiting',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                color: member.isReady
+                                                    ? Colors.green
+                                                    : Colors.orange,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 10,
+                                          ),
+                                          if (authService.user?.$id ==
+                                                  _party.hostId &&
+                                              member.userId != _party.hostId)
+                                            Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red.shade900,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: IconButton(
+                                                    onPressed: () async {
+                                                      await authService
+                                                          .kickMember(
+                                                              member.userId);
+                                                    },
+                                                    icon: const Icon(
+                                                      Icons.logout,
+                                                      size: 20,
+                                                    ))),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  if (_party.hostId ==
-                      authService.user!.$id) // Check if current user is host
+                ),
+              ),
+
+              // Bottom Actions
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
                     SizedBox(
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: _party.canStart ? _startGame : null,
+                        onPressed: _toggleReady,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.accentColor,
+                          backgroundColor:
+                              _isReady ? Colors.green : AppTheme.primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: isStarting
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(Colors.white),
-                                ))
-                            : const Text(
-                                'Start Game',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
+                        child: Text(
+                          _isReady ? '✓ Ready' : 'Mark as Ready',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
-                ],
+                    const SizedBox(height: 10),
+                    if (_party.hostId ==
+                        authService.user!.$id) // Check if current user is host
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: _party.canStart ? _startGame : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.accentColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: isStarting
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ))
+                              : const Text(
+                                  'Start Game',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

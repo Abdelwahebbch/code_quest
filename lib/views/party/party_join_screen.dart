@@ -31,24 +31,26 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     try {
       final docs = await authService.database.listRows(
-        databaseId: "6972adad002e2ba515f2",
-        tableId: "party",
-      );
+          databaseId: "6972adad002e2ba515f2",
+          tableId: "party",
+          queries: [
+            Query.equal("isPublic", true),
+            Query.notEqual("hostId", authService.user?.$id)
+          ]);
       if (!mounted) return;
       setState(() {
         _availableParties.clear();
         _availableParties.addAll(
-          docs.rows.where((doc) => doc.data["isPublic"] == true).map((doc) =>
-              Party(
-                  partyId: doc.$id,
-                  partyCode: doc.data["partyCode"],
-                  partyName: doc.data["partyName"],
-                  hostId: doc.data["hostId"],
-                  hostName: doc.data["hostName"],
-                  maxMembers: doc.data["maxMembers"] ?? 4,
-                  difficulty: doc.data["difficulty"] ?? "Normal",
-                  gameMode: doc.data["gameMode"] ?? "Classic",
-                  nbMembers: doc.data["memberCount"])),
+          docs.rows.map((doc) => Party(
+              partyId: doc.$id,
+              partyCode: doc.data["partyCode"],
+              partyName: doc.data["partyName"],
+              hostId: doc.data["hostId"],
+              hostName: doc.data["hostName"],
+              maxMembers: doc.data["maxMembers"] ?? 4,
+              difficulty: doc.data["difficulty"] ?? "Normal",
+              gameMode: doc.data["gameMode"] ?? "Classic",
+              nbMembers: doc.data["memberCount"])),
         );
       });
     } catch (e) {
@@ -60,7 +62,10 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
     final authService = Provider.of<AppwriteService>(context, listen: false);
 
     _subscription = authService.realtime.subscribe([
-      Channel.tablesdb('6972adad002e2ba515f2').table('party').row(),
+      Channel.tablesdb('6972adad002e2ba515f2').table('party').row()
+    ], queries: [
+      Query.equal("isPublic", true),
+      Query.notEqual("hostId", authService.user?.$id)
     ]);
 
     _subscription!.stream.listen((res) {
@@ -78,25 +83,22 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
           gameMode: msg["gameMode"],
           nbMembers: msg["memberCount"]);
 
-      if (msg["isPublic"] && res.events.any((e) => e.contains("create"))) {
-         if (!mounted) return;
+      if (res.events.any((e) => e.contains("create"))) {
+        if (!mounted) return;
         setState(() => _availableParties.add(partyFromPayload()));
       } else if (res.events.any((e) => e.contains("update"))) {
-         if (!mounted) return;
+        if (!mounted) return;
         setState(() {
           final index =
               _availableParties.indexWhere((p) => p.partyId == msg["\$id"]);
           if (index != -1 && msg["isPublic"]) {
             _availableParties[index] = partyFromPayload();
-          } else if (index != -1 && !msg["isPublic"]) {
-            _availableParties.removeAt(index);
-          } else if (msg["isPublic"]) {
+          } else {
             _availableParties.add(partyFromPayload());
           }
         });
-      } else if (msg["isPublic"] &&
-          res.events.any((e) => e.contains("delete"))) {
-             if (!mounted) return;
+      } else if (res.events.any((e) => e.contains("delete"))) {
+        if (!mounted) return;
         setState(() {
           _availableParties.removeWhere((p) => p.partyId == msg["\$id"]);
         });
@@ -113,7 +115,7 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
     }
 
     final authService = Provider.of<AppwriteService>(context, listen: false);
-     if (!mounted) return;
+    if (!mounted) return;
     setState(() => _isLoading = true);
 
     try {
@@ -160,7 +162,7 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
     }
 
     final authService = Provider.of<AppwriteService>(context, listen: false);
-     if (!mounted) return;
+    if (!mounted) return;
     setState(() => _isLoading = true);
 
     try {
@@ -267,7 +269,8 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
                         : const Text(
                             'Join Party',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, color: Colors.white),
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
                           ),
                   ),
                 ),

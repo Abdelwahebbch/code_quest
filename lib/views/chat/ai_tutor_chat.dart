@@ -21,9 +21,12 @@ class AITutorChat extends StatefulWidget {
 }
 
 class _AITutorChatState extends State<AITutorChat> {
-  final List<Message> _messages = [Message(role: "bot", message: "What can I help with?")];
+  final List<Message> _messages = [
+    Message(role: "bot", message: "What can I help with?")
+  ];
   final TextEditingController _messageController = TextEditingController();
   int missionIndex = 0;
+  bool isSending = false;
 
   @override
   void initState() {
@@ -35,9 +38,12 @@ class _AITutorChatState extends State<AITutorChat> {
         missionIndex = i;
       }
     }
-    for(int i=0;i<authservice.progress.missions[missionIndex].conversation.length;i++){
-      var message=jsonDecode(authservice.progress.missions[missionIndex].conversation[i]);
-      Message msg=Message(role: message['role'], message: message['message']);
+    for (int i = 0;
+        i < authservice.progress.missions[missionIndex].conversation.length;
+        i++) {
+      var message = jsonDecode(
+          authservice.progress.missions[missionIndex].conversation[i]);
+      Message msg = Message(role: message['role'], message: message['message']);
       _messages.add(msg);
     }
     _scrollToBottom();
@@ -90,12 +96,11 @@ class _AITutorChatState extends State<AITutorChat> {
                           isAI ? const Radius.circular(15) : Radius.zero,
                     ),
                   ),
-                  child: MarkdownBody(selectable: true, data:msg.message ),
-              
+                  child: MarkdownBody(selectable: true, data: msg.message),
                 ),
               );
             },
-          ),  
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(16.0),
@@ -118,9 +123,27 @@ class _AITutorChatState extends State<AITutorChat> {
               ),
               const SizedBox(width: 8),
               FloatingActionButton.small(
-                onPressed: _sendMessage,
-                backgroundColor: AppTheme.primaryColor,
-                child: const Icon(Icons.send, color: Colors.white),
+                onPressed: () {
+                  if (!isSending && _messageController.text.isNotEmpty) {
+                    setState(() {
+                      isSending=true;
+                    });
+                    _sendMessage();
+                  }
+                  else{
+                    null;
+                  }
+                },
+                backgroundColor: _messageController.text.isNotEmpty ? AppTheme.primaryColor  : Colors.grey,
+                child: !isSending 
+                    ? (const Icon(Icons.send, color: Colors.white))
+                    : const Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                    ),
               ),
             ],
           ),
@@ -129,7 +152,7 @@ class _AITutorChatState extends State<AITutorChat> {
     );
   }
 
-  void _sendMessage() async { 
+  void _sendMessage() async {
     final authservice = Provider.of<AppwriteService>(context, listen: false);
 
     if (_messageController.text.isEmpty) return;
@@ -145,11 +168,15 @@ class _AITutorChatState extends State<AITutorChat> {
       _scrollToBottom();
     final data = await AppwritecloudfunctionsService.sendMessage(m);
     setState(() {
+      _messages.removeLast();
       _messages.add(Message(role: "bot", message: data["response"]));
+      isSending=false;
     });
     await authservice.updateMissionAiPoints(widget.mission.id);
-    await authservice.addToConversation( "user",missionIndex,widget.mission.id, m.message);
-    await authservice.addToConversation( "bot", missionIndex,widget.mission.id,data["response"]?.toString() ?? "");
+    await authservice.addToConversation(
+        "user", missionIndex, widget.mission.id, m.message);
+    await authservice.addToConversation("bot", missionIndex, widget.mission.id,
+        data["response"]?.toString() ?? "");
   }
 
   void _scrollToBottom() {
