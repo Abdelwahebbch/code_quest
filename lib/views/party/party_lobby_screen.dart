@@ -153,13 +153,11 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   }
 
   void _startGame() async {
-    final ai =
-        Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     if (_party.canStart) {
       setState(() {
         isStarting = true;
       });
-      await ai.requestForPartyQuizzes(_party, _party.difficulty);
+      await AppwritecloudfunctionsService.requestForPartyQuizzes(_party, _party.difficulty);
       final authService = Provider.of<AppwriteService>(context, listen: false);
       setState(() {
         isStarting = false;

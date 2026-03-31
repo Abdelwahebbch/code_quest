@@ -16,9 +16,12 @@ class LearningPathScreen extends StatefulWidget {
 }
 
 class _LearningPathScreenState extends State<LearningPathScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late TabController _tabController;
-   int selectedTab = 0;
+  late AnimationController _progressAnimationController; // ADD
+  late Animation<double> _progressAnimation;
+  // not used
+  int selectedTab = 0;
 
   @override
   void initState() {
@@ -29,11 +32,24 @@ class _LearningPathScreenState extends State<LearningPathScreen>
         selectedTab = _tabController.index;
       });
     });
+    _progressAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    _progressAnimation = Tween<double>(
+      begin: 0,
+      end: widget.learningPath.overallProgressPercentage / 100,
+    ).animate(CurvedAnimation(
+      parent: _progressAnimationController,
+      curve: Curves.easeOut,
+    ));
+    _progressAnimationController.forward();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _progressAnimationController.dispose();
     super.dispose();
   }
 
@@ -42,12 +58,13 @@ class _LearningPathScreenState extends State<LearningPathScreen>
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('${widget.learningPath.language} Learning Path'),
+          title: Text('${widget.learningPath.topic} Learning Path'),
           backgroundColor: AppTheme.primaryColor,
           elevation: 0,
           bottom: TabBar(
             controller: _tabController,
             indicatorColor: Colors.white,
+            labelColor: const Color.fromARGB(255, 189, 175, 175),
             tabs: const [
               Tab(text: 'Overview'),
               Tab(text: 'Milestones'),
@@ -92,43 +109,50 @@ class _LearningPathScreenState extends State<LearningPathScreen>
                       ),
                 ),
                 const SizedBox(height: 20),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: 150,
-                      height: 150,
-                      child: CircularProgressIndicator(
-                        value: widget.learningPath.overallProgressPercentage /
-                            100,
-                        strokeWidth: 8,
-                        backgroundColor: Colors.white.withValues(alpha: 0.3),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                      ),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${widget.learningPath.overallProgressPercentage}%',
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                AnimatedBuilder(
+                    animation: _progressAnimation,
+                    builder: (context, child) {
+                      final displayPercentage =
+                          (_progressAnimation.value * 100).toInt();
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            height: 150,
+                            child: CircularProgressIndicator(
+                              year2023: false,
+                              value: _progressAnimation.value,
+                              strokeWidth: 8,
+                              backgroundColor:
+                                  Colors.white.withValues(alpha: 0.3),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Complete',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '$displayPercentage%',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Text(
+                                'Complete',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                        ],
+                      );
+                    }),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -334,10 +358,9 @@ class _LearningPathScreenState extends State<LearningPathScreen>
   Widget _buildConceptTile(Concept concept) {
     final isLocked = concept.completionPercentage == 0 &&
         concept.prerequisites.isNotEmpty &&
-        !concept.prerequisites.every((id) =>
-            widget.learningPath.concepts
-                .firstWhere((c) => c.id == id)
-                .isCompleted);
+        !concept.prerequisites.every((id) => widget.learningPath.concepts
+            .firstWhere((c) => c.id == id)
+            .isCompleted);
 
     return GestureDetector(
       onTap: !isLocked
@@ -360,8 +383,8 @@ class _LearningPathScreenState extends State<LearningPathScreen>
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isLocked
-                ? Colors.grey.withValues(alpha:0.3)
-                : AppTheme.primaryColor.withValues(alpha:0.3),
+                ? Colors.grey.withValues(alpha: 0.3)
+                : AppTheme.primaryColor.withValues(alpha: 0.3),
             width: 1.5,
           ),
         ),
@@ -390,7 +413,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
                         concept.category,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.grey[600],
-                        ),
+                            ),
                       ),
                     ],
                   ),
@@ -398,8 +421,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
                 if (isLocked)
                   const Icon(Icons.lock, size: 20, color: Colors.grey)
                 else if (concept.isCompleted)
-                  const Icon(Icons.check_circle,
-                      size: 20, color: Colors.green)
+                  const Icon(Icons.check_circle, size: 20, color: Colors.green)
                 else
                   Text(
                     '${concept.completionPercentage}%',
@@ -416,11 +438,9 @@ class _LearningPathScreenState extends State<LearningPathScreen>
               child: LinearProgressIndicator(
                 value: concept.completionPercentage / 100,
                 minHeight: 6,
-                backgroundColor: Colors.grey.withValues(alpha:0.2),
+                backgroundColor: Colors.grey.withValues(alpha: 0.2),
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  concept.isCompleted
-                      ? Colors.green
-                      : AppTheme.primaryColor,
+                  concept.isCompleted ? Colors.green : AppTheme.primaryColor,
                 ),
               ),
             ),
@@ -443,10 +463,10 @@ class _LearningPathScreenState extends State<LearningPathScreen>
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: milestone.isCompleted
-              ? Colors.green.withValues(alpha:0.3)
+              ? Colors.green.withValues(alpha: 0.3)
               : isLocked
-                  ? Colors.grey.withValues(alpha:0.2)
-                  : AppTheme.primaryColor.withValues(alpha:0.3),
+                  ? Colors.grey.withValues(alpha: 0.2)
+                  : AppTheme.primaryColor.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -456,10 +476,10 @@ class _LearningPathScreenState extends State<LearningPathScreen>
           Container(
             decoration: BoxDecoration(
               color: milestone.isCompleted
-                  ? Colors.green.withValues(alpha:0.1)
+                  ? Colors.green.withValues(alpha: 0.1)
                   : isLocked
-                      ? Colors.grey.withValues(alpha:0.1)
-                      : AppTheme.primaryColor.withValues(alpha:0.1),
+                      ? Colors.grey.withValues(alpha: 0.1)
+                      : AppTheme.primaryColor.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -482,12 +502,10 @@ class _LearningPathScreenState extends State<LearningPathScreen>
                         children: [
                           Text(
                             'Milestone ${index + 1}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey[600],
+                                    ),
                           ),
                           Text(
                             milestone.title,
@@ -509,7 +527,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
                     else
                       Container(
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withValues(alpha:0.2),
+                          color: AppTheme.primaryColor.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         padding: const EdgeInsets.all(8),
@@ -563,7 +581,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
                   child: LinearProgressIndicator(
                     value: milestone.completionPercentage / 100,
                     minHeight: 8,
-                    backgroundColor: Colors.grey.withValues(alpha:0.2),
+                    backgroundColor: Colors.grey.withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       milestone.isCompleted
                           ? Colors.green
@@ -595,8 +613,9 @@ class _LearningPathScreenState extends State<LearningPathScreen>
                       .map((concept) => Container(
                             decoration: BoxDecoration(
                               color: concept.isCompleted
-                                  ? Colors.green.withValues(alpha:0.2)
-                                  : AppTheme.primaryColor.withValues(alpha:0.1),
+                                  ? Colors.green.withValues(alpha: 0.2)
+                                  : AppTheme.primaryColor
+                                      .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: const EdgeInsets.symmetric(
@@ -631,19 +650,17 @@ class _LearningPathScreenState extends State<LearningPathScreen>
     );
   }
 
+// TODO: thabbet fi el condition  c.completionPercentage != 0 &&
   Widget _buildNextStepCard() {
-    final nextConcept = widget.learningPath.concepts
-        .firstWhere(
-          (c) =>
-              !c.isCompleted &&
-              c.completionPercentage == 0 &&
-              (c.prerequisites.isEmpty ||
-                  c.prerequisites.every((id) =>
-                      widget.learningPath.concepts
-                          .firstWhere((concept) => concept.id == id)
-                          .isCompleted)),
-          orElse: () => widget.learningPath.concepts.first,
-        );
+    final nextConcept = widget.learningPath.concepts.firstWhere(
+      (c) =>
+          !c.isCompleted &&
+          (c.prerequisites.isEmpty ||
+              c.prerequisites.every((id) => widget.learningPath.concepts
+                  .firstWhere((concept) => concept.id == id)
+                  .isCompleted)),
+      orElse: () => widget.learningPath.concepts.first,
+    );
 
     return GestureDetector(
       onTap: () {
@@ -662,7 +679,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
           gradient: LinearGradient(
             colors: [
               AppTheme.primaryColor,
-              AppTheme.primaryColor.withValues(alpha:0.7),
+              AppTheme.primaryColor.withValues(alpha: 0.7),
             ],
           ),
           borderRadius: BorderRadius.circular(12),
@@ -735,7 +752,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
         Text(
           label,
           style: TextStyle(
-            color: color.withValues(alpha:0.9),
+            color: color.withValues(alpha: 0.9),
             fontSize: 12,
           ),
         ),

@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:appwrite/models.dart';
+
 class Concept {
   final String id;
   final String name;
@@ -5,7 +9,8 @@ class Concept {
   final String category; // e.g., "Variables", "Functions", "OOP"
   final int difficulty; // 1-5
   final int estimatedHours;
-  final List<String> prerequisites; // IDs of concepts that must be completed first
+  final List<String>
+      prerequisites; // IDs of concepts that must be completed first
   final List<String> relatedMissions; // Mission IDs related to this concept
   final String icon; // Emoji or icon name
   final bool isCompleted;
@@ -38,7 +43,8 @@ class Concept {
       difficulty: json['difficulty'] as int,
       estimatedHours: json['estimatedHours'] as int,
       prerequisites: List<String>.from(json['prerequisites'] as List? ?? []),
-      relatedMissions: List<String>.from(json['relatedMissions'] as List? ?? []),
+      relatedMissions:
+          List<String>.from(json['relatedMissions'] as List? ?? []),
       icon: json['icon'] as String,
       isCompleted: json['isCompleted'] as bool? ?? false,
       completionPercentage: json['completionPercentage'] as int? ?? 0,
@@ -136,7 +142,7 @@ class LearningPathMilestone {
 
 class LearningPath {
   final String userId;
-  final String language; // e.g., "Python", "JavaScript"
+  final String topic;
   final List<LearningPathMilestone> milestones;
   final List<Concept> concepts;
   final int totalConceptsCompleted;
@@ -148,7 +154,7 @@ class LearningPath {
 
   LearningPath({
     required this.userId,
-    required this.language,
+    required this.topic,
     required this.milestones,
     required this.concepts,
     required this.totalConceptsCompleted,
@@ -163,39 +169,50 @@ class LearningPath {
   int get remainingConcepts => totalConcepts - totalConceptsCompleted;
   int get completedPercentage =>
       totalConcepts > 0 ? (totalConceptsCompleted * 100 ~/ totalConcepts) : 0;
-  int get completedMilestones =>
-      milestones.where((m) => m.isCompleted).length;
-  int get unlockedMilestones =>
-      milestones.where((m) => m.isUnlocked).length;
+  int get completedMilestones => milestones.where((m) => m.isCompleted).length;
+  int get unlockedMilestones => milestones.where((m) => m.isUnlocked).length;
 
-  factory LearningPath.fromJson(Map<String, dynamic> json) {
+  factory LearningPath.fromJson(Row row) {
+    print(row.$id);
+    final rawMilestones = row.data['milestones'];
+    final rawConcepts = row.data['concepts'];
+
+    // 2. Check if it's a stringified JSON array and decode it, otherwise treat as List
+    final List<dynamic>? milestonesList = rawMilestones is String
+        ? jsonDecode(rawMilestones) as List<dynamic>?
+        : rawMilestones as List<dynamic>?;
+
+    final List<dynamic>? conceptsList = rawConcepts is String
+        ? jsonDecode(rawConcepts) as List<dynamic>?
+        : rawConcepts as List<dynamic>?;
     return LearningPath(
-      userId: json['userId'] as String,
-      language: json['language'] as String,
-      milestones: (json['milestones'] as List?)
-              ?.map((m) => LearningPathMilestone.fromJson(m as Map<String, dynamic>))
+      userId: row.$id,
+      topic: row.data['topic'] as String,
+      milestones: milestonesList
+              ?.map((m) =>
+                  LearningPathMilestone.fromJson(m as Map<String, dynamic>))
               .toList() ??
           [],
-      concepts: (json['concepts'] as List?)
+      concepts: conceptsList
               ?.map((c) => Concept.fromJson(c as Map<String, dynamic>))
               .toList() ??
           [],
-      totalConceptsCompleted: json['totalConceptsCompleted'] as int? ?? 0,
-      totalConcepts: json['totalConcepts'] as int? ?? 0,
+      totalConceptsCompleted: row.data['totalConceptsCompleted'] as int? ?? 0,
+      totalConcepts: row.data['totalConcepts'] as int? ?? 0,
       overallProgressPercentage:
-          json['overallProgressPercentage'] as int? ?? 0,
-      startedAt: DateTime.parse(json['startedAt'] as String),
-      completedAt: json['completedAt'] != null
-          ? DateTime.parse(json['completedAt'] as String)
+          row.data['overallProgressPercentage'] as int? ?? 0,
+      startedAt: DateTime.parse(row.data['startedAt'] as String),
+      completedAt: row.data['completedAt'] != null
+          ? DateTime.parse(row.data['completedAt'] as String)
           : null,
-      currentLevel: json['currentLevel'] as String? ?? 'Beginner',
+      currentLevel: row.data['currentLevel'] as String? ?? 'Beginner',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'userId': userId,
-      'language': language,
+      'topic': topic,
       'milestones': milestones.map((m) => m.toJson()).toList(),
       'concepts': concepts.map((c) => c.toJson()).toList(),
       'totalConceptsCompleted': totalConceptsCompleted,
@@ -209,198 +226,3 @@ class LearningPath {
 }
 
 // Sample data for demonstration
-class LearningPathSampleData {
-  static LearningPath getSamplePythonPath() {
-    final concepts = [
-      Concept(
-        id: 'var-001',
-        name: 'Variables & Data Types',
-        description: 'Learn about variables, strings, numbers, and basic data types',
-        category: 'Fundamentals',
-        difficulty: 1,
-        estimatedHours: 2,
-        prerequisites: [],
-        relatedMissions: ['mission-001', 'mission-002'],
-        icon: '📦',
-        isCompleted: true,
-        completionPercentage: 100,
-        startedAt: DateTime.now().subtract(const Duration(days: 30)),
-        completedAt: DateTime.now().subtract(const Duration(days: 25)),
-      ),
-      Concept(
-        id: 'cond-001',
-        name: 'Conditionals & Logic',
-        description: 'Master if/else statements and boolean logic',
-        category: 'Control Flow',
-        difficulty: 1,
-        estimatedHours: 3,
-        prerequisites: ['var-001'],
-        relatedMissions: ['mission-003', 'mission-004'],
-        icon: '🔀',
-        isCompleted: true,
-        completionPercentage: 100,
-        startedAt: DateTime.now().subtract(const Duration(days: 24)),
-        completedAt: DateTime.now().subtract(const Duration(days: 20)),
-      ),
-      Concept(
-        id: 'loop-001',
-        name: 'Loops & Iteration',
-        description: 'Understand for loops, while loops, and iteration patterns',
-        category: 'Control Flow',
-        difficulty: 2,
-        estimatedHours: 4,
-        prerequisites: ['cond-001'],
-        relatedMissions: ['mission-005', 'mission-006'],
-        icon: '🔁',
-        isCompleted: true,
-        completionPercentage: 100,
-        startedAt: DateTime.now().subtract(const Duration(days: 19)),
-        completedAt: DateTime.now().subtract(const Duration(days: 15)),
-      ),
-      Concept(
-        id: 'func-001',
-        name: 'Functions & Scope',
-        description: 'Create reusable functions and understand variable scope',
-        category: 'Functions',
-        difficulty: 2,
-        estimatedHours: 5,
-        prerequisites: ['loop-001'],
-        relatedMissions: ['mission-007', 'mission-008'],
-        icon: '⚙️',
-        isCompleted: true,
-        completionPercentage: 100,
-        startedAt: DateTime.now().subtract(const Duration(days: 14)),
-        completedAt: DateTime.now().subtract(const Duration(days: 10)),
-      ),
-      Concept(
-        id: 'list-001',
-        name: 'Lists & Collections',
-        description: 'Work with lists, tuples, and other collection types',
-        category: 'Data Structures',
-        difficulty: 2,
-        estimatedHours: 4,
-        prerequisites: ['func-001'],
-        relatedMissions: ['mission-009', 'mission-010'],
-        icon: '📋',
-        isCompleted: true,
-        completionPercentage: 100,
-        startedAt: DateTime.now().subtract(const Duration(days: 9)),
-        completedAt: DateTime.now().subtract(const Duration(days: 5)),
-      ),
-      Concept(
-        id: 'dict-001',
-        name: 'Dictionaries & Maps',
-        description: 'Master key-value data structures',
-        category: 'Data Structures',
-        difficulty: 2,
-        estimatedHours: 3,
-        prerequisites: ['list-001'],
-        relatedMissions: ['mission-011', 'mission-012'],
-        icon: '🗺️',
-        isCompleted: false,
-        completionPercentage: 60,
-        startedAt: DateTime.now().subtract(const Duration(days: 4)),
-      ),
-      Concept(
-        id: 'oop-001',
-        name: 'Object-Oriented Programming',
-        description: 'Learn classes, objects, inheritance, and polymorphism',
-        category: 'OOP',
-        difficulty: 3,
-        estimatedHours: 8,
-        prerequisites: ['dict-001', 'func-001'],
-        relatedMissions: ['mission-013', 'mission-014'],
-        icon: '🏗️',
-        isCompleted: false,
-        completionPercentage: 0,
-      ),
-      Concept(
-        id: 'err-001',
-        name: 'Error Handling',
-        description: 'Handle exceptions and write robust error-handling code',
-        category: 'Advanced',
-        difficulty: 3,
-        estimatedHours: 3,
-        prerequisites: ['oop-001'],
-        relatedMissions: ['mission-015', 'mission-016'],
-        icon: '⚠️',
-        isCompleted: false,
-        completionPercentage: 0,
-      ),
-      Concept(
-        id: 'file-001',
-        name: 'File I/O & Modules',
-        description: 'Read/write files and organize code with modules',
-        category: 'Advanced',
-        difficulty: 3,
-        estimatedHours: 4,
-        prerequisites: ['err-001'],
-        relatedMissions: ['mission-017', 'mission-018'],
-        icon: '📁',
-        isCompleted: false,
-        completionPercentage: 0,
-      ),
-    ];
-
-    final milestones = [
-      LearningPathMilestone(
-        id: 'milestone-001',
-        title: 'Python Basics',
-        description: 'Master the fundamentals of Python programming',
-        conceptIds: ['var-001', 'cond-001', 'loop-001'],
-        order: 1,
-        isUnlocked: true,
-        isCompleted: true,
-        completionPercentage: 100,
-        icon: '🎯',
-        completedAt: DateTime.now().subtract(const Duration(days: 15)),
-      ),
-      LearningPathMilestone(
-        id: 'milestone-002',
-        title: 'Functions & Data Structures',
-        description: 'Learn to write functions and work with collections',
-        conceptIds: ['func-001', 'list-001', 'dict-001'],
-        order: 2,
-        isUnlocked: true,
-        isCompleted: false,
-        completionPercentage: 70,
-        icon: '🔧',
-        unlockedAt: DateTime.now().subtract(const Duration(days: 14)),
-      ),
-      LearningPathMilestone(
-        id: 'milestone-003',
-        title: 'Object-Oriented Programming',
-        description: 'Master OOP concepts and design patterns',
-        conceptIds: ['oop-001', 'err-001'],
-        order: 3,
-        isUnlocked: false,
-        isCompleted: false,
-        completionPercentage: 0,
-        icon: '🏛️',
-      ),
-      LearningPathMilestone(
-        id: 'milestone-004',
-        title: 'Advanced Topics',
-        description: 'Explore file handling, modules, and more',
-        conceptIds: ['file-001'],
-        order: 4,
-        isUnlocked: false,
-        isCompleted: false,
-        completionPercentage: 0,
-        icon: '🚀',
-      ),
-    ];
-
-    return LearningPath(
-      userId: 'user-123',
-      language: 'Python',
-      milestones: milestones,
-      concepts: concepts,
-      totalConceptsCompleted: 5,
-      totalConcepts: 9,
-      overallProgressPercentage: 56,
-      startedAt: DateTime.now().subtract(const Duration(days: 30)),
-      currentLevel: 'Intermediate',
-    );
-  }
-}

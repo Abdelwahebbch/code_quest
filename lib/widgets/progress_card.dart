@@ -1,6 +1,9 @@
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:pfe_test/models/mock_data.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:provider/provider.dart';
 import '../models/user_info_model.dart';
-import '../models/learning_path_model.dart';
 import '../theme/app_theme.dart';
 import '../views/learning_path/learning_path_screen.dart';
 
@@ -13,7 +16,10 @@ class ProgressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        final learningPath = LearningPathSampleData.getSamplePythonPath();
+        final authservice =
+            Provider.of<AppwriteService>(context, listen: false);
+        final learningPath = authservice.path;
+        // LearningPathSampleData.getSamplePythonPath();
         Navigator.push(
           context,
           MaterialPageRoute(
