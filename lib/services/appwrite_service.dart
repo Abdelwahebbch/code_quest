@@ -223,7 +223,7 @@ class AppwriteService extends ChangeNotifier {
       var rows = await database
           .listRows(databaseId: dbID, tableId: "mock_mission", queries: [
         Query.equal("user_category",
-            data["What best describes your current journey?"].toString()),
+            data["journey"].toString()),
       ]);
       for (var row in rows.rows) {
         await database.createRow(
