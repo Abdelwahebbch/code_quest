@@ -16,7 +16,7 @@ class OnboardingScreen extends StatefulWidget {
 class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   late String _currentQuesId;
   final List<String> _history = [];
-  final Map<String, String?> _answers = {};
+  final Map<String, String> _answers = {};
   DateTime? startDate;
   DateTime? endDate;
   int questionsLen = 1;
@@ -106,7 +106,7 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
             MaterialPageRoute(builder: (context) => const DashboardScreen()));
       }
     } catch (e) {
-      debugPrint("Error when saving choices");
+      debugPrint("Error when saving choices $e");
     }
   }
 

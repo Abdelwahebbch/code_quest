@@ -173,6 +173,7 @@ class AppwriteService extends ChangeNotifier {
   /// Google SignIn
   Future<void> signInWithGoogle() async {
     try {
+      // account.deleteSession(sessionId: 'current');
       await account.createOAuth2Session(
         provider: OAuthProvider.google,
       );
@@ -206,7 +207,7 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  void completeOnboarding(Map<String, String?> data) async {
+  Future<void> completeOnboarding(Map<String, String> data) async {
     try {
       // await database.createRow(
       //     databaseId: dbID,
@@ -248,6 +249,7 @@ class AppwriteService extends ChangeNotifier {
             });
       }
     } catch (e) {
+      print("Error fi complete onboarding $e ");
       rethrow;
     }
   }
@@ -261,10 +263,10 @@ class AppwriteService extends ChangeNotifier {
       response = await database
           .listRows(databaseId: dbID, tableId: "missions", queries: [
         Query.equal("user_id", user!.$id),
-        Query.createdAfter("${date}T00:00:00Z"),
+        // Query.createdAfter("${date}T00:00:00Z"),
         Query.createdBefore("${date}T23:59:59Z")
       ]);
- 
+
       if (response.rows.isEmpty) {
         date = DateTime.now()
             .toUtc()
@@ -350,7 +352,15 @@ class AppwriteService extends ChangeNotifier {
         totalFailures: row.data["totalFailures"] ?? 0,
         totalAIQuestions: row.data["totalAIQuestions"] ?? 0,
       );
-      path = await getLearningPath();
+      try {
+        path = await getLearningPath();
+      } on AppwriteException catch (e) {
+        if (e.code == 404) {
+          print("Not Found mouch mochkol");
+        } else {
+          rethrow;
+        }
+      }
 
       notifyListeners();
     } catch (e) {

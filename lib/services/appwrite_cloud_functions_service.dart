@@ -40,7 +40,7 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
     try {
       final res = await http.post(
           Uri.parse('https://69c8037600042b81ce1b.fra.appwrite.run/'),
-          body: {
+          body: jsonEncode({
             "userId": userId,
             "profile": {
               "Topic": profile.language,
@@ -50,10 +50,10 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
               "focusArea": profile.focusArea,
               "commitment": profile.commitment,
             }
-          });
+          }));
       debugPrint(res.body);
     } catch (e) {
-      debugPrint("Error when create learning path");
+      debugPrint("Error when create learning path $e");
       rethrow;
     }
   }
