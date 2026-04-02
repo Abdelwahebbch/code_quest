@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/waiting/generating_path_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/onboarding_model.dart';
@@ -35,7 +36,7 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
       case "uni_student":
         questionsLen = 5;
         break;
-    
+
       case "explorer":
         questionsLen = 4;
         break;
@@ -86,7 +87,6 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _saveUserChoices() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
     try {
       _answers.addEntries({
         MapEntry("exam_start",
@@ -97,17 +97,34 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
             endDate != null ? endDate!.toIso8601String() : "undefined")
       });
       setState(() {
-        _isLoading=true;
+        _isLoading = true;
       });
-      await authService.completeOnboarding(_answers);
-      await authService.getUserInfo();
+
       if (mounted) {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen()));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => GeneratingPathScreen(
+                      generationFuture: _waiting()
+                     ,
+                      onComplete: (x) {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const DashboardScreen()));
+                      },
+                      onError: (Object error) {},
+                    )));
       }
     } catch (e) {
       debugPrint("Error when saving choices $e");
     }
+  }
+
+  Future<void> _waiting() async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    await authService.completeOnboarding(_answers);
+    await authService.getUserInfo();
   }
 
   @override
