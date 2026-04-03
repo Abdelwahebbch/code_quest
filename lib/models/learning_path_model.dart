@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:appwrite/models.dart';
+import 'package:pfe_test/models/mission_model.dart';
 
 class Concept {
   final String id;
@@ -104,7 +105,7 @@ class LearningPathMilestone {
   });
 
   factory LearningPathMilestone.fromJson(Map<String, dynamic> json) {
-    return LearningPathMilestone(
+    return LearningPathMilestone( 
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String,
@@ -145,6 +146,7 @@ class LearningPath {
   final String topic;
   final List<LearningPathMilestone> milestones;
   final List<Concept> concepts;
+  final List<Mission> missions;
   final int totalConceptsCompleted;
   final int totalConcepts;
   final int overallProgressPercentage;
@@ -157,6 +159,7 @@ class LearningPath {
     required this.topic,
     required this.milestones,
     required this.concepts,
+    required this.missions,
     required this.totalConceptsCompleted,
     required this.totalConcepts,
     required this.overallProgressPercentage,
@@ -176,6 +179,8 @@ class LearningPath {
     print(row.$id);
     final rawMilestones = row.data['milestones'];
     final rawConcepts = row.data['concepts'];
+    final rawMissions = row.data['missions'];
+    print("Aloo");
 
     // 2. Check if it's a stringified JSON array and decode it, otherwise treat as List
     final List<dynamic>? milestonesList = rawMilestones is String
@@ -185,6 +190,10 @@ class LearningPath {
     final List<dynamic>? conceptsList = rawConcepts is String
         ? jsonDecode(rawConcepts) as List<dynamic>?
         : rawConcepts as List<dynamic>?;
+
+    final List<dynamic>? missionsList = rawMissions is String
+        ? jsonDecode(rawMissions) as List<dynamic>?
+        : rawMissions as List<dynamic>?;
     return LearningPath(
       userId: row.$id,
       topic: row.data['topic'] as String,
@@ -196,6 +205,31 @@ class LearningPath {
       concepts: conceptsList
               ?.map((c) => Concept.fromJson(c as Map<String, dynamic>))
               .toList() ??
+          [],
+      missions: missionsList?.map((doc) {
+        
+            final MissionType type = MissionType.values
+                .firstWhere((e) => e.name.contains(doc["type"]));
+            switch (type) {
+              case MissionType.complete:
+                return Mission.jsonCompleteMission( doc);
+
+              case MissionType.debug:
+                return Mission.jsonDebugMission(doc);
+
+              case MissionType.multipleChoice:
+                return Mission.jsonMultipleChoice(doc);
+
+              case MissionType.ordering:
+                return Mission.jsonOrdering(doc);
+
+              case MissionType.singleChoice:
+                return Mission.jsonSingleChoice(doc);
+
+              case MissionType.test:
+                return Mission.jsonTestMission(doc);
+            }
+          }).toList() ??
           [],
       totalConceptsCompleted: row.data['totalConceptsCompleted'] as int? ?? 0,
       totalConcepts: row.data['totalConcepts'] as int? ?? 0,
