@@ -47,6 +47,9 @@ class _AITutorChatState extends State<AITutorChat> {
       _messages.add(msg);
     }
     _scrollToBottom();
+    _messageController.addListener(() {
+    setState(() {}); 
+  });
   }
 
   @override
@@ -163,6 +166,7 @@ class _AITutorChatState extends State<AITutorChat> {
         mission: widget.mission);
     setState(() {
       _messages.add(m);
+      _messages.add(Message(role: "bot", message: "ThinKing ..."));
     });
     _messageController.clear();
       _scrollToBottom();
