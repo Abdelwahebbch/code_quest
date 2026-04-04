@@ -4,8 +4,30 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/appwrite_service.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late int rank;
+  bool isReady = false;
+
+  Future<void> getRank() async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    rank = await authService.getRank();
+    setState(() {
+      isReady = true;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getRank();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +36,19 @@ class ProfileScreen extends StatelessWidget {
     final String userImage = authService.progress.imageId;
     NetworkImage dataBaseImage = NetworkImage(
         'https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/$userImage/view?project=697295e70021593c3438&mode=admin');
-
+    if (!isReady) {
+      return const SafeArea(
+          child: Scaffold(
+        body: Center(
+            child: SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ))),
+      ));
+    }
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -45,13 +79,18 @@ class ProfileScreen extends StatelessWidget {
                 backgroundColor: AppTheme.primaryColor,
                 backgroundImage: userImage.isEmpty ? null : dataBaseImage,
                 child: userImage.isEmpty
-                    ? const Icon(Icons.person, color: Colors.white)
+                    ? const Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 50,
+                      )
                     : null,
               ),
               const SizedBox(height: 16),
               Text(
                 user?.name ?? "Guest",
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               Text(
                 user?.email ?? "",
@@ -85,7 +124,7 @@ class ProfileScreen extends StatelessWidget {
       children: [
         _buildStatItem("Missions", "${authService.progress.nbMissions}"),
         _buildStatItem("Points", "${authService.progress.totalPoints}"),
-        _buildStatItem("Rank", "#${authService.progress.rank}"),
+        _buildStatItem("Rank", "#$rank"),
       ],
     );
   }
@@ -171,9 +210,9 @@ class ProfileScreen extends StatelessWidget {
         'unlocked': false
       },
     ];
-    List<Map<String, dynamic>> badges=[];
-    for(int i=0;i<allBadges.length;i++){
-      if(earnBadges.contains(allBadges[i]['name'])){
+    List<Map<String, dynamic>> badges = [];
+    for (int i = 0; i < allBadges.length; i++) {
+      if (earnBadges.contains(allBadges[i]['name'])) {
         badges.add(allBadges[i]);
       }
     }
@@ -213,23 +252,43 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildProgressList(context) {
     final authService = Provider.of<AppwriteService>(context, listen: false);
-    Map<String,dynamic> progress=authService.progress.badgesProgress;
+    Map<String, dynamic> progress = authService.progress.badgesProgress;
     int missionsCompletedToday = 0;
-      for (int i = 0; i < authService.progress.missions.length; i++) {
-        if (authService.progress.missions[i].isCompleted) {
-          missionsCompletedToday += 1;
-        }
+    for (int i = 0; i < authService.progress.missions.length; i++) {
+      if (authService.progress.missions[i].isCompleted) {
+        missionsCompletedToday += 1;
       }
-    double bugHunter =(progress['debug']/10)>=1 ? 1 : progress['debug']/10;
-    double codeNinja =((authService.progress.nbMissionCompletedWithoutHints/10)*2)>=1 ? 1 : (authService.progress.nbMissionCompletedWithoutHints/10)*2;
-    double TestMaster =((progress['test']/10)*2)>=1 ? 1 : (progress['test']/10)*2;
-    double FastLearner= missionsCompletedToday/3 >=1 ? 1 :missionsCompletedToday/3;
-    double Architect= progress['ordering']/10 >=1 ? 1 : progress['ordering']/10;
-    double CleanCoder=((progress['complete']/10>1 ? 1: progress['complete']/10)+(authService.progress.totalFailures/30>1 ? 1 : authService.progress.totalFailures/30))/2;
-    double TeamPlayer= ((progress['singleChoice']/10>1 ? 1 :progress['singleChoice']/10)+(progress['multipleChoice']/10>1 ? 1 :progress['multipleChoice']/10))/2;
-    double AIWhisperer= (authService.progress.totalAIQuestions/50)>1 ? 1 : (authService.progress.totalAIQuestions/50);
-    
-    //TODO : lazem dynamique 
+    }
+    double bugHunter =
+        (progress['debug'] / 10) >= 1 ? 1 : progress['debug'] / 10;
+    double codeNinja =
+        ((authService.progress.nbMissionCompletedWithoutHints / 10) * 2) >= 1
+            ? 1
+            : (authService.progress.nbMissionCompletedWithoutHints / 10) * 2;
+    double TestMaster =
+        ((progress['test'] / 10) * 2) >= 1 ? 1 : (progress['test'] / 10) * 2;
+    double FastLearner =
+        missionsCompletedToday / 3 >= 1 ? 1 : missionsCompletedToday / 3;
+    double Architect =
+        progress['ordering'] / 10 >= 1 ? 1 : progress['ordering'] / 10;
+    double CleanCoder =
+        ((progress['complete'] / 10 > 1 ? 1 : progress['complete'] / 10) +
+                (authService.progress.totalFailures / 30 > 1
+                    ? 1
+                    : authService.progress.totalFailures / 30)) /
+            2;
+    double TeamPlayer = ((progress['singleChoice'] / 10 > 1
+                ? 1
+                : progress['singleChoice'] / 10) +
+            (progress['multipleChoice'] / 10 > 1
+                ? 1
+                : progress['multipleChoice'] / 10)) /
+        2;
+    double AIWhisperer = (authService.progress.totalAIQuestions / 50) > 1
+        ? 1
+        : (authService.progress.totalAIQuestions / 50);
+
+    //TODO : lazem dynamique
     return Column(
       children: [
         _buildProgressItem("Bug Hunter", bugHunter),
