@@ -237,8 +237,8 @@ class AppwriteService extends ChangeNotifier {
               "difficulty": row.data["difficulty"],
               "initialCode": row.data["initialCode"],
               "solution": row.data["solution"],
-              "options": row.data["options"],
-              "correctOrder": row.data["correctOrder"],
+              "options": List<String>.from(row.data["options"]),
+              "correctOrder": List<String>.from(row.data["correctOrder"]),
               "points": row.data["points"],
               "isCompleted": false,
               "description": row.data["description"],
@@ -274,7 +274,7 @@ class AppwriteService extends ChangeNotifier {
             .toIso8601String()
             .split('T')
             .first;
-        print(date);
+        
         response = await database
             .listRows(databaseId: dbID, tableId: "missions", queries: [
           Query.equal("user_id", user!.$id),
@@ -282,8 +282,9 @@ class AppwriteService extends ChangeNotifier {
           Query.createdBefore("${date}T23:59:59Z")
         ]);
       }
-      print(response.rows);
+
       return response.rows.map((doc) {
+        
         final MissionType type = MissionType.values
             .firstWhere((e) => e.name.contains(doc.data["type"]));
         switch (type) {
@@ -540,6 +541,12 @@ class AppwriteService extends ChangeNotifier {
         rowId: id,
         data: {'isCompleted': true, "rate": rate},
       );
+      progress.nbMissions += 1;
+      await database.updateRow(
+          databaseId: dbID,
+          tableId: "user_profiles",
+          rowId: user!.$id,
+          data: {'nbMission': progress.nbMissions});
       int? missionNb;
       for (int i = 0; i < progress.missions.length; i++) {
         if (progress.missions[i].id == id) {
