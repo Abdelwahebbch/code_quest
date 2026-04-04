@@ -264,12 +264,14 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         isCorrect = _currentAnswer
             .toString()
             .contains(widget.mission.solution.toString());
+            rate=10.0-((widget.mission.aiPointsUsed*0.5)+(widget.mission.nbFailed*1));
         break;
       case MissionType.multipleChoice:
         if (_currentAnswer is List<String>) {
           final correctAnswers = widget.mission.solution?.split(',') ?? [];
           isCorrect = _currentAnswer.length == correctAnswers.length &&
               _currentAnswer.every((item) => correctAnswers.contains(item));
+              rate=10.0-((widget.mission.aiPointsUsed*0.5)+widget.mission.nbFailed*1);
         }
         break;
       case MissionType.ordering:
@@ -277,12 +279,14 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
           final correctOrder = widget.mission.correctOrder ?? [];
           isCorrect = _currentAnswer.length == correctOrder.length &&
               equals(_currentAnswer, correctOrder);
+              rate=10.0-((widget.mission.aiPointsUsed*0.5)+widget.mission.nbFailed*1);
         }
         break;
       case MissionType.test:
         isCorrect = _currentAnswer
             .toString()
             .contains(widget.mission.solution.toString());
+            rate=10.0-((widget.mission.aiPointsUsed*0.5)+widget.mission.nbFailed*1);
         break;
     }
 
