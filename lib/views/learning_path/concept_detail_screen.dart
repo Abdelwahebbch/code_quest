@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/models/learning_path_model.dart';
+import 'package:pfe_test/models/mission_model.dart';
 import 'package:pfe_test/theme/app_theme.dart';
+import 'package:pfe_test/views/mission/mission_detail_screen.dart';
 
 class ConceptDetailScreen extends StatefulWidget {
   final Concept concept;
@@ -61,7 +63,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                   gradient: LinearGradient(
                     colors: [
                       AppTheme.primaryColor,
-                      AppTheme.primaryColor.withOpacity(0.7),
+                      AppTheme.primaryColor.withValues(alpha: 0.7),
                     ],
                   ),
                 ),
@@ -76,10 +78,11 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                     const SizedBox(height: 16),
                     Text(
                       widget.concept.name,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -126,7 +129,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                   ],
                 ),
               ),
-      
+
               // Progress Section
               Padding(
                 padding: const EdgeInsets.all(20),
@@ -138,13 +141,14 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                       children: [
                         Text(
                           'Your Progress',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         Text(
                           '${widget.concept.completionPercentage}%',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primaryColor,
                             fontSize: 16,
@@ -158,7 +162,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                       child: LinearProgressIndicator(
                         value: widget.concept.completionPercentage / 100,
                         minHeight: 12,
-                        backgroundColor: Colors.grey.withOpacity(0.2),
+                        backgroundColor: Colors.grey.withValues(alpha:0.2),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           widget.concept.isCompleted
                               ? Colors.green
@@ -187,7 +191,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                   ],
                 ),
               ),
-      
+
               // Description
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -208,7 +212,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                   ],
                 ),
               ),
-      
+
               // Prerequisites
               if (prerequisiteConcepts.isNotEmpty)
                 Padding(
@@ -218,9 +222,10 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                     children: [
                       Text(
                         'Prerequisites',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: 12),
                       ...prerequisiteConcepts.map((concept) => Container(
@@ -230,8 +235,8 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: concept.isCompleted
-                                    ? Colors.green.withOpacity(0.3)
-                                    : Colors.grey.withOpacity(0.2),
+                                    ? Colors.green.withValues(alpha: .3)
+                                    : Colors.grey.withValues(alpha:0.2),
                               ),
                             ),
                             padding: const EdgeInsets.all(12),
@@ -244,7 +249,8 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         concept.name,
@@ -276,7 +282,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                     ],
                   ),
                 ),
-      
+
               // Related Missions
               if (widget.concept.relatedMissions.isNotEmpty)
                 Padding(
@@ -286,70 +292,84 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                     children: [
                       Text(
                         'Related Missions',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: 12),
-                      ...widget.concept.relatedMissions
-                          .map((missionId) => Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.primaryColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
+                      ...widget.concept.relatedMissions.map((missionId) {
+                        Mission m = widget.learningPath.missions.firstWhere(
+                          (element) => element.id.contains(missionId),
+                        );
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        MissionDetailScreen(mission: m)));
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppTheme.primaryColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    color: AppTheme.primaryColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  padding: const EdgeInsets.all(8),
+                                  child: const Icon(
+                                    Icons.assignment,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
                                 ),
-                                padding: const EdgeInsets.all(12),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.primaryColor,
-                                        shape: BoxShape.circle,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        m.title,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
-                                      padding: const EdgeInsets.all(8),
-                                      child: const Icon(
-                                        Icons.assignment,
-                                        color: Colors.white,
-                                        size: 18,
+                                      Text(
+                                        'Practice this concept',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Colors.grey[600],
+                                            ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            missionId,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleSmall
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                          ),
-                                          Text(
-                                            'Practice this concept',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(
-                                                  color: Colors.grey[600],
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(Icons.arrow_forward,
-                                        color: Colors.grey),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ))
-                          .toList(),
+                                const Icon(Icons.arrow_forward,
+                                    color: Colors.grey),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ],
                   ),
                 ),
-      
+
               // Learning Resources
               Padding(
                 padding: const EdgeInsets.all(20),
@@ -386,7 +406,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                   ],
                 ),
               ),
-      
+
               // Action Buttons
               Padding(
                 padding: const EdgeInsets.all(20),
@@ -432,10 +452,10 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                             width: 2,
                           ),
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               Icon(Icons.check_circle, color: Colors.green),
                               SizedBox(width: 8),
                               Text(
