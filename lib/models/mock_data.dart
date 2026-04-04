@@ -194,7 +194,7 @@ class LearningPathSampleData {
       totalConcepts: 9,
       overallProgressPercentage: 56,
       startedAt: DateTime.now().subtract(const Duration(days: 30)),
-      currentLevel: 'Intermediate',
+      currentLevel: 'Intermediate', missions: [],
     );
   }
 }
