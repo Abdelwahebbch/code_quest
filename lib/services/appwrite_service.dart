@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/enums.dart';
 import 'package:appwrite/models.dart' as models;
@@ -102,10 +103,6 @@ class AppwriteService extends ChangeNotifier {
           }),
           'isFirstLogin': true,
         },
-        permissions: [
-          Permission.read(Role.user(_user!.$id)),
-          Permission.update(Role.user(_user!.$id)),
-        ],
       );
     } catch (e) {
       debugPrint("Error fi create new row: $e");
@@ -130,10 +127,12 @@ class AppwriteService extends ChangeNotifier {
             email: email,
             password: password,
           );
+          break;
         case true:
           await account.createOAuth2Session(
             provider: OAuthProvider.google,
           );
+          break;
       }
       _user = await account.get();
       await createNewRow();
@@ -209,21 +208,15 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> completeOnboarding(Map<String, String> data) async {
     try {
-      // await database.createRow(
-      //     databaseId: dbID,
-      //     tableId: "user_goals",
-      //     rowId: user!.$id,
-      //     data: {"username": user!.name, "prompt": data.toString()});
+      await database.createRow(
+          databaseId: dbID,
+          tableId: "user_goals",
+          rowId: user!.$id,
+          data: {"username": user!.name, "prompt": data.toString()});
       updateIsFirstLogin();
-      ResolvedProfile profile =
-          ProfileResolver.resolve(userId: user!.$id, answers: data);
-
-      await AppwritecloudfunctionsService.createLearningPath(
-          profile, user!.$id);
       var rows = await database
           .listRows(databaseId: dbID, tableId: "mock_mission", queries: [
-        Query.equal("user_category",
-            data["journey"].toString()),
+        Query.equal("user_category", data["journey"].toString()),
       ]);
       for (var row in rows.rows) {
         await database.createRow(
@@ -248,6 +241,11 @@ class AppwriteService extends ChangeNotifier {
               "rate": 0,
             });
       }
+      ResolvedProfile profile =
+          ProfileResolver.resolve(userId: user!.$id, answers: data);
+
+      await AppwritecloudfunctionsService.createLearningPath(
+          profile, user!.$id);
     } catch (e) {
       print("Error fi complete onboarding $e ");
       rethrow;
@@ -263,8 +261,9 @@ class AppwriteService extends ChangeNotifier {
       response = await database
           .listRows(databaseId: dbID, tableId: "missions", queries: [
         Query.equal("user_id", user!.$id),
-        // Query.createdAfter("${date}T00:00:00Z"),
-        Query.createdBefore("${date}T23:59:59Z")
+        Query.createdAfter("${date}T00:00:00Z"),
+        Query.createdBefore("${date}T23:59:59Z"),
+        Query.orderDesc("\$createdAt"),
       ]);
 
       if (response.rows.isEmpty) {
@@ -274,7 +273,7 @@ class AppwriteService extends ChangeNotifier {
             .toIso8601String()
             .split('T')
             .first;
-        
+
         response = await database
             .listRows(databaseId: dbID, tableId: "missions", queries: [
           Query.equal("user_id", user!.$id),
@@ -284,7 +283,6 @@ class AppwriteService extends ChangeNotifier {
       }
 
       return response.rows.map((doc) {
-        
         final MissionType type = MissionType.values
             .firstWhere((e) => e.name.contains(doc.data["type"]));
         switch (type) {
@@ -325,12 +323,19 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
+  Future<double> getRate() async {
+    final row = await database.getRow(
+        databaseId: dbID, tableId: "user_goals", rowId: _user!.$id);
+    return row.data["rate"];
+  }
+
   Future<void> getUserInfo() async {
     try {
       models.User user = await account.get();
       final row = await database.getRow(
           databaseId: dbID, tableId: "user_profiles", rowId: user.$id);
       int x = await getRank();
+      double rate = await getRate();
       isFirstLogin = row.data["isFirstLogin"] ?? true;
       notifyListeners();
       progress = UserInfo(
@@ -352,6 +357,7 @@ class AppwriteService extends ChangeNotifier {
             row.data["nbMissionCompletedWithoutHints"] ?? 0,
         totalFailures: row.data["totalFailures"] ?? 0,
         totalAIQuestions: row.data["totalAIQuestions"] ?? 0,
+        rate: rate,
       );
       try {
         path = await getLearningPath();
@@ -408,12 +414,6 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> updateLanguageSelected(String languageSelected) async {
     try {
-      await database.updateRow(
-        databaseId: dbID,
-        tableId: "user_goals",
-        rowId: _user!.$id,
-        data: {'lang_goal': languageSelected},
-      );
       await database.updateRow(
         databaseId: dbID,
         tableId: "user_profiles",
@@ -533,6 +533,29 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
+  Future<void> updateRate(int missionDiffculty, double rate) async {
+    try {
+      //Elo Algorthime
+      //s= normalized mission rate
+      double S = rate / 10;
+      //E = Expected probability
+      //2 = is scale you can change
+      double E =
+          1 / (1 + pow(10, ((missionDiffculty - progress.rate) / 2)));
+      // Update
+      double newRate = progress.rate + (S - E);
+      progress.rate = double.parse(newRate.clamp(1, 10).toStringAsFixed(2));
+      notifyListeners();
+      await database.updateRow(
+          databaseId: dbID,
+          tableId: "user_goals",
+          rowId: user!.$id,
+          data: {'rate': progress.rate});
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateMissionStatus(String id, double rate) async {
     try {
       await database.updateRow(
@@ -548,12 +571,15 @@ class AppwriteService extends ChangeNotifier {
           rowId: user!.$id,
           data: {'nbMission': progress.nbMissions});
       int? missionNb;
+      int missionDiffculty = 0;
       for (int i = 0; i < progress.missions.length; i++) {
         if (progress.missions[i].id == id) {
           progress.missions[i].isCompleted = true;
+          missionDiffculty = progress.missions[i].difficulty;
           missionNb = i;
         }
       }
+      await updateRate(missionDiffculty, rate);
       await checkbadges(missionNb!);
       notifyListeners();
     } catch (e) {
