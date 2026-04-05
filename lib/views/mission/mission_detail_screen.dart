@@ -214,7 +214,11 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       ),
     );
   }
-
+  double getRate(){
+    double rate=10.0-((widget.mission.aiPointsUsed*1)+(widget.mission.nbFailed*2));
+    if(rate<1) { return 1; }
+    return rate;
+  }
   Future<void> _checkAnswer() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
    
@@ -257,21 +261,21 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             authService.progress, widget.mission, _codeController.text.trim());
         Navigator.pop(context);
         isCorrect = check[0];
-        rate = check[1];
+        rate = check[1]-widget.mission.aiPointsUsed*0.5;
 
         break;
       case MissionType.singleChoice:
         isCorrect = _currentAnswer
             .toString()
             .contains(widget.mission.solution.toString());
-            rate=10.0-((widget.mission.aiPointsUsed*0.5)+(widget.mission.nbFailed*1));
+            rate=10.0-((widget.mission.aiPointsUsed*0.5)+(widget.mission.nbFailed*2));
         break;
       case MissionType.multipleChoice:
         if (_currentAnswer is List<String>) {
           final correctAnswers = widget.mission.solution?.split(',') ?? [];
           isCorrect = _currentAnswer.length == correctAnswers.length &&
               _currentAnswer.every((item) => correctAnswers.contains(item));
-              rate=10.0-((widget.mission.aiPointsUsed*0.5)+widget.mission.nbFailed*1);
+              rate=getRate();
         }
         break;
       case MissionType.ordering:
@@ -279,14 +283,14 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
           final correctOrder = widget.mission.correctOrder ?? [];
           isCorrect = _currentAnswer.length == correctOrder.length &&
               equals(_currentAnswer, correctOrder);
-              rate=10.0-((widget.mission.aiPointsUsed*0.5)+widget.mission.nbFailed*1);
+              rate=getRate();
         }
         break;
       case MissionType.test:
         isCorrect = _currentAnswer
             .toString()
             .contains(widget.mission.solution.toString());
-            rate=10.0-((widget.mission.aiPointsUsed*0.5)+widget.mission.nbFailed*1);
+            rate=getRate();
         break;
     }
 
