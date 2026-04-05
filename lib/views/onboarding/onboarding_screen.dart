@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/views/onboarding/language_selection_screen.dart';
 import 'package:pfe_test/waiting/generating_path_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
@@ -104,28 +105,14 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) => GeneratingPathScreen(
-                      generationFuture: _waiting()
-                     ,
-                      onComplete: (x) {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const DashboardScreen()));
-                      },
-                      onError: (Object error) {},
-                    )));
+                builder: (context) =>  LanguageSelectionScreen(answers : _answers)));
       }
     } catch (e) {
       debugPrint("Error when saving choices $e");
     }
   }
 
-  Future<void> _waiting() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
-    await authService.completeOnboarding(_answers);
-    await authService.getUserInfo();
-  }
+  
 
   @override
   Widget build(BuildContext context) {
