@@ -38,7 +38,7 @@ class MissionTile extends StatelessWidget {
                 _buildTag("${mission.points} XP", AppTheme.accentColor),
                 const SizedBox(width: 8),
                 _buildTag(
-                    "Diff: ${mission.difficulty}/5", AppTheme.warningColor),
+                    "Diff: ${mission.difficulty}/10", AppTheme.warningColor),
               ],
             ),
           ],
