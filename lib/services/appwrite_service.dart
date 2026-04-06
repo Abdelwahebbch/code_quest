@@ -335,7 +335,6 @@ class AppwriteService extends ChangeNotifier {
       final row = await database.getRow(
           databaseId: dbID, tableId: "user_profiles", rowId: user.$id);
       int x = await getRank();
-      double rate = await getRate();
       isFirstLogin = row.data["isFirstLogin"] ?? true;
       notifyListeners();
       progress = UserInfo(
@@ -357,8 +356,10 @@ class AppwriteService extends ChangeNotifier {
             row.data["nbMissionCompletedWithoutHints"] ?? 0,
         totalFailures: row.data["totalFailures"] ?? 0,
         totalAIQuestions: row.data["totalAIQuestions"] ?? 0,
-        rate: rate,
       );
+      if(!isFirstLogin){
+        progress.rate=await getRate();
+      }
       try {
         path = await getLearningPath();
       } on AppwriteException catch (e) {

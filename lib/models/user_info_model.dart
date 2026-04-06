@@ -40,7 +40,7 @@ class UserInfo {
     this.nbMissionCompletedWithoutHints=0,
     this.totalFailures=0,
     this.totalAIQuestions=0,
-    this.rate=0.0
+    this.rate=0.5
   });
   //TODO : we must discust about it quickly
   double get progressToNextLevel {
