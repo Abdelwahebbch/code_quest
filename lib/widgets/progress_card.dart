@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/models/mock_data.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:provider/provider.dart';
 import '../models/user_info_model.dart';
@@ -16,7 +17,7 @@ class ProgressCard extends StatelessWidget {
       onTap: () {
         final authservice =
             Provider.of<AppwriteService>(context, listen: false);
-        final learningPath = authservice.path;
+        final learningPath = LearningPathSampleData.getSamplePythonPath();
         // LearningPathSampleData.getSamplePythonPath();
         Navigator.push(
           context,
