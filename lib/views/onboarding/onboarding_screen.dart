@@ -82,9 +82,33 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _skip() {
-    Navigator.pushReplacement(context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()));
+  Future<void> _waiting(Map<String, String> answers) async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    await authService.updateLanguageSelected("Python");
+    await authService.completeOnboarding(answers, false);
+    await authService.getUserInfo();
+  }
+
+  Future<void> _skip() async {
+    final Map<String, String> answers = {
+      "journey": "Self-Taught Explorer",
+      "explorer_objective": "Just exploring for fun",
+      "student_objective_": "Learn the basics",
+      "commitment": "☕ 15-30 min"
+    };
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => GeneratingPathScreen(
+                  generationFuture: _waiting(answers),
+                  onComplete: (x) {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const DashboardScreen()));
+                  },
+                  onError: (Object error) {},
+                )));
   }
 
   Future<void> _saveUserChoices() async {
@@ -105,14 +129,13 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) =>  LanguageSelectionScreen(answers : _answers)));
+                builder: (context) =>
+                    LanguageSelectionScreen(answers: _answers)));
       }
     } catch (e) {
       debugPrint("Error when saving choices $e");
     }
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -143,10 +166,13 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
                         onPressed: _goBack,
                         icon: const Icon(Icons.arrow_back),
                       ),
-                    GestureDetector(
-                      onTap: _skip,
-                      child: const Text("Skip"),
-                    ),
+                    if (_history.isEmpty)
+                      GestureDetector(
+                        onTap: () async {
+                          await _skip();
+                        },
+                        child: const Text("Skip"),
+                      ),
                   ],
                 ),
                 const SizedBox(
