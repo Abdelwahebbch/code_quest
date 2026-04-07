@@ -26,8 +26,38 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   ];
   Future<void> _waiting() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
-    await authService.completeOnboarding(widget.answers);
+    await authService.completeOnboarding(widget.answers,true);
     await authService.getUserInfo();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.answers["journey"] == "High School Student") {
+      if (widget.answers["student_objective_"] ==
+          "Learn the basics") {
+        selectedLanguage = "Python";
+      }
+    }
+    if (widget.answers["journey"] == "Self-Taught Explorer") {
+      if (widget.answers["explorer_objective"] ==
+          "Build my own apps or websites") {
+        if (widget.answers["student_objective_"] ==
+            "Learn the basics") {
+          languages.removeAt(0);
+          selectedLanguage = "JavaScript";
+        }
+      } else if (widget.answers["explorer_objective"] ==
+          "Start a career in tech") {
+        widget.answers["student_objective_"] ="Learn the basics";
+        selectedLanguage = "Python";
+      } else {
+        if (widget.answers["student_objective_"] ==
+            "Learn the basics") {
+          selectedLanguage = "Python";
+        }
+      }
+    }
   }
 
   @override
