@@ -40,7 +40,6 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
     if (authService.user != null && authService.isFirstLogin) {
-      authService.updateIsFirstLogin();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const OnboardingScreen()),
