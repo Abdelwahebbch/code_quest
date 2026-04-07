@@ -151,7 +151,7 @@ class AppwriteService extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      // await account.deleteSession(sessionId: 'current');
+      //await account.deleteSession(sessionId: 'current');
       await account.createEmailPasswordSession(
         email: email,
         password: password,
@@ -206,14 +206,16 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<void> completeOnboarding(Map<String, String> data) async {
+  Future<void> completeOnboarding(
+      Map<String, String> data, bool pathCreation) async {
     try {
+      updateIsFirstLogin();
       await database.createRow(
           databaseId: dbID,
           tableId: "user_goals",
           rowId: user!.$id,
           data: {"username": user!.name, "prompt": data.toString()});
-      updateIsFirstLogin();
+
       var rows = await database
           .listRows(databaseId: dbID, tableId: "mock_mission", queries: [
         Query.equal("user_category", data["journey"].toString()),
@@ -241,11 +243,14 @@ class AppwriteService extends ChangeNotifier {
               "rate": 0,
             });
       }
+
       ResolvedProfile profile =
           ProfileResolver.resolve(userId: user!.$id, answers: data);
-
-      await AppwritecloudfunctionsService.createLearningPath(
-          profile, user!.$id);
+      if (pathCreation) {
+        await AppwritecloudfunctionsService.createLearningPath(
+            profile, user!.$id);
+      }
+      
     } catch (e) {
       print("Error fi complete onboarding $e ");
       rethrow;
@@ -278,7 +283,8 @@ class AppwriteService extends ChangeNotifier {
             .listRows(databaseId: dbID, tableId: "missions", queries: [
           Query.equal("user_id", user!.$id),
           Query.createdAfter("${date}T00:00:00Z"),
-          Query.createdBefore("${date}T23:59:59Z")
+          Query.createdBefore("${date}T23:59:59Z"),
+          Query.orderDesc("\$createdAt"),
         ]);
       }
 
@@ -357,8 +363,8 @@ class AppwriteService extends ChangeNotifier {
         totalFailures: row.data["totalFailures"] ?? 0,
         totalAIQuestions: row.data["totalAIQuestions"] ?? 0,
       );
-      if(!isFirstLogin){
-        progress.rate=await getRate();
+      if (!isFirstLogin) {
+        progress.rate = await getRate();
       }
       try {
         path = await getLearningPath();
@@ -541,8 +547,7 @@ class AppwriteService extends ChangeNotifier {
       double S = rate / 10;
       //E = Expected probability
       //2 = is scale you can change
-      double E =
-          1 / (1 + pow(10, ((missionDiffculty - progress.rate) / 2)));
+      double E = 1 / (1 + pow(10, ((missionDiffculty - progress.rate) / 2)));
       // Update
       double newRate = progress.rate + (S - E);
       progress.rate = double.parse(newRate.clamp(1, 10).toStringAsFixed(2));
