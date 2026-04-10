@@ -72,12 +72,12 @@ OnboardingQuestion(
     question: "What is your main objective right now?",
     options: [
       OnboardingOption(
-          id: 'basics',
-          label: "Learn the basics",
+          id: 'basics_',
+          label: "Learn the basics_",
           nextQuestionId: 'commitment'),
       OnboardingOption(
-          id: 'master_lang',
-          label: "Master a programming language",
+          id: 'master_lang_',
+          label: "Master a programming language_",
           nextQuestionId: 'commitment'),
     ],
   ),

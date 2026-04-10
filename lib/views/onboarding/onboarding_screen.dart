@@ -113,7 +113,8 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _saveUserChoices() async {
     try {
-      _answers.addEntries({
+      // lezem nel9awelha 7aal t3mel fi machkel fel database
+       /*_answers.addEntries({
         MapEntry("exam_start",
             startDate != null ? startDate!.toIso8601String() : "undefined")
       });
@@ -121,6 +122,7 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
         MapEntry("exam_end",
             endDate != null ? endDate!.toIso8601String() : "undefined")
       });
+      */
       setState(() {
         _isLoading = true;
       });
