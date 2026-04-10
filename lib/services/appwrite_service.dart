@@ -29,6 +29,7 @@ class AppwriteService extends ChangeNotifier {
   late UserInfo progress;
   late Party party;
   late PartyMember partyMember;
+  late Map<String,dynamic> userGoals;
   final String dbID = '6972adad002e2ba515f2';
 
   AppwriteService() {
@@ -151,7 +152,7 @@ class AppwriteService extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      //await account.deleteSession(sessionId: 'current');
+      await account.deleteSession(sessionId: 'current');
       await account.createEmailPasswordSession(
         email: email,
         password: password,
@@ -209,12 +210,13 @@ class AppwriteService extends ChangeNotifier {
   Future<void> completeOnboarding(
       Map<String, String> data, bool pathCreation) async {
     try {
+      userGoals=data;
       updateIsFirstLogin();
       await database.createRow(
           databaseId: dbID,
           tableId: "user_goals",
           rowId: user!.$id,
-          data: {"username": user!.name, "prompt": data.toString()});
+          data: {"username": user!.name, "prompt": jsonEncode(data)});
 
       var rows = await database
           .listRows(databaseId: dbID, tableId: "mock_mission", queries: [
@@ -329,10 +331,11 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<double> getRate() async {
+  Future<void> getuserGoals() async {
     final row = await database.getRow(
         databaseId: dbID, tableId: "user_goals", rowId: _user!.$id);
-    return row.data["rate"];
+    progress.rate = row.data["rate"];
+    userGoals = jsonDecode(row.data["prompt"]);
   }
 
   Future<void> getUserInfo() async {
@@ -364,7 +367,7 @@ class AppwriteService extends ChangeNotifier {
         totalAIQuestions: row.data["totalAIQuestions"] ?? 0,
       );
       if (!isFirstLogin) {
-        progress.rate = await getRate();
+        await getuserGoals();
       }
       try {
         path = await getLearningPath();
@@ -382,7 +385,15 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-
+  Future<void> updateUserGoals(Map<String,String> data) async{
+        await database.updateRow(
+          databaseId: dbID,
+          tableId: "user_goals",
+          rowId: user!.$id,
+          data: {"prompt": jsonEncode(data)});
+          userGoals=data;
+          notifyListeners();
+  }
   Future<void> updateProfile(
       String imagePath, String userName, String bio) async {
     try {
