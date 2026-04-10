@@ -55,7 +55,8 @@ class MissionTile extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => MissionDetailScreen(mission: mission)),
+                  builder: (context) => MissionDetailScreen(
+                      isLearningPath: false, mission: mission)),
             );
           } else {
             null;
