@@ -11,6 +11,7 @@ import 'package:pfe_test/models/user_info_model.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import '../models/mission_model.dart';
 
+
 class AppwriteService extends ChangeNotifier {
   Client client = Client();
 
@@ -222,8 +223,7 @@ class AppwriteService extends ChangeNotifier {
           profile, user!.$id);
       var rows = await database
           .listRows(databaseId: dbID, tableId: "mock_mission", queries: [
-        Query.equal("user_category",
-            data["journey"].toString()),
+        Query.equal("user_category", data["journey"].toString()),
       ]);
       for (var row in rows.rows) {
         await database.createRow(
@@ -578,28 +578,25 @@ class AppwriteService extends ChangeNotifier {
 
   Future<void> updateFailedNb(String id) async {
     try {
-      int previousNbFailed = 0;
-      for (int i = 0; i < progress.missions.length; i++) {
-        if (progress.missions[i].id == id) {
-          previousNbFailed = progress.missions[i].nbFailed;
-          progress.missions[i].nbFailed = previousNbFailed + 1;
-        }
-      }
-      int cuurentNbFailed = previousNbFailed + 1;
-      int previousTotalFailures = progress.totalFailures;
-      int currentTotalFailures = previousTotalFailures + 1;
-      progress.totalFailures = currentTotalFailures;
+      progress.missions.firstWhere((m) => m.id.contains(id)).nbFailed += 1;
+
       await database.updateRow(
         databaseId: dbID,
         tableId: "missions",
         rowId: id,
-        data: {'nbFailed': cuurentNbFailed},
+        data: {
+          'nbFailed':
+              progress.missions.firstWhere((m) => m.id.contains(id)).nbFailed
+        },
       );
       await database.updateRow(
         databaseId: dbID,
         tableId: "user_profiles",
         rowId: user!.$id,
-        data: {'totalFailures': currentTotalFailures},
+        data: {
+          'totalFailures':
+              progress.missions.firstWhere((m) => m.id.contains(id)).nbFailed
+        },
       );
       notifyListeners();
     } catch (e) {
@@ -1180,4 +1177,24 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<dynamic> getLearningPathRows(DatabaseTables table, rowId) {
+    return database.getRow(databaseId: dbID, tableId: table.name, rowId: rowId);
+  }
+}
+
+enum DatabaseTables {
+  user_profiles,
+  user_goals,
+  quizzes,
+  party_member,
+  party_history,
+  party,
+  mock_mission,
+  missions,
+  learning_path_missions,
+  learnig_paths,
+  learnig_path_milestones,
+  learnig_path_concepts,
+  feedbacks
 }
