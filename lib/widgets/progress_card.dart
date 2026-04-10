@@ -17,7 +17,7 @@ class ProgressCard extends StatelessWidget {
       onTap: () {
         final authservice =
             Provider.of<AppwriteService>(context, listen: false);
-        final learningPath = LearningPathSampleData.getSamplePythonPath();
+        final learningPath = authservice.path;
         // LearningPathSampleData.getSamplePythonPath();
         Navigator.push(
           context,
