@@ -168,7 +168,7 @@ class LearningPath {
     required this.currentLevel,
   });
 
-  // Calculate statistics
+ 
   int get remainingConcepts => totalConcepts - totalConceptsCompleted;
   int get completedPercentage =>
       totalConcepts > 0 ? (totalConceptsCompleted * 100 ~/ totalConcepts) : 0;
