@@ -13,7 +13,10 @@ import 'package:highlight/languages/python.dart';
 
 class MissionDetailScreen extends StatefulWidget {
   final Mission mission;
-  const MissionDetailScreen({super.key, required this.mission});
+  final bool isLearningPath;
+
+  const MissionDetailScreen(
+      {super.key, required this.isLearningPath, required this.mission});
 
   @override
   State<MissionDetailScreen> createState() => _MissionDetailScreenState();
@@ -136,7 +139,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 fontSize: 12,
               ),
             ),
-             const SizedBox(height: 8),
+            const SizedBox(height: 8),
             Container(
               height: 500,
               decoration: BoxDecoration(
@@ -144,9 +147,10 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade800),
               ),
-              child: SingleChildScrollView(child: CodeField(minLines: 20, controller: _codeController)),
+              child: SingleChildScrollView(
+                  child: CodeField(minLines: 20, controller: _codeController)),
             ),
-             const SizedBox(height: 8),
+            const SizedBox(height: 8),
             const Text(
               "OUTPUT ",
               style: TextStyle(
@@ -217,7 +221,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   Future<void> _checkAnswer() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
-   
+
     bool isCorrect = false;
     double rate = 0.0;
     switch (widget.mission.type) {
@@ -253,12 +257,15 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             ));
           },
         );
-        final List<dynamic> check = await AppwritecloudfunctionsService.checkAnwser(
-            authService.progress, widget.mission, _codeController.text.trim());
+        final List<dynamic> check =
+            await AppwritecloudfunctionsService.checkAnwser(
+                authService.progress,
+                widget.mission,
+                _codeController.text.trim());
+        if (!mounted) return;
         Navigator.pop(context);
         isCorrect = check[0];
         rate = check[1];
-
         break;
       case MissionType.singleChoice:
         isCorrect = _currentAnswer
@@ -286,6 +293,13 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         break;
     }
 
+    if (isCorrect && !widget.isLearningPath) {
+      authService.updateXp(widget.mission.points);
+      authService.updateMissionStatus(widget.mission.id, rate);
+    } else if (!widget.isLearningPath) {
+      authService.updateFailedNb(widget.mission.id);
+    }
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -298,16 +312,17 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             onPressed: () async {
               //debugPrint("XP = ${authService.progress.experience}");
               if (isCorrect) {
-                await authService.updateXp(widget.mission.points);
-                await authService.updateMissionStatus(widget.mission.id, rate);
-
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const DashboardScreen()),
-                    (Route<dynamic> route) => false);
+                if (widget.isLearningPath) {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const DashboardScreen()),
+                      (Route<dynamic> route) => false);
+                }
               } else {
-                await authService.updateFailedNb(widget.mission.id);
                 Navigator.pop(context);
               }
             },
