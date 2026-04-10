@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/views/onboarding/language_selection_screen.dart';
 import 'package:pfe_test/waiting/generating_path_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
@@ -81,14 +82,39 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _skip() {
-    Navigator.pushReplacement(context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()));
+  Future<void> _waiting(Map<String, String> answers) async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    await authService.updateLanguageSelected("Python");
+    await authService.completeOnboarding(answers, false);
+    await authService.getUserInfo();
+  }
+
+  Future<void> _skip() async {
+    final Map<String, String> answers = {
+      "journey": "Self-Taught Explorer",
+      "explorer_objective": "Just exploring for fun",
+      "student_objective_": "Learn the basics",
+      "commitment": "☕ 15-30 min"
+    };
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => GeneratingPathScreen(
+                  generationFuture: _waiting(answers),
+                  onComplete: (x) {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const DashboardScreen()));
+                  },
+                  onError: (Object error) {},
+                )));
   }
 
   Future<void> _saveUserChoices() async {
     try {
-      _answers.addEntries({
+      // lezem nel9awelha 7aal t3mel fi machkel fel database
+       /*_answers.addEntries({
         MapEntry("exam_start",
             startDate != null ? startDate!.toIso8601String() : "undefined")
       });
@@ -96,6 +122,7 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
         MapEntry("exam_end",
             endDate != null ? endDate!.toIso8601String() : "undefined")
       });
+      */
       setState(() {
         _isLoading = true;
       });
@@ -104,27 +131,12 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) => GeneratingPathScreen(
-                      generationFuture: _waiting()
-                     ,
-                      onComplete: (x) {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const DashboardScreen()));
-                      },
-                      onError: (Object error) {},
-                    )));
+                builder: (context) =>
+                    LanguageSelectionScreen(answers: _answers)));
       }
     } catch (e) {
       debugPrint("Error when saving choices $e");
     }
-  }
-
-  Future<void> _waiting() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
-    await authService.completeOnboarding(_answers);
-    await authService.getUserInfo();
   }
 
   @override
@@ -156,10 +168,13 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
                         onPressed: _goBack,
                         icon: const Icon(Icons.arrow_back),
                       ),
-                    GestureDetector(
-                      onTap: _skip,
-                      child: const Text("Skip"),
-                    ),
+                    if (_history.isEmpty)
+                      GestureDetector(
+                        onTap: () async {
+                          await _skip();
+                        },
+                        child: const Text("Skip"),
+                      ),
                   ],
                 ),
                 const SizedBox(

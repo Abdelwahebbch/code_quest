@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pfe_test/models/onboarding_model.dart';
 import 'package:provider/provider.dart';
 import '../../services/appwrite_service.dart';
 import '../../theme/app_theme.dart';
+import '../onboarding/questions.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -29,7 +32,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
-
+  List<String> userGoalsKeys = [];
+  List<String> userGoalsValues = [];
+  List<String> newUserGoalsValues = [];
+  List<String> newUserGoalsKeys = [];
+  String? NextQestionQuestion;
+  List<OnboardingOption>? nextQuestionOptions;
   void _pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked != null) {
@@ -47,10 +55,41 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _userNameController.text = authService.progress.username;
     _emailController.text = authService.progress.email;
     _bioController.text = authService.progress.bio;
+    for (var element in authService.userGoals.values) {
+      userGoalsValues.add(element.toString());
+    }
+    userGoalsKeys = authService.userGoals.keys.toList();
+    print(userGoalsValues);
+  }
+
+  void builAlert(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Center(
+            child: Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  color: AppTheme.secondaryColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )));
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    print(nextQuestionOptions?.length);
+
     final authService = Provider.of<AppwriteService>(context, listen: false);
     if (pickedPath.isNotEmpty) {
       backgroundImage = FileImage(File(pickedPath));
@@ -75,38 +114,50 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           actions: [
             TextButton(
               onPressed: () async {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) {
-                    return Center(
-                        child: Container(
-                            height: 50,
-                            width: 50,
-                            decoration: BoxDecoration(
-                          color: AppTheme.secondaryColor,
-                          borderRadius: BorderRadius.circular(12),
-                          ),
-                            child: const Padding(
-                            padding: EdgeInsets.all(20.0),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                if (newUserGoalsKeys.isNotEmpty &&
+                    !newUserGoalsKeys.contains("commitment")) {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text("Incomplete Changes"),
+                          content: const Text(
+                              "Please complete all questions before saving your changes."),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("OK"),
                             ),
-                            )));
-                  },
-                );
-                await authService.updateProfile(
-                    pickedPath, _userNameController.text, _bioController.text);
-                Navigator.pop(context);
-                //it handle in appservice function to not make tow function
-                // ignore: use_build_context_synchronously
-                Navigator.pop(context);
+                          ],
+                        );
+                      });
+                } else if (newUserGoalsKeys.isNotEmpty) {
+                  builAlert(context);
+                  Map<String, String> data = {};
+                  for (int i = 0; i < newUserGoalsKeys.length; i++) {
+                    data.addAll(
+                        {newUserGoalsKeys[i]: newUserGoalsValues[i]});
+                  }
+                  await authService.updateUserGoals(data);
+                  await authService.updateProfile(pickedPath,
+                      _userNameController.text, _bioController.text);
+                  //it handle in appservice function to not make tow function
+                  // ignore: use_build_context_synchronously
+                  Navigator.pop(context);
+                } else if (newUserGoalsKeys.isEmpty) {
+                  builAlert(context);
+                  await authService.updateProfile(pickedPath,
+                      _userNameController.text, _bioController.text);
+                  Navigator.pop(context);
+                  //it handle in appservice function to not make tow function
+                  // ignore: use_build_context_synchronously
+                  Navigator.pop(context);
+                }
               },
               child: const Text("SAVE",
                   style: TextStyle(
-                      color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -150,6 +201,217 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _buildEditField(context, "Email", _emailController, true),
               const SizedBox(height: 16),
               _buildEditField(context, "Bio", _bioController, false),
+              const SizedBox(height: 16),
+              ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: newUserGoalsValues.isEmpty
+                      ? userGoalsValues.length
+                      : newUserGoalsValues.length,
+                  itemBuilder: (context, index) {
+                    var items = [];
+                    String question = "";
+                    if (newUserGoalsValues.isEmpty) {
+                      var condition = questions.firstWhere(
+                          (onboardingQuestions) => onboardingQuestions.options
+                              .any((labels) =>
+                                  labels.label == userGoalsValues[index]));
+                      items = condition.options;
+                      question = condition.question;
+                    } else {
+                      for (int i = 0; i < questions.length; i++) {
+                        for (int j = 0; j < questions[i].options.length; j++) {
+                          if (newUserGoalsValues[index] ==
+                              questions[i].options[j].label) {
+                            items = questions[i].options;
+                            question = questions[i].question;
+                          }
+                        }
+                      }
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(question,
+                            style: const TextStyle(
+                                color: AppTheme.accentColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12)),
+                        const SizedBox(height: 8),
+                        DropdownButton2(
+                          isExpanded: true,
+                          underline: const SizedBox(),
+                          hint: newUserGoalsValues.isEmpty
+                              ? Text(
+                                  userGoalsValues[index],
+                                  style: const TextStyle(color: Colors.white),
+                                )
+                              : Text(
+                                  newUserGoalsValues[index],
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                          items: items.map((option) {
+                            return DropdownMenuItem<String>(
+                              value: option.label,
+                              child: (newUserGoalsValues.isEmpty
+                                      ? option.label == userGoalsValues[index]
+                                      : option.label ==
+                                          newUserGoalsValues[index])
+                                  ? Text(
+                                      option.label,
+                                      style: const TextStyle(
+                                          color: AppTheme.primaryColor),
+                                    )
+                                  : Text(option.label),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              String? nextQuestionId;
+                              print(value);
+                              print("aaa&1");
+                              if (newUserGoalsValues.isEmpty) {
+                                String id = questions
+                                    .firstWhere((onboardingQuestions) =>
+                                        onboardingQuestions.options.any(
+                                            (labels) => labels.label == value))
+                                    .id;
+                                int indexValue = userGoalsKeys.indexOf(id);
+                                if (indexValue > 0) {
+                                  newUserGoalsKeys.addAll(userGoalsKeys
+                                      .getRange(0, indexValue + 1));
+                                  newUserGoalsValues.addAll(userGoalsValues
+                                      .getRange(0, indexValue));
+                                  print(newUserGoalsKeys);
+                                } else if (indexValue == 0) {
+                                  newUserGoalsKeys.add(userGoalsKeys[0]);
+                                  newUserGoalsValues = [];
+                                }
+                              } else {
+                                String id = questions
+                                    .firstWhere((onboardingQuestions) =>
+                                        onboardingQuestions.options.any(
+                                            (labels) => labels.label == value))
+                                    .id;
+                                print("id" + id);
+                                int indexValue =
+                                    newUserGoalsKeys.indexOf(id);
+                                print("newUserGoalsKeys" +
+                                    newUserGoalsKeys.toString());
+                                print("indexValue" + indexValue.toString());
+                                if (indexValue > 0) {
+                                  int end = newUserGoalsKeys.length;
+                                  newUserGoalsKeys.removeRange(
+                                      indexValue + 1, end);
+                                  newUserGoalsValues.removeRange(
+                                      indexValue, end);
+                                  print("newUserGoalsKeys" +
+                                      newUserGoalsKeys.toString());
+                                  print("newUserGoalsValues" +
+                                      newUserGoalsValues.toString());
+                                } else if (indexValue == 0) {
+                                  newUserGoalsKeys = [];
+                                  newUserGoalsKeys.add(userGoalsKeys[0]);
+                                  newUserGoalsValues = [];
+                                }
+                              }
+                              newUserGoalsValues.add(value!);
+                              for (int i = 0; i < questions.length; i++) {
+                                for (int j = 0;
+                                    j < questions[i].options.length;
+                                    j++) {
+                                  if (value == questions[i].options[j].label) {
+                                    nextQuestionId =
+                                        questions[i].options[j].nextQuestionId;
+                                    break;
+                                  }
+                                }
+                                if (nextQuestionId != null) break;
+                              }
+                              if (nextQuestionId != null) {
+                                for (int i = 0; i < questions.length; i++) {
+                                  if (questions[i].id == nextQuestionId) {
+                                    nextQuestionOptions = questions[i].options;
+                                    NextQestionQuestion = questions[i].question;
+                                    print(nextQuestionOptions?.length);
+                                  }
+                                }
+                              } else {
+                                nextQuestionOptions = null;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  }),
+              if (nextQuestionOptions != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(NextQestionQuestion!,
+                        style: const TextStyle(
+                            color: AppTheme.accentColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12)),
+                    const SizedBox(height: 8),
+                    DropdownButton2(
+                      isExpanded: true,
+                      underline: const SizedBox(),
+                      hint: const Text(
+                        "Select Option",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      items: nextQuestionOptions!.map((option) {
+                        return DropdownMenuItem<String>(
+                          value: option.label,
+                          child: Text(
+                            option.label,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          print("aaaaa2");
+                          print(value);
+                          String id = questions
+                              .firstWhere((onboardingQuestions) =>
+                                  onboardingQuestions.options
+                                      .any((labels) => labels.label == value))
+                              .id;
+                          String? nextQuestionId;
+                          newUserGoalsKeys.add(id);
+                          print("newUserGoalsKeys2" +
+                              newUserGoalsKeys.toString());
+                          newUserGoalsValues.add(value!);
+                          for (int i = 0; i < questions.length; i++) {
+                            for (int j = 0;
+                                j < questions[i].options.length;
+                                j++) {
+                              if (value == questions[i].options[j].label) {
+                                nextQuestionId =
+                                    questions[i].options[j].nextQuestionId;
+                                break;
+                              } else {
+                                nextQuestionId = null;
+                              }
+                            }
+                            if (nextQuestionId != null) break;
+                          }
+                          if (nextQuestionId != null) {
+                            for (int i = 0; i < questions.length; i++) {
+                              if (questions[i].id == nextQuestionId) {
+                                nextQuestionOptions = questions[i].options;
+                                NextQestionQuestion = questions[i].question;
+                              }
+                            }
+                          } else {
+                            nextQuestionOptions = null;
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
             ],
           ),
         ),

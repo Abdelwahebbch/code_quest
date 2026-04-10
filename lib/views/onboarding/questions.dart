@@ -3,7 +3,7 @@ import 'package:pfe_test/models/onboarding_model.dart';
 final List<OnboardingQuestion> questions = [
   OnboardingQuestion(
     id: 'journey',
-    question: "What best describes your current journey?",
+    question: "Which best describes you right now?",
     options: [
       OnboardingOption(
           id: 'hs_student',
@@ -30,7 +30,7 @@ final List<OnboardingQuestion> questions = [
   
   OnboardingQuestion(
     id: 'section',
-    question: "What is your study section?",
+    question: "What is your study track?",
     options: [
       OnboardingOption(
           id: 'sc_student',
@@ -40,7 +40,7 @@ final List<OnboardingQuestion> questions = [
       OnboardingOption(
           id: 'lettre_student',
           label: "Literature Section",
-          nextQuestionId: 'student_objective'),
+          nextQuestionId: 'student_objective_'),
     ],
   ),
 
@@ -67,7 +67,20 @@ final List<OnboardingQuestion> questions = [
   ),
 
 
-
+OnboardingQuestion(
+    id: 'student_objective_',
+    question: "What is your main objective right now?",
+    options: [
+      OnboardingOption(
+          id: 'basics_',
+          label: "Learn the basics_",
+          nextQuestionId: 'commitment'),
+      OnboardingOption(
+          id: 'master_lang_',
+          label: "Master a programming language_",
+          nextQuestionId: 'commitment'),
+    ],
+  ),
 
 
 
@@ -119,42 +132,17 @@ final List<OnboardingQuestion> questions = [
       OnboardingOption(
           id: 'build_apps',
           label: "Build my own apps or websites",
-          nextQuestionId: 'learning_goal'),
+          nextQuestionId: 'student_objective_'),
       OnboardingOption(
           id: 'start_career',
           label: "Start a career in tech",
-          nextQuestionId: 'learning_goal'),
+          nextQuestionId: 'commitment'),
       OnboardingOption(
           id: 'just_fun',
           label: "Just exploring for fun",
-          nextQuestionId: 'learning_goal'),
+          nextQuestionId: 'student_objective_'),
     ],
   ),
-
-
-
-
-
-  OnboardingQuestion(
-    id: 'learning_goal',
-    question: "What's your goal?",
-    options: [
-      OnboardingOption(
-          id: 'basics',
-          label: "Learn the basics",
-          nextQuestionId: 'commitment'),
-      OnboardingOption(
-          id: 'master_lang',
-          label: "Master a programming language",
-          nextQuestionId: 'commitment'),
-      OnboardingOption(
-          id: 'exam_prep',
-          label: "Prepare for exams",
-          nextQuestionId: 'commitment'),
-    ],
-  ),
-
-
 
 
 

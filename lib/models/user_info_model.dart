@@ -20,6 +20,7 @@ class UserInfo {
   int nbMissionCompletedWithoutHints;
   int totalFailures;
   int totalAIQuestions;
+  double rate;
 
   UserInfo({
     required this.username,
@@ -38,7 +39,8 @@ class UserInfo {
     this.showingBadges=const[],
     this.nbMissionCompletedWithoutHints=0,
     this.totalFailures=0,
-    this.totalAIQuestions=0
+    this.totalAIQuestions=0,
+    this.rate=0.5
   });
   //TODO : we must discust about it quickly
   double get progressToNextLevel {

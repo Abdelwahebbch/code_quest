@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/waiting/generating_path_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../dashboard/dashboard_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
-  const LanguageSelectionScreen({super.key});
+  final Map<String, String> answers;
+  const LanguageSelectionScreen({super.key, required this.answers});
 
   @override
   State<LanguageSelectionScreen> createState() =>
@@ -22,6 +24,41 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     {'name': 'Java', 'icon': Icons.coffee, 'color': Colors.orange},
     {'name': 'C++', 'icon': Icons.terminal, 'color': Colors.blueAccent},
   ];
+  Future<void> _waiting() async {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    await authService.completeOnboarding(widget.answers,true);
+    await authService.getUserInfo();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.answers["journey"] == "High School Student") {
+      if (widget.answers["student_objective_"] ==
+          "Learn the basics") {
+        selectedLanguage = "Python";
+      }
+    }
+    if (widget.answers["journey"] == "Self-Taught Explorer") {
+      if (widget.answers["explorer_objective"] ==
+          "Build my own apps or websites") {
+        if (widget.answers["student_objective_"] ==
+            "Learn the basics") {
+          languages.removeAt(0);
+          selectedLanguage = "JavaScript";
+        }
+      } else if (widget.answers["explorer_objective"] ==
+          "Start a career in tech") {
+        widget.answers["student_objective_"] ="Learn the basics";
+        selectedLanguage = "Python";
+      } else {
+        if (widget.answers["student_objective_"] ==
+            "Learn the basics") {
+          selectedLanguage = "Python";
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +84,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 const SizedBox(height: 32),
                 Expanded(
                   child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
@@ -70,8 +108,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                                 : AppTheme.cardColor,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color:
-                                  isSelected ? Colors.white : Colors.transparent,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.transparent,
                               width: 2,
                             ),
                           ),
@@ -81,15 +120,17 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                               Icon(
                                 lang['icon'],
                                 size: 40,
-                                color: isSelected ? Colors.white : lang['color'],
+                                color:
+                                    isSelected ? Colors.white : lang['color'],
                               ),
                               const SizedBox(height: 12),
                               Text(
                                 lang['name'],
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color:
-                                      isSelected ? Colors.white : Colors.white70,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.white70,
                                 ),
                               ),
                             ],
@@ -106,12 +147,22 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                     onPressed: selectedLanguage == null
                         ? null
                         : () {
-                            authService.updateLanguageSelected(selectedLanguage!);
+                            authService
+                                .updateLanguageSelected(selectedLanguage!);
                             Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const DashboardScreen()),
-                            );
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => GeneratingPathScreen(
+                                          generationFuture: _waiting(),
+                                          onComplete: (x) {
+                                            Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const DashboardScreen()));
+                                          },
+                                          onError: (Object error) {},
+                                        )));
                           },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
