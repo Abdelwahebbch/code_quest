@@ -308,7 +308,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        MissionDetailScreen(mission: m)));
+                                        MissionDetailScreen(isLearningPath: true ,mission: m)));
                           },
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 12),
