@@ -85,7 +85,7 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _waiting(Map<String, String> answers) async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
     await authService.updateLanguageSelected("Python");
-    await authService.completeOnboarding(answers, false);
+    await authService.completeOnboarding(answers, false,null,null);
     await authService.getUserInfo();
   }
 
@@ -113,16 +113,6 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _saveUserChoices() async {
     try {
-      // lezem nel9awelha 7aal t3mel fi machkel fel database
-       /*_answers.addEntries({
-        MapEntry("exam_start",
-            startDate != null ? startDate!.toIso8601String() : "undefined")
-      });
-      _answers.addEntries({
-        MapEntry("exam_end",
-            endDate != null ? endDate!.toIso8601String() : "undefined")
-      });
-      */
       setState(() {
         _isLoading = true;
       });
@@ -132,7 +122,7 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    LanguageSelectionScreen(answers: _answers)));
+                    LanguageSelectionScreen(answers: _answers,startDate : startDate,endDate : endDate)));
       }
     } catch (e) {
       debugPrint("Error when saving choices $e");
