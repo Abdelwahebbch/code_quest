@@ -7,7 +7,9 @@ import '../dashboard/dashboard_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   final Map<String, String> answers;
-  const LanguageSelectionScreen({super.key, required this.answers});
+  final DateTime? startDate;
+  final DateTime? endDate; 
+  const LanguageSelectionScreen({super.key, required this.answers, this.startDate, this.endDate});
 
   @override
   State<LanguageSelectionScreen> createState() =>
@@ -26,7 +28,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   ];
   Future<void> _waiting() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
-    await authService.completeOnboarding(widget.answers,true);
+    await authService.completeOnboarding(widget.answers,true,widget.startDate,widget.endDate);
     await authService.getUserInfo();
   }
 
@@ -43,7 +45,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       if (widget.answers["explorer_objective"] ==
           "Build my own apps or websites") {
         if (widget.answers["student_objective_"] ==
-            "Learn the basics") {
+            "Learn the basics_") {
           languages.removeAt(0);
           selectedLanguage = "JavaScript";
         }
