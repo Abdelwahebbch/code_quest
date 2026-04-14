@@ -36,7 +36,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   List<String> userGoalsValues = [];
   List<String> newUserGoalsValues = [];
   List<String> newUserGoalsKeys = [];
-  String? NextQestionQuestion;
+  String? nextQestionQuestion;
+  DateTime? startDate;
+  DateTime? endDate;
+  String? language;
   List<OnboardingOption>? nextQuestionOptions;
   void _pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -135,19 +138,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   builAlert(context);
                   Map<String, String> data = {};
                   for (int i = 0; i < newUserGoalsKeys.length; i++) {
-                    data.addAll(
-                        {newUserGoalsKeys[i]: newUserGoalsValues[i]});
+                    data.addAll({newUserGoalsKeys[i]: newUserGoalsValues[i]});
                   }
                   await authService.updateUserGoals(data);
+                  await authService.fixEducationTime(startDate, endDate);
                   await authService.updateProfile(pickedPath,
                       _userNameController.text, _bioController.text);
+                  if (language != null) {
+                    await authService.updateLanguageSelected("JavaScript");
+                  }
                   //it handle in appservice function to not make tow function
+                  // ignore: use_build_context_synchronously
+                  Navigator.pop(context);
                   // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                 } else if (newUserGoalsKeys.isEmpty) {
                   builAlert(context);
                   await authService.updateProfile(pickedPath,
                       _userNameController.text, _bioController.text);
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                   //it handle in appservice function to not make tow function
                   // ignore: use_build_context_synchronously
@@ -204,6 +213,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
               ListView.builder(
                   shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: newUserGoalsValues.isEmpty
                       ? userGoalsValues.length
                       : newUserGoalsValues.length,
@@ -264,7 +274,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   : Text(option.label),
                             );
                           }).toList(),
-                          onChanged: (value) {
+                          onChanged: (value) async {
+                            if (value == "Select range") {
+                              final DateTimeRange? selectedRange =
+                                  await showDateRangePicker(
+                                context: context,
+                                firstDate: DateTime(2025),
+                                lastDate: DateTime(2027),
+                              );
+                              if (selectedRange == null) {
+                                return;
+                              }
+                              startDate = selectedRange.start;
+                              endDate = selectedRange.end;
+                            }
+                            if (value == "Build my own apps or websites") {
+                              language = "JavaScript";
+                            }
                             setState(() {
                               String? nextQuestionId;
                               print(value);
@@ -279,8 +305,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 if (indexValue > 0) {
                                   newUserGoalsKeys.addAll(userGoalsKeys
                                       .getRange(0, indexValue + 1));
-                                  newUserGoalsValues.addAll(userGoalsValues
-                                      .getRange(0, indexValue));
+                                  newUserGoalsValues.addAll(
+                                      userGoalsValues.getRange(0, indexValue));
                                   print(newUserGoalsKeys);
                                 } else if (indexValue == 0) {
                                   newUserGoalsKeys.add(userGoalsKeys[0]);
@@ -293,8 +319,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                             (labels) => labels.label == value))
                                     .id;
                                 print("id" + id);
-                                int indexValue =
-                                    newUserGoalsKeys.indexOf(id);
+                                int indexValue = newUserGoalsKeys.indexOf(id);
                                 print("newUserGoalsKeys" +
                                     newUserGoalsKeys.toString());
                                 print("indexValue" + indexValue.toString());
@@ -331,7 +356,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 for (int i = 0; i < questions.length; i++) {
                                   if (questions[i].id == nextQuestionId) {
                                     nextQuestionOptions = questions[i].options;
-                                    NextQestionQuestion = questions[i].question;
+                                    nextQestionQuestion = questions[i].question;
                                     print(nextQuestionOptions?.length);
                                   }
                                 }
@@ -348,7 +373,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(NextQestionQuestion!,
+                    Text(nextQestionQuestion!,
                         style: const TextStyle(
                             color: AppTheme.accentColor,
                             fontWeight: FontWeight.bold,
@@ -369,7 +394,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                         );
                       }).toList(),
-                      onChanged: (value) {
+                      onChanged: (value) async {
+                        if (value == "Select range") {
+                          final DateTimeRange? selectedRange =
+                              await showDateRangePicker(
+                            context: context,
+                            firstDate: DateTime(2025),
+                            lastDate: DateTime(2027),
+                          );
+                          if (selectedRange == null) {
+                            return;
+                          }
+
+                          startDate = selectedRange.start;
+                          endDate = selectedRange.end;
+                        }
+                        if (value == "Build my own apps or websites") {
+                          language = "JavaScript";
+                        }
                         setState(() {
                           print("aaaaa2");
                           print(value);
@@ -401,7 +443,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             for (int i = 0; i < questions.length; i++) {
                               if (questions[i].id == nextQuestionId) {
                                 nextQuestionOptions = questions[i].options;
-                                NextQestionQuestion = questions[i].question;
+                                nextQestionQuestion = questions[i].question;
                               }
                             }
                           } else {
