@@ -30,7 +30,7 @@ class AppwriteService extends ChangeNotifier {
   late UserInfo progress;
   late Party party;
   late PartyMember partyMember;
-  late Map<String,dynamic> userGoals;
+  late Map<String, dynamic> userGoals;
   final String dbID = '6972adad002e2ba515f2';
 
   AppwriteService() {
@@ -208,21 +208,38 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<void> completeOnboarding(
-      Map<String, String> data, bool pathCreation) async {
+  Future<void> completeOnboarding(Map<String, String> data, bool pathCreation,
+      DateTime? startDate, DateTime? endDate) async {
     try {
-      userGoals=data;
+      userGoals = data;
+      print(progress.progLanguage);
+      print(data["journey"].toString());
       updateIsFirstLogin();
-      await database.createRow(
-          databaseId: dbID,
-          tableId: "user_goals",
-          rowId: user!.$id,
-          data: {"username": user!.name, "prompt": jsonEncode(data)});
+      if (startDate != null && endDate != null) {
+        await database.createRow(
+            databaseId: dbID,
+            tableId: "user_goals",
+            rowId: user!.$id,
+            data: {
+              "username": user!.name,
+              "prompt": jsonEncode(data),
+              "startDate": startDate.toString(),
+              "endDate": endDate.toString()
+            });
+      } else {
+        await database.createRow(
+            databaseId: dbID,
+            tableId: "user_goals",
+            rowId: user!.$id,
+            data: {"username": user!.name, "prompt": jsonEncode(data)});
+      }
 
       var rows = await database
           .listRows(databaseId: dbID, tableId: "mock_mission", queries: [
         Query.equal("user_category", data["journey"].toString()),
+        Query.equal("language", progress.progLanguage),
       ]);
+
       for (var row in rows.rows) {
         await database.createRow(
             databaseId: dbID,
@@ -247,13 +264,12 @@ class AppwriteService extends ChangeNotifier {
             });
       }
 
-      ResolvedProfile profile =
+      /*ResolvedProfile profile =
           ProfileResolver.resolve(userId: user!.$id, answers: data);
       if (pathCreation) {
         await AppwritecloudfunctionsService.createLearningPath(
             profile, user!.$id);
-      }
-      
+      }*/
     } catch (e) {
       print("Error fi complete onboarding $e ");
       rethrow;
@@ -386,15 +402,26 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-  Future<void> updateUserGoals(Map<String,String> data) async{
-        await database.updateRow(
-          databaseId: dbID,
-          tableId: "user_goals",
-          rowId: user!.$id,
-          data: {"prompt": jsonEncode(data)});
-          userGoals=data;
-          notifyListeners();
+
+  Future<void> updateUserGoals(Map<String, String> data) async {
+    await database.updateRow(
+        databaseId: dbID,
+        tableId: "user_goals",
+        rowId: user!.$id,
+        data: {"prompt": jsonEncode(data)});
+    userGoals = data;
+    notifyListeners();
   }
+
+  Future<void> fixEducationTime(DateTime? startDate, DateTime? endDate) async {
+    await database.updateRow(
+        databaseId: dbID,
+        tableId: "user_goals",
+        rowId: user!.$id,
+        data: { "startDate": startDate?.toString(),
+              "endDate": endDate?.toString()});
+  }
+
   Future<void> updateProfile(
       String imagePath, String userName, String bio) async {
     try {
