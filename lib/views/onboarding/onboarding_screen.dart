@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/views/onboarding/language_selection_screen.dart';
-import 'package:pfe_test/waiting/generating_path_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/onboarding_model.dart';
 import '../dashboard/dashboard_screen.dart';
-import 'questions.dart';
+import '../../moks/questions.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -84,8 +84,11 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _waiting(Map<String, String> answers) async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
+    final fnService = Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     await authService.updateLanguageSelected("Python");
-    await authService.completeOnboarding(answers, false);
+    await authService.completeOnboarding(answers, true);
+    await fnService.createLearningPath(authService.user!.$id, authService.progress.progLanguage , answers.toString());
+
     await authService.getUserInfo();
   }
 
@@ -96,25 +99,15 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
       "student_objective_": "Learn the basics",
       "commitment": "☕ 15-30 min"
     };
-    Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => GeneratingPathScreen(
-                  generationFuture: _waiting(answers),
-                  onComplete: (x) {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const DashboardScreen()));
-                  },
-                  onError: (Object error) {},
-                )));
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (context) => const DashboardScreen()));
+    _waiting(answers );
   }
 
   Future<void> _saveUserChoices() async {
     try {
-      // lezem nel9awelha 7aal t3mel fi machkel fel database
-       /*_answers.addEntries({
+      //TODO lezem nel9awelha 7aal t3mel fi machkel fel database
+      /*_answers.addEntries({
         MapEntry("exam_start",
             startDate != null ? startDate!.toIso8601String() : "undefined")
       });
