@@ -1,8 +1,11 @@
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe_test/models/learning_path_model.dart';
 import 'package:pfe_test/models/mission_model.dart';
+import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/views/mission/mission_detail_screen.dart';
+import 'package:provider/provider.dart';
 
 class ConceptDetailScreen extends StatefulWidget {
   final Concept concept;
@@ -99,7 +102,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                         const SizedBox(width: 12),
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: .2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           padding: const EdgeInsets.symmetric(
@@ -162,7 +165,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                       child: LinearProgressIndicator(
                         value: widget.concept.completionPercentage / 100,
                         minHeight: 12,
-                        backgroundColor: Colors.grey.withValues(alpha:0.2),
+                        backgroundColor: Colors.grey.withValues(alpha: 0.2),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           widget.concept.isCompleted
                               ? Colors.green
@@ -236,7 +239,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                               border: Border.all(
                                 color: concept.isCompleted
                                     ? Colors.green.withValues(alpha: .3)
-                                    : Colors.grey.withValues(alpha:0.2),
+                                    : Colors.grey.withValues(alpha: 0.2),
                               ),
                             ),
                             padding: const EdgeInsets.all(12),
@@ -284,91 +287,115 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                 ),
 
               // Related Missions
-              if (widget.concept.relatedMissions.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Related Missions',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                      const SizedBox(height: 12),
-                      ...widget.concept.relatedMissions.map((missionId) {
-                        Mission m = widget.learningPath.missions.firstWhere(
-                          (element) => element.id.contains(missionId),
-                        );
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        MissionDetailScreen(isLearningPath: true ,mission: m)));
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color:
-                                  AppTheme.primaryColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              children: [
-                                Container(
-                                  decoration: const BoxDecoration(
-                                    color: AppTheme.primaryColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  padding: const EdgeInsets.all(8),
-                                  child: const Icon(
-                                    Icons.assignment,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        m.title,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      Text(
-                                        'Practice this concept',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: Colors.grey[600],
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Icon(Icons.arrow_forward,
-                                    color: Colors.grey),
-                              ],
-                            ),
+              // if (widget.concept.relatedMissions.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Related Missions',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
+                    ),
+                    const SizedBox(height: 12),
+                    FutureBuilder<List<Mission>>(
+                      future: Future.wait(
+                        widget.concept.relatedMissions.map((missionId) {
+                          var authService = Provider.of<AppwriteService>(
+                              context,
+                              listen: false);
+                          return authService.loadMissions(missionId);
+                        }),
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        }
+                        if (snapshot.data!.isEmpty) {
+                          return const Text('There is no missions 😉');
+                        }
+                        final missions = snapshot.data ?? [];
+                        return Column(
+                          children: missions.map((m) {
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MissionDetailScreen(
+                                        isLearningPath: true, mission: m),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryColor
+                                      .withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.all(12),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      decoration: const BoxDecoration(
+                                        color: AppTheme.primaryColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: const EdgeInsets.all(8),
+                                      child: const Icon(
+                                        Icons.assignment,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            m.title,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleSmall
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                          ),
+                                          Text(
+                                            'Practice this concept',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  color: Colors.grey[600],
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Icon(Icons.arrow_forward,
+                                        color: Colors.grey),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(), // This .toList() now returns List<Widget> correctly!
                         );
-                      }).toList(),
-                    ],
-                  ),
+                      },
+                    )
+                  ],
                 ),
+              ),
 
               // Learning Resources
               Padding(
@@ -445,7 +472,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                         width: double.infinity,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: Colors.green,
@@ -492,7 +519,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: colors[difficulty].withOpacity(0.2),
+        color: colors[difficulty].withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -536,7 +563,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.grey.withValues(alpha: 0.2),
         ),
       ),
       padding: const EdgeInsets.all(12),
@@ -544,7 +571,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha:0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(8),
