@@ -26,11 +26,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     {'name': 'Java', 'icon': Icons.coffee, 'color': Colors.orange},
     {'name': 'C++', 'icon': Icons.terminal, 'color': Colors.blueAccent},
   ];
-  Future<void> _waiting() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
-    await authService.completeOnboarding(widget.answers,true,widget.startDate,widget.endDate);
-    await authService.getUserInfo();
-  }
 
   @override
   void initState() {
@@ -150,7 +145,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                             authService
                                 .updateLanguageSelected(selectedLanguage!);
                             authService.completeOnboarding(
-                                widget.answers, true);
+                                widget.answers, true,widget.startDate,widget.endDate);
                             await authService.getUserInfo();
                             Navigator.pushReplacement(
                                 context,
