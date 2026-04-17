@@ -7,7 +7,7 @@ import 'package:pfe_test/models/onboarding_model.dart';
 import 'package:provider/provider.dart';
 import '../../services/appwrite_service.dart';
 import '../../theme/app_theme.dart';
-import '../onboarding/questions.dart';
+import '../../moks/questions.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -143,6 +143,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       _userNameController.text, _bioController.text);
                   //it handle in appservice function to not make tow function
                   // ignore: use_build_context_synchronously
+                  Navigator.pop(context);
                   Navigator.pop(context);
                 } else if (newUserGoalsKeys.isEmpty) {
                   builAlert(context);
@@ -371,8 +372,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          print("aaaaa2");
-                          print(value);
+                       
                           String id = questions
                               .firstWhere((onboardingQuestions) =>
                                   onboardingQuestions.options
@@ -380,8 +380,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               .id;
                           String? nextQuestionId;
                           newUserGoalsKeys.add(id);
-                          print("newUserGoalsKeys2" +
-                              newUserGoalsKeys.toString());
+                       
                           newUserGoalsValues.add(value!);
                           for (int i = 0; i < questions.length; i++) {
                             for (int j = 0;

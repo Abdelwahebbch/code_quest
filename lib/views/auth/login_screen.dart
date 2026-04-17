@@ -73,7 +73,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 170,
                   image: AssetImage('assets/icon/icon.png'),
                 ),
-                
                 const Text(
                   "Master Software Engineering",
                   textAlign: TextAlign.center,
@@ -128,15 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 TextButton(
                   onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return const AlertDialog(
-                            title: Text("Coming Soon"),
-                            content: Text("This feature is not yet available. It will be released in a future update."),
-                          
-                          );
-                        });
+                    authService.account.createRecovery(email: "", url: "url");
                   },
                   child: const Text("Forgot Password ?"),
                 ),

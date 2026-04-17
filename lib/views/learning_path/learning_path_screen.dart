@@ -452,9 +452,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
 
   Widget _buildMilestoneCard(LearningPathMilestone milestone, int index) {
     final isLocked = !milestone.isUnlocked;
-    final relatedConcepts = widget.learningPath.concepts
-        .where((c) => milestone.conceptIds.contains(c.id))
-        .toList();
+    final relatedConcepts = milestone.concepts ; 
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -785,7 +783,7 @@ class _LearningPathScreenState extends State<LearningPathScreen>
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+  String _formatDate(DateTime? date) {
+    return '${date!.day}/${date.month}/${date.year}';
   }
 }
