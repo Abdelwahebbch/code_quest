@@ -104,6 +104,17 @@
         );
       }
       return SafeArea(
+        child: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('To leave the party results, tap the "Back to Home" button in the Bottom.'),
+            ),
+          );
+        },
         child: Scaffold(
           appBar: AppBar(
             title: const Text('Game Results'),
@@ -457,6 +468,6 @@
             ),
           ),
         ),
-      );
+      ));
     }
   }
