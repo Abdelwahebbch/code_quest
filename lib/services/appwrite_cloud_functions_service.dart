@@ -4,7 +4,7 @@ import 'dart:convert';
 
 import 'package:pfe_test/models/message_model.dart';
 import 'package:pfe_test/models/party_model.dart';
-import 'package:pfe_test/models/resolve_user_profile.dart';
+
 import 'package:pfe_test/models/user_info_model.dart';
 
 import '../models/mission_model.dart';
@@ -35,26 +35,48 @@ class AppwritecloudfunctionsService extends ChangeNotifier {
     }
   }
 
-  static Future<void> createLearningPath(
-      ResolvedProfile profile, String userId) async {
-    try {
-      final res = await http.post(
-          Uri.parse('https://69c8037600042b81ce1b.fra.appwrite.run/'),
-          body: jsonEncode({
-            "userId": userId,
-            "profile": {
-              "Topic": profile.language,
-              "currentLevel": profile.currentLevel,
-              "milestoneCount": profile.milestoneCount,
-              "conceptsPerMilestone": profile.conceptsPerMilestone,
-              "focusArea": profile.focusArea,
-              "commitment": profile.commitment,
-            }
-          }));
-      debugPrint(res.body);
-    } catch (e) {
-      debugPrint("Error when create learning path $e");
-      rethrow;
+  // static Future<void> createLearningPath(
+  //     ResolvedProfile profile, String userId) async {
+  //   try {
+  //     final res = await http.post(
+  //         Uri.parse('https://69c8037600042b81ce1b.fra.appwrite.run/'),
+  //         body: jsonEncode({
+  //           "userId": userId,
+  //           "profile": {
+  //             "Topic": profile.language,
+  //             "currentLevel": profile.currentLevel,
+  //             "milestoneCount": profile.milestoneCount,
+  //             "conceptsPerMilestone": profile.conceptsPerMilestone,
+  //             "focusArea": profile.focusArea,
+  //             "commitment": profile.commitment,
+  //           }
+  //         }));
+  //     debugPrint(res.body);
+  //   } catch (e) {
+  //     debugPrint("Error when create learning path $e");
+  //     rethrow;
+  //   }
+  // }
+
+  Future<void> createLearningPath(String id, String p, String d) async {
+    int x = 0;
+    int time = 5000;
+    while (x <= 4) {
+      try {
+        final res = await http.post(
+            Uri.parse('https://69c8037600042b81ce1b.fra.appwrite.run/'),
+            body: jsonEncode({"progLang": p, "userId": id, "desc": d}));
+        if (res.statusCode > 499) {
+          debugPrint(res.body);
+          x++;
+          if (x >= 4) throw Exception("Max attempts reached");
+        } else {
+          debugPrint("Another exception");
+        }
+      } catch (e) {
+        debugPrint("Error when create learning path $e");
+        rethrow;
+      }
     }
   }
 
