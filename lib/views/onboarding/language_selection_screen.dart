@@ -24,36 +24,28 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     {'name': 'Java', 'icon': Icons.coffee, 'color': Colors.orange},
     {'name': 'C++', 'icon': Icons.terminal, 'color': Colors.blueAccent},
   ];
-  Future<void> _waiting() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
-    await authService.completeOnboarding(widget.answers,true);
-    await authService.getUserInfo();
-  }
 
   @override
   void initState() {
     super.initState();
     if (widget.answers["journey"] == "High School Student") {
-      if (widget.answers["student_objective_"] ==
-          "Learn the basics") {
+      if (widget.answers["student_objective_"] == "Learn the basics") {
         selectedLanguage = "Python";
       }
     }
     if (widget.answers["journey"] == "Self-Taught Explorer") {
       if (widget.answers["explorer_objective"] ==
           "Build my own apps or websites") {
-        if (widget.answers["student_objective_"] ==
-            "Learn the basics") {
+        if (widget.answers["student_objective_"] == "Learn the basics") {
           languages.removeAt(0);
           selectedLanguage = "JavaScript";
         }
       } else if (widget.answers["explorer_objective"] ==
           "Start a career in tech") {
-        widget.answers["student_objective_"] ="Learn the basics";
+        widget.answers["student_objective_"] = "Learn the basics";
         selectedLanguage = "Python";
       } else {
-        if (widget.answers["student_objective_"] ==
-            "Learn the basics") {
+        if (widget.answers["student_objective_"] == "Learn the basics") {
           selectedLanguage = "Python";
         }
       }
@@ -146,23 +138,17 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                   child: ElevatedButton(
                     onPressed: selectedLanguage == null
                         ? null
-                        : () {
+                        : () async {
                             authService
                                 .updateLanguageSelected(selectedLanguage!);
+                            authService.completeOnboarding(
+                                widget.answers, true);
+                            await authService.getUserInfo();
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => GeneratingPathScreen(
-                                          generationFuture: _waiting(),
-                                          onComplete: (x) {
-                                            Navigator.pushReplacement(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        const DashboardScreen()));
-                                          },
-                                          onError: (Object error) {},
-                                        )));
+                                    builder: (context) =>
+                                        const DashboardScreen()));
                           },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
