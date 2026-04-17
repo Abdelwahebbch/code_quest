@@ -7,11 +7,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe_test/models/learning_path_model.dart';
 import 'package:pfe_test/models/party_model.dart';
-import 'package:pfe_test/models/resolve_user_profile.dart';
 import 'package:pfe_test/models/user_info_model.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/mission_model.dart';
-
 
 class AppwriteService extends ChangeNotifier {
   Client client = Client();
@@ -30,11 +29,24 @@ class AppwriteService extends ChangeNotifier {
   late UserInfo progress;
   late Party party;
   late PartyMember partyMember;
-  late Map<String,dynamic> userGoals;
+  late Map<String, dynamic> userGoals;
   final String dbID = '6972adad002e2ba515f2';
 
   AppwriteService() {
     _init();
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+      final prefs = await SharedPreferences.getInstance();
+      await account.createPushTarget(
+        targetId: ID.unique(),
+        identifier: newToken,
+        providerId: '699bf106002c3fc1716f',
+      );
+      await prefs.setString('fcm_token', newToken);
+    });
+
+    print("ok");
+    registerNotificationDevice();
+    print("ok");
   }
 
   void _init() {
@@ -50,21 +62,24 @@ class AppwriteService extends ChangeNotifier {
   }
 
   Future<void> registerNotificationDevice() async {
-    final account = Account(client);
-    try {
-      FirebaseMessaging messaging = FirebaseMessaging.instance;
-      await messaging.requestPermission();
-      String? fcmToken = await messaging.getToken();
+    final prefs = await SharedPreferences.getInstance();
+    final storedToken = prefs.getString('fcmToken');
 
-      if (fcmToken != null) {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? fcmToken = await messaging.getToken();
+
+    if (fcmToken != null && fcmToken != storedToken) {
+      try {
         await account.createPushTarget(
           targetId: ID.unique(),
           identifier: fcmToken,
           providerId: '699bf106002c3fc1716f',
         );
+        await prefs.setString('fcmToken', fcmToken);
+        // ignore: empty_catches
+      } catch (e) {
+        debugPrint("error fi register nooootiiif $e ");
       }
-    } catch (e) {
-      print("Error fi el registerNotificationDevice ");
     }
   }
 
@@ -125,6 +140,7 @@ class AppwriteService extends ChangeNotifier {
             password: password,
             name: name,
           );
+          //await account.deleteSession(sessionId: 'current');
           await account.createEmailPasswordSession(
             email: email,
             password: password,
@@ -139,8 +155,9 @@ class AppwriteService extends ChangeNotifier {
       _user = await account.get();
       await createNewRow();
       await getUserInfo();
+      await registerNotificationDevice();
       _isLoading = false;
-      registerNotificationDevice();
+      // registerNotificationDevice();
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -153,15 +170,16 @@ class AppwriteService extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      await account.deleteSession(sessionId: 'current');
       await account.createEmailPasswordSession(
         email: email,
         password: password,
       );
+
       _user = await account.get();
       _isLoading = false;
-      registerNotificationDevice();
+      // registerNotificationDevice();
       await getUserInfo();
+      await registerNotificationDevice();
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -189,6 +207,7 @@ class AppwriteService extends ChangeNotifier {
         }
       }
       await getUserInfo();
+      await registerNotificationDevice();
       _isLoading = false;
       notifyListeners();
     } on AppwriteException catch (e) {
@@ -202,6 +221,7 @@ class AppwriteService extends ChangeNotifier {
     try {
       await account.deleteSession(sessionId: 'current');
       _user = null;
+
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -211,7 +231,7 @@ class AppwriteService extends ChangeNotifier {
   Future<void> completeOnboarding(
       Map<String, String> data, bool pathCreation) async {
     try {
-      userGoals=data;
+      userGoals = data;
       updateIsFirstLogin();
       await database.createRow(
           databaseId: dbID,
@@ -247,13 +267,10 @@ class AppwriteService extends ChangeNotifier {
             });
       }
 
-      ResolvedProfile profile =
-          ProfileResolver.resolve(userId: user!.$id, answers: data);
       if (pathCreation) {
-        await AppwritecloudfunctionsService.createLearningPath(
-            profile, user!.$id);
+        await AppwritecloudfunctionsService().createLearningPath(
+            user!.$id, progress.progLanguage, data.toString());
       }
-      
     } catch (e) {
       print("Error fi complete onboarding $e ");
       rethrow;
@@ -321,11 +338,34 @@ class AppwriteService extends ChangeNotifier {
   }
 
   Future<LearningPath> getLearningPath() async {
+    List<LearningPathMilestone> milestones = [];
+    List<Concept> concepts = [];
     try {
-      final row = await database.getRow(
-          databaseId: dbID, tableId: "learnig_paths", rowId: user!.$id);
+      var row = await database.getRow(
+          databaseId: dbID,
+          tableId: DatabaseTables.learnig_paths.name,
+          rowId: user!.$id,
+          queries: [
+            Query.select([
+              "*",
+              "milestones.*",
+              "milestones.concepts.*",
+              "milestones.concepts.missionrelation.*"
+            ])
+          ]);
 
-      return LearningPath.fromJson(row);
+      final Map<String, dynamic> parsedData = row.data;
+      milestones = (parsedData['milestones'] as List<dynamic>?)
+              ?.map((e) =>
+                  LearningPathMilestone.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [];
+      for (var m in milestones) {
+        if (m.concepts.isNotEmpty) {
+          concepts.addAll(m.concepts);
+        }
+      }
+      return LearningPath.fromJson(parsedData, milestones, concepts);
     } catch (e) {
       debugPrint("Error fetching learning path : $e");
       rethrow;
@@ -335,7 +375,9 @@ class AppwriteService extends ChangeNotifier {
   Future<void> getuserGoals() async {
     final row = await database.getRow(
         databaseId: dbID, tableId: "user_goals", rowId: _user!.$id);
-    progress.rate = row.data["rate"];
+
+    progress.rate = row.data["rate"] / 1;
+
     userGoals = jsonDecode(row.data["prompt"]);
   }
 
@@ -344,9 +386,11 @@ class AppwriteService extends ChangeNotifier {
       models.User user = await account.get();
       final row = await database.getRow(
           databaseId: dbID, tableId: "user_profiles", rowId: user.$id);
+
       int x = await getRank();
       isFirstLogin = row.data["isFirstLogin"] ?? true;
       notifyListeners();
+
       progress = UserInfo(
         progLanguage: row.data["progLanguage"] ?? "not selected",
         username: user.name,
@@ -367,11 +411,14 @@ class AppwriteService extends ChangeNotifier {
         totalFailures: row.data["totalFailures"] ?? 0,
         totalAIQuestions: row.data["totalAIQuestions"] ?? 0,
       );
+
       if (!isFirstLogin) {
         await getuserGoals();
       }
+
       try {
         path = await getLearningPath();
+        print(path.milestones.first.concepts.length);
       } on AppwriteException catch (e) {
         if (e.code == 404) {
           print("Not Found mouch mochkol");
@@ -386,15 +433,17 @@ class AppwriteService extends ChangeNotifier {
       rethrow;
     }
   }
-  Future<void> updateUserGoals(Map<String,String> data) async{
-        await database.updateRow(
-          databaseId: dbID,
-          tableId: "user_goals",
-          rowId: user!.$id,
-          data: {"prompt": jsonEncode(data)});
-          userGoals=data;
-          notifyListeners();
+
+  Future<void> updateUserGoals(Map<String, String> data) async {
+    await database.updateRow(
+        databaseId: dbID,
+        tableId: "user_goals",
+        rowId: user!.$id,
+        data: {"prompt": jsonEncode(data)});
+    userGoals = data;
+    notifyListeners();
   }
+
   Future<void> updateProfile(
       String imagePath, String userName, String bio) async {
     try {
@@ -1231,6 +1280,62 @@ class AppwriteService extends ChangeNotifier {
 
   Future<dynamic> getLearningPathRows(DatabaseTables table, rowId) {
     return database.getRow(databaseId: dbID, tableId: table.name, rowId: rowId);
+  }
+
+  void testSelect() async {
+    try {
+      await database.createRow(
+        databaseId: dbID,
+        tableId: 'learnig_paths',
+        rowId: ID.unique(),
+        data: {
+          'topic': 'Spiderman',
+          'totalConceptsCompleted': 5,
+          'totalConcepts': 5,
+          'overallProgressPercentage': 5,
+          'milestones': [
+            {
+              'title': 'Bob',
+              'description': 'Great movie!',
+              'order': 5,
+              'concepts': [
+                {'name': 'Aloo Alooo'}
+              ]
+            },
+          ]
+        },
+      );
+    } catch (e) {
+      print("Error is $e");
+    }
+  }
+
+  Future<Mission> loadMissions(String id) async {
+    var mission = await database.getRow(
+        databaseId: dbID, tableId: DatabaseTables.missions.name, rowId: id);
+
+    final MissionType type = MissionType.values
+        .firstWhere((e) => e.name.contains(mission.data["type"]));
+
+    switch (type) {
+      case MissionType.complete:
+        return Mission.completeMission(mission);
+
+      case MissionType.debug:
+        return Mission.debugMission(mission);
+
+      case MissionType.multipleChoice:
+        return Mission.multipleChoice(mission);
+
+      case MissionType.ordering:
+        return Mission.ordering(mission);
+
+      case MissionType.singleChoice:
+        return Mission.singleChoice(mission);
+
+      case MissionType.test:
+        return Mission.testMission(mission);
+    }
   }
 }
 
