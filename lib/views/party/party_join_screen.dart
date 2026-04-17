@@ -81,7 +81,8 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
           maxMembers: msg["maxMembers"],
           difficulty: msg["difficulty"],
           gameMode: msg["gameMode"],
-          nbMembers: msg["memberCount"]);
+          nbMembers: msg["memberCount"],
+          isStarted : msg["isStarted"]);
 
       if (res.events.any((e) => e.contains("create"))) {
         if (!mounted) return;
@@ -131,6 +132,13 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
         );
         return;
       }
+      if(rowId.contains("Party already Started")){
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Party already Started'), duration: Duration(seconds: 2)),
+        );
+        return;
+      }
       if (rowId.contains("Party not found")) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -160,7 +168,13 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
       );
       return;
     }
-
+    if(party.isStarted){
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Party already Started'), duration: Duration(seconds: 2)),
+        );
+        return;
+      }
     final authService = Provider.of<AppwriteService>(context, listen: false);
     if (!mounted) return;
     setState(() => _isLoading = true);
