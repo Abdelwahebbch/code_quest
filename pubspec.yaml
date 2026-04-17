@@ -23,6 +23,8 @@ dependencies:
   pin_code_fields: ^8.0.1
   flutter_markdown_plus: ^1.0.7
   flutter_code_editor: ^0.3.5
+  shared_preferences: ^2.5.5
+  rive: ^0.14.5
   
 dev_dependencies:
   flutter_test:
