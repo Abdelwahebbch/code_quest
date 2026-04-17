@@ -21,9 +21,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void initState() {
+    
     super.initState();
-    Provider.of<AppwriteService>(context, listen: false)
-        .registerNotificationDevice();
+ 
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
