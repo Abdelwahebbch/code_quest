@@ -20,6 +20,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   late final authService;
   bool _isReady = false;
   bool isStarting = false;
+  bool lastStats=false;
   RealtimeSubscription? subscription;
   RealtimeSubscription? subscription1;
   @override
@@ -41,20 +42,22 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
           .row(_party.partyId)
     ]);
     subscription?.stream.listen((response) async {
-      if (response.payload["isStarted"] == true && _party.isStarted == false) {
-        List<Map<String, dynamic>> quizs = await getQuiz();
+      if (!response.payload.containsKey("isStarted")) return;
+      if (response.payload["isStarted"] == true && lastStats != response.payload["isStarted"]) {
+        List<Map<String, dynamic>> quizs = [];
+        quizs = await getQuiz();
         if (quizs.isNotEmpty) {
-          if (!mounted) return;
           authService.changeIsStartedLocaly();
-          Navigator.push(
+          lastStats = response.payload["isStarted"] ;
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => PartyQuizScreen(questions: quizs),
             ),
           );
-        }
-        else{
-          await  authService.partyPlayAgain();
+          quizs = [];
+        } else {
+          await authService.partyPlayAgain();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
@@ -63,10 +66,11 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
           );
         }
       }
-      if (response.payload["isStarted"] == false && _party.isStarted == true) {
+      if (response.payload["isStarted"] == false && lastStats != response.payload["isStarted"]) {
         authService.changeIsStartedLocaly();
+        lastStats = response.payload["isStarted"];
         if (!mounted) return;
-        Navigator.push(
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => const PartyLobbyScreen(),
@@ -157,7 +161,8 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
       setState(() {
         isStarting = true;
       });
-      await AppwritecloudfunctionsService.requestForPartyQuizzes(_party, _party.difficulty);
+      await AppwritecloudfunctionsService.requestForPartyQuizzes(
+          _party, _party.difficulty);
       final authService = Provider.of<AppwriteService>(context, listen: false);
       setState(() {
         isStarting = false;
@@ -184,6 +189,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AppwriteService>(context, listen: false);
+    _isReady=authService.partyMember.isReady;
     return SafeArea(
       child: PopScope(
         canPop: false,
