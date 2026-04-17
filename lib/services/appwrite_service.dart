@@ -913,6 +913,11 @@ class AppwriteService extends ChangeNotifier {
       }
       final partyRow = partyResult.rows.first;
       final String rowId = partyRow.$id;
+      final bool isStarted= partyRow.data["isStarted"];
+      print(isStarted);
+      if(isStarted == true){
+        return "Party already Started";
+      }
       final int maxMembers = partyRow.data["maxMembers"] ?? 0;
       final membersResult = await database.listRows(
         databaseId: dbID,
@@ -1199,6 +1204,7 @@ class AppwriteService extends ChangeNotifier {
         tableId: "quizzes",
         queries: [
           Query.equal("partyId", party.partyId),
+          Query.orderDesc("\$createdAt"),
         ],
       );
       for (int i = 0; i < rows.rows.length; i++) {
@@ -1301,6 +1307,7 @@ class AppwriteService extends ChangeNotifier {
         rowId: party.partyId,
         data: {'isStarted': false},
       );
+
     } catch (e) {
       rethrow;
     }
