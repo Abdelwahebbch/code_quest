@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/moks/mock_data.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:provider/provider.dart';
 import '../models/user_info_model.dart';
