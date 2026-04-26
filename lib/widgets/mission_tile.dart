@@ -11,6 +11,7 @@ class MissionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isComplete = mission.isCompleted;
+    bool isSurrendered = mission.isSurrendered;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -43,15 +44,15 @@ class MissionTile extends StatelessWidget {
             ),
           ],
         ),
-        trailing: isComplete
+        trailing: isSurrendered ? const Icon(Icons.close,color: Colors.redAccent,):(isComplete
             ? const Icon(
                 Icons.check,
                 color: AppTheme.warningColor,
               )
-            : const Icon(Icons.chevron_right),
+            : const Icon(Icons.chevron_right)),
         onTap: () {
           //add if is it commplet
-          if (!isComplete) {
+          if (!isComplete && !isSurrendered) {
             Navigator.push(
               context,
               MaterialPageRoute(
