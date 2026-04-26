@@ -429,6 +429,7 @@ class AppwriteService extends ChangeNotifier {
             row.data["nbMissionCompletedWithoutHints"] ?? 0,
         totalFailures: row.data["totalFailures"] ?? 0,
         totalAIQuestions: row.data["totalAIQuestions"] ?? 0,
+        elo: row.data["elo"],
       );
 
       if (!isFirstLogin) {
@@ -629,16 +630,22 @@ class AppwriteService extends ChangeNotifier {
     }
   }
 
-  Future<void> updateRate(int missionDiffculty, double rate) async {
+  Future<void> updateRate(int missionDiffculty,int missionPoints ,double S) async {
     try {
       //Elo Algorthime
       //s= normalized mission rate
-      double S = rate / 10;
       //E = Expected probability
       //2 = is scale you can change
-      double E = 1 / (1 + pow(10, ((missionDiffculty - progress.rate) / 2)));
+      double E = 1 / (1 + pow(10, ((missionDiffculty - progress.rate) / 4)));
+      double k= 0.3*(1+0.5*(missionDiffculty/10));
+      double s2=S*(1+0.1*(missionPoints/2500));
       // Update
-      double newRate = progress.rate + (S - E);
+      double newRate = progress.rate + k*(s2 - E);
+      print(newRate);
+      progress.elo+=((k*(s2 - E))*100).toInt();
+      if(progress.elo<0) progress.elo=0;
+      if(newRate>10) newRate=10;
+      if(newRate<0.0) newRate=0.0;
       progress.rate = double.parse(newRate.clamp(1, 10).toStringAsFixed(2));
       notifyListeners();
       await database.updateRow(
@@ -646,6 +653,11 @@ class AppwriteService extends ChangeNotifier {
           tableId: "user_goals",
           rowId: user!.$id,
           data: {'rate': progress.rate});
+      await database.updateRow(
+          databaseId: dbID,
+          tableId: "user_profiles",
+          rowId: user!.$id,
+          data: {'elo': progress.elo});
     } catch (e) {
       rethrow;
     }
@@ -667,19 +679,47 @@ class AppwriteService extends ChangeNotifier {
           data: {'nbMission': progress.nbMissions});
       int? missionNb;
       int missionDiffculty = 0;
+      int missionPoints=0;
       for (int i = 0; i < progress.missions.length; i++) {
         if (progress.missions[i].id == id) {
           progress.missions[i].isCompleted = true;
           missionDiffculty = progress.missions[i].difficulty;
+          missionPoints= progress.missions[i].points;
           missionNb = i;
         }
       }
-      await updateRate(missionDiffculty, rate);
+      await updateRate(missionDiffculty, missionPoints,rate);
       await checkbadges(missionNb!);
       notifyListeners();
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> surrendereMission(String id) async{
+    try {
+      await database.updateRow(
+        databaseId: dbID,
+        tableId: "missions",
+        rowId: id,
+        data: {'Surrendered': true},
+      );
+      int? missionNb;
+      int missionDiffculty = 0;
+      int missionPoints=0;
+      for (int i = 0; i < progress.missions.length; i++) {
+        if (progress.missions[i].id == id) {
+          progress.missions[i].isSurrendered = true;
+          missionDiffculty = progress.missions[i].difficulty;
+          missionPoints= progress.missions[i].points;
+        }
+      }
+      await updateRate(missionDiffculty, missionPoints,0);
+      //To do Rate
+    } catch (e) {
+      rethrow;
+    }
+    notifyListeners();
   }
 
   Future<int> getRank() async {
