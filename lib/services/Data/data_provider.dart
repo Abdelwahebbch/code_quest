@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart' hide Row;
 import 'package:appwrite/models.dart';
+import 'package:pfe_test/models/learning_path_model.dart';
 import 'package:pfe_test/models/mission_model.dart';
 import 'package:pfe_test/models/user_info_model.dart';
-import 'package:pfe_test/models/user_model.dart';
 import 'package:pfe_test/services/Auth/auth_provider.dart';
 import 'package:pfe_test/services/Data/data_repository.dart';
 
@@ -16,6 +16,7 @@ class DataProvider with ChangeNotifier {
 
   late UserInfo progress;
   late bool isFirstLogin;
+  late LearningPath path ; 
   late Map<String, dynamic> userGoals;
   bool get isLoading => _isLoading;
 
@@ -144,7 +145,7 @@ class DataProvider with ChangeNotifier {
       }
 
       try {
-        // path = await getLearningPath();
+         path = await getLearningPath();
         //print(path.milestones.first.concepts.length);
       } on AppwriteException catch (e) {
         if (e.code == 404) {
@@ -159,7 +160,40 @@ class DataProvider with ChangeNotifier {
       rethrow;
     }
   }
+  Future<LearningPath> getLearningPath() async {
+    List<LearningPathMilestone> milestones = [];
+    List<Concept> concepts = [];
+    try {
+      var row = await dataRepository.getRow(
+         
+          tableId: "learnig_paths",
+          rowId: authProvider.currentUser!.id,
+          queries: [
+            Query.select([
+              "*",
+              "milestones.*",
+              "milestones.concepts.*",
+              "milestones.concepts.missionrelation.*"
+            ])
+          ]);
 
+      final Map<String, dynamic> parsedData = row.data;
+      milestones = (parsedData['milestones'] as List<dynamic>?)
+              ?.map((e) =>
+                  LearningPathMilestone.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [];
+      for (var m in milestones) {
+        if (m.concepts.isNotEmpty) {
+          concepts.addAll(m.concepts);
+        }
+      }
+      return LearningPath.fromJson(parsedData, milestones, concepts);
+    } catch (e) {
+      debugPrint("Error fetching learning path : $e");
+      rethrow;
+    }
+  }
   Future<void> getuserGoals() async {
     final row = await dataRepository.getRow(
         tableId: "user_goals", rowId: authProvider.currentUser!.id);

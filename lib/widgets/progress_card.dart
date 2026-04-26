@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pfe_test/models/user_info_model.dart';
+import 'package:pfe_test/services/Auth/auth_provider.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
+import 'package:pfe_test/views/learning_path/learning_path_screen.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
-
 
 class ProgressCard extends StatelessWidget {
   final UserInfo user;
@@ -13,22 +16,23 @@ class ProgressCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         try {
-          // final authservice =
-          //     Provider.of<AuthProvider>(context, listen: false);
+          final authservice = Provider.of<AuthProvider>(context, listen: false);
+          final dataservice = Provider.of<DataProvider>(context, listen: false);
 
-          // if (authservice.user!.$id != authservice.path.userId) Exception("For previous user ");
+          if (authservice.currentUser!.id != dataservice.path.userId)
+            Exception("For previous user ");
 
-          // final learningPath = authservice.path;
-          // // LearningPathSampleData.getSamplePythonPath();
+          final learningPath = dataservice.path;
+          // LearningPathSampleData.getSamplePythonPath();
 
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => LearningPathScreen(
-          //       learningPath: learningPath,
-          //     ),
-          //   ),
-          // );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LearningPathScreen(
+                learningPath: learningPath,
+              ),
+            ),
+          );
         } catch (e) {
           showDialog(
               context: context,
@@ -38,7 +42,7 @@ class ProgressCard extends StatelessWidget {
                       "Learning path not found ! ",
                       style: TextStyle(fontSize: 12),
                     ),
-                    content: Text("We can't load your lerning path "),
+                   
                   ));
         }
       },

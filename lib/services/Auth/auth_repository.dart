@@ -18,6 +18,9 @@ class AuthRepository {
         return null;
       }
       rethrow;
+    } catch (e){
+      print(e); 
+      rethrow;
     }
   }
 

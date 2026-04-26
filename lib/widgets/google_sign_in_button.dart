@@ -2,8 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/Auth/auth_provider.dart';
-import 'package:pfe_test/services/Data/data_provider.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:pfe_test/views/onboarding/onboarding_screen.dart';
 import 'package:provider/provider.dart';

@@ -1,6 +1,5 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart' hide Row;
-import 'package:appwrite/models.dart';
 import 'package:pfe_test/models/party_model.dart';
 import 'package:pfe_test/models/user_info_model.dart';
 import 'package:pfe_test/services/Auth/auth_provider.dart';

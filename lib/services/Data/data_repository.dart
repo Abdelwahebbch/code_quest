@@ -20,12 +20,13 @@ class DataRepository {
     }
   }
 
-  Future<Row> getRow({required String tableId, required String rowId}) async {
+  Future<Row> getRow( {List<String>? queries,required String tableId, required String rowId}) async {
     try {
       return await appwriteService.databases.getRow(
         databaseId: '6972adad002e2ba515f2',
         tableId: tableId,
         rowId: rowId,
+        queries: queries
       );
     } catch (e) {
       rethrow;

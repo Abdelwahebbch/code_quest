@@ -40,7 +40,7 @@ void main() {
               ..init()),
         ChangeNotifierProvider<PartyDataProvider>(
             create: (context) => PartyDataProvider(
-              appwriteService: context.read<AppwriteService>(),
+                appwriteService: context.read<AppwriteService>(),
                 dataRepository: context.read<DataRepository>(),
                 authProvider: context.read<AuthProvider>(),
                 progress: context.read<DataProvider>().progress)),
@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeManager = Provider.of<ThemeManager>(context , listen: false);
+    final themeManager = Provider.of<ThemeManager>(context, listen: false);
     return MaterialApp(
       scrollBehavior: const MaterialScrollBehavior()
           .copyWith(dragDevices: PointerDeviceKind.values.toSet()),
@@ -66,28 +66,18 @@ class MyApp extends StatelessWidget {
       themeMode: themeManager.themeMode,
       home: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
-          // 1. FIRST, check if Auth is loading
           if (authProvider.isLoading) {
             return const SplashScreen();
-          }
-
-          // 2. SECOND, if we have a user, check DataProvider
-          else if (authProvider.currentUser != null) {
+          } else if (authProvider.currentUser != null) {
             return Consumer<DataProvider>(
               builder: (context, dataProvider, child) {
-                // Now we wait for the data to load
                 if (dataProvider.isLoading) {
-                  // You can show the Splash screen here, or a different loading indicator
                   return const SplashScreen();
                 }
-                // Both Auth and Data are ready!
                 return const DashboardScreen();
               },
             );
-          }
-
-          // 3. THIRD, if no user is found, go to Login
-          else {
+          } else {
             return const LoginScreen();
           }
         },

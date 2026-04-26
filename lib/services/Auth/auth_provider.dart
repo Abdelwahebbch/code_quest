@@ -1,5 +1,3 @@
-import 'package:appwrite/appwrite.dart';
-import 'package:appwrite/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/models.dart';
 import 'package:pfe_test/models/user_model.dart';
@@ -56,7 +54,7 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       // account.deleteSession(sessionId: 'current');
       await authRepository.continueWithGoogle();
-     User user = await authRepository.appwriteService.account.get();
+      User user = await authRepository.appwriteService.account.get();
       _currentUser = UserModel.fromAppwriteUser(user);
       // try {
       //   //await createNewRow();
