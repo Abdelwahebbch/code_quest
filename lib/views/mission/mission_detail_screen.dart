@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:http/http.dart';
 import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
@@ -59,13 +60,61 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               padding: const EdgeInsets.all(16),
               color: AppTheme.cardColor,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("MISSION OBJECTIVE",
-                      style: TextStyle(
-                          color: AppTheme.accentColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("MISSION OBJECTIVE",
+                          style: TextStyle(
+                              color: AppTheme.accentColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12)),
+                      TextButton(
+                          onPressed: () async {
+                            final authService = Provider.of<AppwriteService>(
+                                context,
+                                listen: false);
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => AlertDialog(
+                                title: const Center(child: Text("Warning !")),
+                                content: const Text(
+                                    "Are you sure you want to surrender?"),
+                                actions: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("Cancel"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          await authService.surrendereMission(
+                                              widget.mission.id);
+                                          authService.updateMissionStatus(
+                                              widget.mission.id, 0.0);
+                                          Navigator.pop(context);
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("OK"),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            "Surrendere",
+                            style: TextStyle(color: Colors.redAccent),
+                          ))
+                    ],
+                  ),
                   const SizedBox(height: 8),
                   Text(widget.mission.description,
                       style: const TextStyle(fontSize: 16)),
@@ -218,11 +267,20 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       ),
     );
   }
-  double getRate(){
-    double rate=10.0-((widget.mission.aiPointsUsed*1)+(widget.mission.nbFailed*2));
-    if(rate<1) { return 1; }
+
+  double getRate() {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    double rate = 1 -
+        (((widget.mission.aiPointsUsed / (authService.progress.totalPoints+1)) *
+                0.2) +
+            ((widget.mission.nbFailed / (authService.progress.totalFailures+1)) *
+                0.1));
+    if (rate < 0.0) {
+      return 0.0;
+    }
     return rate;
   }
+
   Future<void> _checkAnswer() async {
     final authService = Provider.of<AppwriteService>(context, listen: false);
 
@@ -269,21 +327,21 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         if (!mounted) return;
         Navigator.pop(context);
         isCorrect = check[0];
-        rate = check[1]-widget.mission.aiPointsUsed*0.5;
+        rate = getRate();
 
         break;
       case MissionType.singleChoice:
         isCorrect = _currentAnswer
             .toString()
             .contains(widget.mission.solution.toString());
-            rate=10.0-((widget.mission.aiPointsUsed*0.5)+(widget.mission.nbFailed*2));
+        rate = getRate();
         break;
       case MissionType.multipleChoice:
         if (_currentAnswer is List<String>) {
           final correctAnswers = widget.mission.solution?.split(',') ?? [];
           isCorrect = _currentAnswer.length == correctAnswers.length &&
               _currentAnswer.every((item) => correctAnswers.contains(item));
-              rate=getRate();
+          rate = getRate();
         }
         break;
       case MissionType.ordering:
@@ -291,14 +349,14 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
           final correctOrder = widget.mission.correctOrder ?? [];
           isCorrect = _currentAnswer.length == correctOrder.length &&
               equals(_currentAnswer, correctOrder);
-              rate=getRate();
+          rate = getRate();
         }
         break;
       case MissionType.test:
         isCorrect = _currentAnswer
             .toString()
             .contains(widget.mission.solution.toString());
-            rate=getRate();
+        rate = getRate();
         break;
     }
 
