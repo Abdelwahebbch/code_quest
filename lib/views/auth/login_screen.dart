@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
-import 'package:pfe_test/views/onboarding/onboarding_screen.dart';
+import 'package:pfe_test/services/Auth/auth_provider.dart';
+import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/widgets/google_sign_in_button.dart';
 import 'package:provider/provider.dart';
-import '../../theme/app_theme.dart';
-import '../../services/appwrite_service.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -26,37 +24,37 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleLogin() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
     try {
-      await authService.login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
+      await Provider.of<AuthProvider>(context, listen: false).signIn(
+        email: _emailController.text,
+        password: _passwordController.text,
       );
-      if (!mounted) return;
-      if (authService.isFirstLogin) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        );
-      }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Login failed: invalid Email or Password")),
-        );
-      }
+      _showErrorDialog(e.toString());
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Okay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          )
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context);
+    final authService = Provider.of<AuthProvider>(context );
 
     return SafeArea(
       child: Scaffold(
@@ -127,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 TextButton(
                   onPressed: () {
-                    authService.account.createRecovery(email: "", url: "url");
+                  
                   },
                   child: const Text("Forgot Password ?"),
                 ),

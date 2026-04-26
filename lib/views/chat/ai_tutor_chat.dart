@@ -1,13 +1,13 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:pfe_test/models/message_model.dart';
-import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/models/mission_model.dart';
+import 'package:pfe_test/services/CloudFunctions/appwrite_cloud_functions_service.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
+import 'package:pfe_test/theme/app_theme.dart';
 import 'package:provider/provider.dart';
-import '../../models/mission_model.dart';
-import '../../theme/app_theme.dart';
+
 
 class AITutorChat extends StatefulWidget {
   final Mission mission;
@@ -31,7 +31,7 @@ class _AITutorChatState extends State<AITutorChat> {
   @override
   void initState() {
     super.initState();
-    final authservice = Provider.of<AppwriteService>(context, listen: false);
+    final authservice = Provider.of<DataProvider>(context, listen: false);
 
     for (int i = 0; i < authservice.progress.missions.length; i++) {
       if (authservice.progress.missions[i].id == widget.mission.id) {
@@ -156,7 +156,7 @@ class _AITutorChatState extends State<AITutorChat> {
   }
 
   void _sendMessage() async {
-    final authservice = Provider.of<AppwriteService>(context, listen: false);
+    final authservice = Provider.of<DataProvider>(context, listen: false);
 
     if (_messageController.text.isEmpty) return;
     Message m = Message(

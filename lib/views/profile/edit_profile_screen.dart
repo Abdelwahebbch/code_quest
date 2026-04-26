@@ -1,13 +1,14 @@
 import 'dart:io';
-
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pfe_test/models/onboarding_model.dart';
+import 'package:pfe_test/moks/questions.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
 import 'package:provider/provider.dart';
-import '../../services/appwrite_service.dart';
+
 import '../../theme/app_theme.dart';
-import '../../moks/questions.dart';
+
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -53,7 +54,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
     dataBasePickedPath = authService.progress.imageId;
     _userNameController.text = authService.progress.username;
     _emailController.text = authService.progress.email;
@@ -93,7 +94,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     print(nextQuestionOptions?.length);
 
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
     if (pickedPath.isNotEmpty) {
       backgroundImage = FileImage(File(pickedPath));
       icon = null;

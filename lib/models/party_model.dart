@@ -2,11 +2,14 @@ import 'dart:convert';
 
 import 'package:pfe_test/models/mission_model.dart';
 
+
+
+
 class PartyMember {
   String userId;
   String username;
   String imageId;
-  int score;
+  int score; 
   int correctAnswers;
   int totalAnswers;
   bool isReady;

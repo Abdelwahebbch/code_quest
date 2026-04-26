@@ -1,8 +1,9 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
-import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
+import 'package:pfe_test/services/Data/party_data_provider.dart';
+import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'party_lobby_screen.dart';
@@ -28,14 +29,13 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
   }
 
   void _fetchParties() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
     try {
-      final docs = await authService.database.listRows(
-          databaseId: "6972adad002e2ba515f2",
+      final docs = await authService.dataRepository.getRows(
           tableId: "party",
           queries: [
             Query.equal("isPublic", true),
-            Query.notEqual("hostId", authService.user?.$id)
+            Query.notEqual("hostId", authService.authProvider.currentUser!.id)
           ]);
       if (!mounted) return;
       setState(() {
@@ -59,13 +59,13 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
   }
 
   void _subscribeToParties() {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
 
-    _subscription = authService.realtime.subscribe([
+    _subscription = authService.appwriteService.realtime.subscribe([
       Channel.tablesdb('6972adad002e2ba515f2').table('party').row()
     ], queries: [
       Query.equal("isPublic", true),
-      Query.notEqual("hostId", authService.user?.$id)
+      Query.notEqual("hostId", authService.authProvider.currentUser!.id)
     ]);
 
     _subscription!.stream.listen((res) {
@@ -115,7 +115,7 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
       return;
     }
 
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
     if (!mounted) return;
     setState(() => _isLoading = true);
 
@@ -175,7 +175,7 @@ class _PartyJoinScreenState extends State<PartyJoinScreen> {
         );
         return;
       }
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
     if (!mounted) return;
     setState(() => _isLoading = true);
 

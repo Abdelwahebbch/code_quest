@@ -1,10 +1,10 @@
-import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe_test/models/learning_path_model.dart';
 import 'package:pfe_test/models/mission_model.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/views/mission/mission_detail_screen.dart';
+
 import 'package:provider/provider.dart';
 
 class ConceptDetailScreen extends StatefulWidget {
@@ -303,7 +303,7 @@ class _ConceptDetailScreenState extends State<ConceptDetailScreen> {
                     FutureBuilder<List<Mission>>(
                       future: Future.wait(
                         widget.concept.relatedMissions.map((missionId) {
-                          var authService = Provider.of<AppwriteService>(
+                          var authService = Provider.of<DataProvider>(
                               context,
                               listen: false);
                           return authService.loadMissions(missionId);

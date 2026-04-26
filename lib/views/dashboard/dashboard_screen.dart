@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/models/mission_model.dart';
+import 'package:pfe_test/services/Auth/auth_provider.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
+import 'package:pfe_test/theme/app_theme.dart';
+import 'package:pfe_test/views/badges/badges_screen.dart';
+import 'package:pfe_test/views/party/party_home_screen.dart';
+import 'package:pfe_test/views/profile/profile_screen.dart';
+import 'package:pfe_test/views/settings/settings_screen.dart';
+import 'package:pfe_test/widgets/mission_tile.dart';
+import 'package:pfe_test/widgets/progress_card.dart';
 import 'package:provider/provider.dart';
-import '../../models/mission_model.dart';
-import '../../theme/app_theme.dart';
-import '../../widgets/progress_card.dart';
-import '../../widgets/mission_tile.dart';
-import '../profile/profile_screen.dart';
-import '../badges/badges_screen.dart';
-import '../settings/settings_screen.dart';
-import '../party/party_home_screen.dart';
-import '../../services/appwrite_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -20,6 +21,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
   late String username;
+
   Future<void> showNotif(List<String> badges) async {
     if (badges.isNotEmpty) {
       for (int i = 0; i < badges.length; i++) {
@@ -31,12 +33,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    final authservice = Provider.of<AppwriteService>(context, listen: false);
-    username = authservice.user!.name;
-    List<String> badges = authservice.progress.showingBadges;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    username = "";
+    List<String> badges = [];
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       showNotif(badges);
-      authservice.emptyShowingBadges();
     });
   }
 
@@ -45,7 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final List<Widget> screens = [
       const DashboardHome(),
       PartyHomeScreen(
-        username: username.split(' ').first,
+        username: Provider.of<AuthProvider>(context).currentUser!.name.split(' ').first,
       ),
       const BadgesScreen(),
       const SettingsScreen(),
@@ -268,10 +268,10 @@ class DashboardHomeState extends State<DashboardHome> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context);
-    missions = authService.progress.missions;
-    final user = authService.progress;
-    final String userImage = user.imageId;
+    final dataService = Provider.of<DataProvider>(context , listen: false);
+    missions = dataService.progress.missions;
+    final user = dataService.progress ;
+    final String userImage = dataService.progress.imageId;
     NetworkImage dataBaseImage = NetworkImage(
         'https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/$userImage/view?project=697295e70021593c3438&mode=admin');
 
@@ -280,7 +280,7 @@ class DashboardHomeState extends State<DashboardHome> {
         body: RefreshIndicator(
           onRefresh: () async {
             try {
-              await authService.getUserInfo();
+              await dataService.getUserInfo();
             } catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("No Internet connection !")));
@@ -303,7 +303,7 @@ class DashboardHomeState extends State<DashboardHome> {
                               Text("Welcome back,",
                                   style:
                                       Theme.of(context).textTheme.bodyMedium),
-                              Text(user.username.split(' ').first,
+                              Text( Provider.of<AuthProvider>(context).currentUser!.name.split(' ').first,
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineMedium),
@@ -341,7 +341,7 @@ class DashboardHomeState extends State<DashboardHome> {
                   ),
                 ),
               ),
-              checkMissionsAv(),
+         checkMissionsAv()
             ],
           ),
         ),

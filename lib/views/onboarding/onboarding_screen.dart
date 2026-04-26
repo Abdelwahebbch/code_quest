@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
 import 'package:pfe_test/views/onboarding/language_selection_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
@@ -83,8 +82,8 @@ class _SmartOnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _waiting(Map<String, String> answers) async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
-    final fnService = Provider.of<AppwritecloudfunctionsService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
+    // final fnService = Provider.of<AppwritecloudfunctionsService>(context, listen: false);
     await authService.updateLanguageSelected("Python");
     await authService.completeOnboarding(answers, false,null,null);
     await authService.getUserInfo();

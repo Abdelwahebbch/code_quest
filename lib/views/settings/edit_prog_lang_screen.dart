@@ -1,6 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 
@@ -17,7 +17,7 @@ class _EditProgLangScreenState extends State<EditProgLangScreen> {
   @override
   void initState() {
     super.initState();
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
     selectedLanguage = authService.progress.progLanguage;
     final userGoals=authService.userGoals;
     if (userGoals["journey"] == "Self-Taught Explorer") {
@@ -33,7 +33,7 @@ class _EditProgLangScreenState extends State<EditProgLangScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
 
     return SafeArea(
       child: Scaffold(

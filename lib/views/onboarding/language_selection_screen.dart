@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
-import 'package:pfe_test/waiting/generating_path_screen.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -57,7 +56,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
     return SafeArea(
       child: Scaffold(
         body: SafeArea(

@@ -1,6 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
 import 'package:pfe_test/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
@@ -73,19 +73,18 @@ class _FeedbackBoxState extends State<FeedbackBox> {
   bool _isSending = false;
 
   Future<void> _submitFeedback() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
     if (_feedbackController.text.trim().isEmpty) return;
 
     setState(() => _isSending = true);
 
-    authService.database.createRow(
-        databaseId: '6972adad002e2ba515f2',
+    authService.dataRepository.createRow(
         tableId: 'feedbacks',
         rowId: ID.unique(),
         data: {
           'feedback': _feedbackController.text,
-          'username': authService.user!.name,
-          'userid': authService.user!.$id
+          'username': authService.authProvider.currentUser!.name,
+          'userid': authService.authProvider.currentUser!.id
         });
 
     setState(() => _isSending = false);

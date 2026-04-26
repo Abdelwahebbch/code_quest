@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
-import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 
 class BadgesScreen extends StatefulWidget {
@@ -72,8 +70,8 @@ class _BadgesScreenState extends State<BadgesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context ,listen: false);
-    List<String> ownBadges =  authService.progress.earnedBadges;
+   
+    List<String> ownBadges =  [];
     setState(() {
       for (var bagde in allBadges) {
         if (ownBadges.contains(bagde['name'])) {

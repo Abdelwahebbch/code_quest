@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_code_editor/flutter_code_editor.dart';
-import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/models/mission_model.dart';
+import 'package:pfe_test/services/CloudFunctions/appwrite_cloud_functions_service.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
+import 'package:pfe_test/theme/app_theme.dart';
+import 'package:pfe_test/views/chat/ai_tutor_chat.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:pfe_test/widgets/choice_challenge.dart';
 import 'package:pfe_test/widgets/ordering_challenge.dart';
 import 'package:provider/provider.dart';
-import '../../models/mission_model.dart';
-import '../../theme/app_theme.dart';
-import '../chat/ai_tutor_chat.dart';
+
 import 'package:highlight/languages/python.dart';
 
 class MissionDetailScreen extends StatefulWidget {
@@ -224,7 +226,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     return rate;
   }
   Future<void> _checkAnswer() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
 
     bool isCorrect = false;
     double rate = 0.0;

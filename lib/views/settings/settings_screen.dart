@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
+import 'package:pfe_test/services/Auth/auth_provider.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
 import 'package:pfe_test/views/settings/edit_prog_lang_screen.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
@@ -19,7 +20,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context, listen: true);
+    final authService = Provider.of<DataProvider>(context, listen: true);
+    final auth= Provider.of<AuthProvider>(context, listen: true);
     final themeManager = Provider.of<ThemeManager>(context);
 
     final isDark = themeManager.themeMode == ThemeMode.dark;
@@ -129,7 +131,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () async {
-                await authService.logout();
+                await auth.signOut();
                 if (context.mounted) {
                   Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
@@ -193,7 +195,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () {
                     setState(() {
                       
-                      Provider.of<AppwriteService>(context, listen: false)
+                      Provider.of<DataProvider>(context, listen: false)
                           .updateDifficultySelected(level);
                     });
                     Navigator.pop(context);

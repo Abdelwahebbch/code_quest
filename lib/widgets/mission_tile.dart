@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/mission_model.dart';
+import 'package:pfe_test/models/mission_model.dart';
+import 'package:pfe_test/views/mission/mission_detail_screen.dart';
 import '../theme/app_theme.dart';
-import '../views/mission/mission_detail_screen.dart';
+
 
 class MissionTile extends StatelessWidget {
   final Mission mission;

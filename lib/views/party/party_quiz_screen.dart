@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
-import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
+import 'package:pfe_test/services/Data/party_data_provider.dart';
+import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import 'party_results_screen.dart';
@@ -32,7 +32,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
   @override
   void initState() {
     super.initState();
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
     _party = authService.party;
     roundStartTime = DateTime.now();
     partyMember = authService.partyMember;
@@ -60,7 +60,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
   }
 
   void _submitAnswer(int? answerIndex) {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
     setState(() {
       _answered = true;
       if (answerIndex != null) {
@@ -108,7 +108,7 @@ class _PartyQuizScreenState extends State<PartyQuizScreen> {
   Widget build(BuildContext context) {
     
     final currentQuestion = _questions[(_currentRound - 1) % _questions.length];
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
     return SafeArea(
       child: PopScope(
           canPop: false,

@@ -1,4 +1,8 @@
+// ignore_for_file: dead_code
+
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/Auth/auth_provider.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:pfe_test/views/onboarding/onboarding_screen.dart';
@@ -13,11 +17,11 @@ class GoogleSignInButton extends StatefulWidget {
 
 class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   Future<void> _handleGoogleSignIn() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<AuthProvider>(context, listen: false);
     try {
       await authService.signInWithGoogle();
       if (!mounted) return;
-      if (authService.isFirstLogin) {
+      if (/*authService.isFirstLogin*/ false) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const OnboardingScreen()),
@@ -30,6 +34,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       }
     } catch (e) {
       if (mounted) {
+        print(e);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Google Sign-In failed")),
         );

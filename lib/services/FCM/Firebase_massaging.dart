@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FirebaseMassaging {

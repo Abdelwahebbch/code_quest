@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/views/onboarding/onboarding_screen.dart';
+import 'package:pfe_test/services/Auth/auth_provider.dart';
+import 'package:pfe_test/theme/app_theme.dart';
+import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
+
 import 'package:provider/provider.dart';
-import '../../theme/app_theme.dart';
-import '../../services/appwrite_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -35,26 +36,43 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    final authService = Provider.of<AppwriteService>(context, listen: false);
     try {
-      await authService.signup(_emailController.text.trim(),
-          _passwordController.text.trim(), _nameController.text.trim(), false);
+      await Provider.of<AuthProvider>(context, listen: false).signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        name: _nameController.text.trim(),
+      );
+      
       if (!mounted) return;
 
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => const OnboardingScreen()));
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => const DashboardScreen()));
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Signup failed: ${e.toString()}")),
-        );
-      }
+      _showErrorDialog("Signup failed: ${e.toString()}");
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Okay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          )
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context);
+    final authService = Provider.of<AuthProvider>(context);
 
     return SafeArea(
       child: Scaffold(
@@ -78,11 +96,13 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
               ),
               const SizedBox(height: 32),
-              _buildTextField("Full Name", Icons.person_outline, _nameController),
+              _buildTextField(
+                  "Full Name", Icons.person_outline, _nameController),
               const SizedBox(height: 16),
               _buildTextField("Email", Icons.email_outlined, _emailController),
               const SizedBox(height: 16),
-              _buildTextField("Password", Icons.lock_outline, _passwordController,
+              _buildTextField(
+                  "Password", Icons.lock_outline, _passwordController,
                   obscure: true),
               const SizedBox(height: 16),
               _buildTextField("Confirm Password", Icons.lock_reset,

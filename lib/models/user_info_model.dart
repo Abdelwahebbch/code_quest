@@ -57,7 +57,4 @@ class UserInfo {
     return max(1, sqrt(experience / 500).floor());
   }
 
-
-
-
 }

@@ -1,9 +1,9 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_cloud_functions_service.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
-import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
+import 'package:pfe_test/services/CloudFunctions/appwrite_cloud_functions_service.dart';
+import 'package:pfe_test/services/Data/party_data_provider.dart';
+import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import 'party_quiz_screen.dart';
@@ -20,7 +20,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   late final authService;
   bool _isReady = false;
   bool isStarting = false;
-  bool lastStats=false;
+  bool lastStats = false;
   RealtimeSubscription? subscription;
   RealtimeSubscription? subscription1;
   @override
@@ -33,22 +33,23 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   @override
   void initState() {
     super.initState();
-    authService = Provider.of<AppwriteService>(context, listen: false);
+    authService = Provider.of<PartyDataProvider>(context, listen: false);
     _party = authService.party;
 
-    subscription = authService.realtime.subscribe([
+    subscription = authService.appwriteService.realtime.subscribe([
       Channel.tablesdb("6972adad002e2ba515f2")
           .table("party")
           .row(_party.partyId)
     ]);
     subscription?.stream.listen((response) async {
       if (!response.payload.containsKey("isStarted")) return;
-      if (response.payload["isStarted"] == true && lastStats != response.payload["isStarted"]) {
+      if (response.payload["isStarted"] == true &&
+          lastStats != response.payload["isStarted"]) {
         List<Map<String, dynamic>> quizs = [];
         quizs = await getQuiz();
         if (quizs.isNotEmpty) {
           authService.changeIsStartedLocaly();
-          lastStats = response.payload["isStarted"] ;
+          lastStats = response.payload["isStarted"];
           await Navigator.push(
             context,
             MaterialPageRoute(
@@ -66,7 +67,8 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
           );
         }
       }
-      if (response.payload["isStarted"] == false && lastStats != response.payload["isStarted"]) {
+      if (response.payload["isStarted"] == false &&
+          lastStats != response.payload["isStarted"]) {
         authService.changeIsStartedLocaly();
         lastStats = response.payload["isStarted"];
         if (!mounted) return;
@@ -79,7 +81,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
       }
     });
 
-    subscription1 = authService.realtime.subscribe(
+    subscription1 = authService.appwriteService.realtime.subscribe(
         [Channel.tablesdb("6972adad002e2ba515f2").table("party_member").row()],
         queries: [Query.equal("partyId", _party.partyId)]);
     subscription1?.stream.listen((response) {
@@ -138,18 +140,18 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
   }
 
   Future<List<Map<String, dynamic>>> getQuiz() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
     List<Map<String, dynamic>> quizs = await authService.getQuiz();
     return quizs;
   }
 
   Future<void> deleteAllMembers() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
     await authService.deleteAllMembers();
   }
 
   Future<void> _toggleReady() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
     await authService.toggleReady(_party.partyId);
     setState(() {
       _isReady = !_isReady;
@@ -163,7 +165,8 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
       });
       await AppwritecloudfunctionsService.requestForPartyQuizzes(
           _party, _party.difficulty);
-      final authService = Provider.of<AppwriteService>(context, listen: false);
+      final authService =
+          Provider.of<PartyDataProvider>(context, listen: false);
       setState(() {
         isStarting = false;
       });
@@ -188,8 +191,8 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
-    _isReady=authService.partyMember.isReady;
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
+    _isReady = authService.partyMember.isReady;
     return SafeArea(
       child: PopScope(
         canPop: false,
@@ -505,7 +508,8 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                                           const SizedBox(
                                             width: 10,
                                           ),
-                                          if (authService.user?.$id ==
+                                          if (authService.authProvider
+                                                      .currentUser!.id ==
                                                   _party.hostId &&
                                               member.userId != _party.hostId)
                                             Container(
@@ -564,7 +568,8 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
                     ),
                     const SizedBox(height: 10),
                     if (_party.hostId ==
-                        authService.user!.$id) // Check if current user is host
+                        authService.authProvider.currentUser!
+                            .id) // Check if current user is host
                       SizedBox(
                         width: double.infinity,
                         height: 48,

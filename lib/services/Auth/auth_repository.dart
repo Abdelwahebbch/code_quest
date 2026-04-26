@@ -1,5 +1,5 @@
-
 import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/enums.dart';
 import 'package:appwrite/models.dart';
 import 'package:pfe_test/services/appwrite_service.dart';
 
@@ -21,9 +21,23 @@ class AuthRepository {
     }
   }
 
-  Future<User> signUp({required String email, required String password}) async {
+  Future<void> continueWithGoogle(
+    ) async {
+    try {
+       await appwriteService.account
+          .createOAuth2Session(provider: OAuthProvider.google);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<User> signUp(
+      {required String email,
+      required String password,
+      required String name}) async {
     try {
       await appwriteService.account.create(
+        name: name,
         userId: ID.unique(),
         email: email,
         password: password,

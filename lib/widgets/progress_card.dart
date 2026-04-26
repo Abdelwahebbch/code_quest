@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/moks/mock_data.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
-import 'package:provider/provider.dart';
-import '../models/user_info_model.dart';
+import 'package:pfe_test/models/user_info_model.dart';
 import '../theme/app_theme.dart';
-import '../views/learning_path/learning_path_screen.dart';
+
 
 class ProgressCard extends StatelessWidget {
   final UserInfo user;
@@ -16,22 +13,22 @@ class ProgressCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         try {
-          final authservice =
-              Provider.of<AppwriteService>(context, listen: false);
+          // final authservice =
+          //     Provider.of<AuthProvider>(context, listen: false);
 
-          if (authservice.user!.$id != authservice.path.userId) Exception("For previous user ");
+          // if (authservice.user!.$id != authservice.path.userId) Exception("For previous user ");
 
-          final learningPath = authservice.path;
-          // LearningPathSampleData.getSamplePythonPath();
+          // final learningPath = authservice.path;
+          // // LearningPathSampleData.getSamplePythonPath();
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LearningPathScreen(
-                learningPath: learningPath,
-              ),
-            ),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => LearningPathScreen(
+          //       learningPath: learningPath,
+          //     ),
+          //   ),
+          // );
         } catch (e) {
           showDialog(
               context: context,

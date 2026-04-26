@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/Auth/auth_provider.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
+import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/views/auth/login_screen.dart';
 import 'package:provider/provider.dart';
-import '../../theme/app_theme.dart';
-import '../../services/appwrite_service.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -16,7 +18,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool isReady = false;
 
   Future<void> getRank() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
     rank = await authService.getRank();
     setState(() {
       isReady = true;
@@ -31,8 +33,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
-    final user = authService.user;
+    final authService = Provider.of<DataProvider>(context, listen: false);
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final user = authService.authProvider.currentUser;
     final String userImage = authService.progress.imageId;
     NetworkImage dataBaseImage = NetworkImage(
         'https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/$userImage/view?project=697295e70021593c3438&mode=admin');
@@ -65,7 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           builder: (context) => const LoginScreen()),
                       (route) => false);
                 }
-                await authService.logout();
+                await auth.signOut();
               },
             )
           ],
@@ -118,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildStatRow(context) {
-    final authService = Provider.of<AppwriteService>(context);
+    final authService = Provider.of<DataProvider>(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -150,7 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildBadgeGrid(context) {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
     List<String> earnBadges = authService.progress.earnedBadges;
     List<Map<String, dynamic>> allBadges = [
       {
@@ -251,7 +254,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProgressList(context) {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<DataProvider>(context, listen: false);
     Map<String, dynamic> progress = authService.progress.badgesProgress;
     int missionsCompletedToday = 0;
     for (int i = 0; i < authService.progress.missions.length; i++) {

@@ -1,8 +1,8 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
-import 'package:pfe_test/theme/app_theme.dart';
 import 'package:pfe_test/models/party_model.dart';
+import 'package:pfe_test/services/Data/party_data_provider.dart';
+import 'package:pfe_test/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'party_lobby_screen.dart';
 
@@ -35,10 +35,10 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
   }
 
   Future<void> _createParty() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
     final mainMember = PartyMember(
-      userId: authService.user!.$id,
-      username: authService.user!.name,
+      userId: authService.authProvider.currentUser!.id,
+      username:  authService.authProvider.currentUser!.name,
       imageId: authService.progress.imageId,
       joinedAt: DateTime.now(),
       score: 0,
@@ -48,14 +48,14 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
     );
 
     String partyID = ID.unique();
-    String partyCode = authService.user!.$id.toString().substring(1, 4) +
+    String partyCode =  authService.authProvider.currentUser!.id.toString().substring(1, 4) +
         partyID.toString().substring(17, 20);
     final party = Party(
         partyId: partyID,
         partyCode: partyCode,
         partyName: _partyNameController.text,
-        hostId: authService.user!.$id,
-        hostName: authService.user!.name,
+        hostId: authService.authProvider.currentUser!.id,
+        hostName: authService.authProvider.currentUser!.name,
         maxMembers: _maxMembers,
         difficulty: _difficulty,
         gameMode: _gameMode,
@@ -77,7 +77,7 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
   }
 
   Future<void> _checkParty() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
+    final authService = Provider.of<PartyDataProvider>(context, listen: false);
     if (_partyNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a party name')),
@@ -101,7 +101,7 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
               child: Material(
                 borderRadius: BorderRadius.circular(15),
                 child: Container(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   width: 300,
                   decoration: BoxDecoration(
                     color: AppTheme.backgroundColor,
@@ -111,14 +111,14 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("You're already hosting a party!",
+                      const Text("You're already hosting a party!",
                           style: TextStyle(fontSize: 18)),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           ElevatedButton(
                             onPressed: () async {
-                              await authService.GotToExisteParty(partyIdDb);
+                              await authService.gotToExisteParty(partyIdDb);
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -130,9 +130,9 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
                                 isStarting = false;
                               });
                             },
-                            child: Text("Go to Party"),
+                            child: const Text("Go to Party"),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 10,
                           ),
                           ElevatedButton(
@@ -140,7 +140,7 @@ class _PartyCreateScreenState extends State<PartyCreateScreen> {
                               await authService.quiteLobby(partyIdDb);
                               await _createParty();
                             },
-                            child: Text("Create New"),
+                            child: const Text("Create New"),
                           ),
                         ],
                       )

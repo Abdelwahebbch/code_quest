@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pfe_test/services/appwrite_service.dart';
-import 'package:pfe_test/views/dashboard/dashboard_screen.dart';
-import 'package:pfe_test/views/onboarding/onboarding_screen.dart';
-import 'package:provider/provider.dart';
-
-import '../../theme/app_theme.dart';
-import '../auth/login_screen.dart';
+import 'package:pfe_test/theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -31,31 +25,10 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
 
     _controller.forward();
-    _navigateToNext();
+
   }
 
-  _navigateToNext() async {
-    final authService = Provider.of<AppwriteService>(context, listen: false);
-    await authService.checkSession();
-    await Future.delayed(const Duration(seconds: 1));
-    if (!mounted) return;
-    if (authService.user != null && authService.isFirstLogin) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
-    } else if (authService.user != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    }
-  }
+
 
   @override
   void dispose() {
@@ -74,9 +47,9 @@ class _SplashScreenState extends State<SplashScreen>
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image(
-                  height: 200,
-                  width: 200,
+                 Image(
+                  height: 170,
+                  width: 170,
                   image: AssetImage('assets/icon/icon.png'),
                 ),
                 SizedBox(height: 8),
