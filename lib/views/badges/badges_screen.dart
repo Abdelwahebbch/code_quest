@@ -10,7 +10,7 @@ class BadgesScreen extends StatefulWidget {
   State<BadgesScreen> createState() => _BadgesScreenState();
 }
 
-class _BadgesScreenState extends State<BadgesScreen> {
+class _BadgesScreenState extends State<BadgesScreen> with SingleTickerProviderStateMixin{
   List<Map<String, dynamic>> allBadges = [
     {
       'name': 'Bug Hunter',
@@ -69,6 +69,19 @@ class _BadgesScreenState extends State<BadgesScreen> {
       'unlocked': false
     },
   ];
+  late TabController _tabController;
+  int selectedTab = 0;
+
+  @override
+  void initState(){
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {
+        selectedTab = _tabController.index;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,32 +94,179 @@ class _BadgesScreenState extends State<BadgesScreen> {
         }
       }
 
-    }); return SafeArea(
+    }); 
+    return SafeArea(
       child: Scaffold(
-        
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+        appBar: AppBar(
+          title: const Center(child: Text("Badges")),
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: Colors.white,
+            labelColor: const Color.fromARGB(255, 189, 175, 175),
+            tabs: const [
+              Tab(text: 'All Badges'),
+              Tab(text: 'Progress'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            badges(),
+            _buildProgressList(context)
+          ],
+        ),
+      ),
+    );
+  }
+    Widget _buildProgressList(context) {
+    final authService = Provider.of<AppwriteService>(context, listen: false);
+    Map<String, dynamic> progress = authService.progress.badgesProgress;
+    int missionsCompletedToday = 0;
+    for (int i = 0; i < authService.progress.missions.length; i++) {
+      if (authService.progress.missions[i].isCompleted) {
+        missionsCompletedToday += 1;
+      }
+    }
+    double bugHunter =
+        (progress['debug'] / 10) >= 1 ? 1 : progress['debug'] / 10;
+    double codeNinja =
+        ((authService.progress.nbMissionCompletedWithoutHints / 10) * 2) >= 1
+            ? 1
+            : (authService.progress.nbMissionCompletedWithoutHints / 10) * 2;
+    double TestMaster =
+        ((progress['test'] / 10) * 2) >= 1 ? 1 : (progress['test'] / 10) * 2;
+    double FastLearner =
+        missionsCompletedToday / 3 >= 1 ? 1 : missionsCompletedToday / 3;
+    double Architect =
+        progress['ordering'] / 10 >= 1 ? 1 : progress['ordering'] / 10;
+    double CleanCoder =
+        ((progress['complete'] / 10 > 1 ? 1 : progress['complete'] / 10) +
+                (authService.progress.totalFailures / 30 > 1
+                    ? 1
+                    : authService.progress.totalFailures / 30)) /
+            2;
+    double TeamPlayer = ((progress['singleChoice'] / 10 > 1
+                ? 1
+                : progress['singleChoice'] / 10) +
+            (progress['multipleChoice'] / 10 > 1
+                ? 1
+                : progress['multipleChoice'] / 10)) /
+        2;
+    double AIWhisperer = (authService.progress.totalAIQuestions / 50) > 1
+        ? 1
+        : (authService.progress.totalAIQuestions / 50);
+
+    //TODO : lazem dynamique
+    return SingleChildScrollView(
+      child: 
+      Column(
+      children: [
+        const SizedBox(height: 40),
+        Padding(
+          padding: const EdgeInsets.only(left: 10.0,right: 10),
+          child: _buildProgressItem("Bug Hunter", bugHunter),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.only(left: 10.0,right: 10),
+          child: _buildProgressItem("Code Ninja", codeNinja),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.only(left: 10.0,right: 10),
+          child: _buildProgressItem("Test Master", TestMaster),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.only(left: 10.0,right: 10),
+          child: _buildProgressItem("Fast Learner", FastLearner),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+         padding: const EdgeInsets.only(left: 10.0,right: 10),
+          child: _buildProgressItem("Architect", Architect),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.only(left: 10.0,right: 10),
+          child: _buildProgressItem("Clean Coder", CleanCoder),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.only(left: 10.0,right: 10),
+          child: _buildProgressItem("Team Player", TeamPlayer),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.only(left: 10.0,right: 10),
+          child: _buildProgressItem("AI Whisperer", AIWhisperer),
+        ),
+        const SizedBox(height: 12),
+      ],
+    ));
+  }
+
+  Widget _buildProgressItem(String title, double progress) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text("${(progress * 100).toInt()}%"),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: Colors.white10,
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget badges(){
+    return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(
                 height: 40,
               ),
-              const Text(
-                "Your Achievements",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold),
+              const Padding(
+                padding:  EdgeInsets.only(left:10.0),
+                child:  Text(
+                  "Your Achievements",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold),
+                ),
               ),
               const SizedBox(
                 height: 16,
               ),
-              _buildSummaryCard(allBadges),
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                child: _buildSummaryCard(allBadges),
+              ),
               const SizedBox(height: 24),
-              Text("All Badges", style: Theme.of(context).textTheme.titleLarge),
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: Text("All Badges", style: Theme.of(context).textTheme.titleLarge),
+              ),
               Expanded(
                 child: GridView.builder(
+                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 16,
@@ -121,12 +281,8 @@ class _BadgesScreenState extends State<BadgesScreen> {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
+          );
   }
-
   Widget _buildSummaryCard(List<Map<String, dynamic>> badges) {
     final unlockedCount = badges.where((b) => b['unlocked'] == true).length;
     return Container(
