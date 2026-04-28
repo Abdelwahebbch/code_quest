@@ -97,61 +97,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final overlay = Overlay.of(context);
     List<Map<String, dynamic>> allBadges = [
       {
-        'name': 'Bug Hunter',
-        'desc': 'Fix 10 debugging missions',
-        'icon': Icons.bug_report,
-        'color': Colors.green,
-        'unlocked': false
-      },
-      {
-        'name': 'Code Ninja',
-        'desc': 'Complete 5 missions without hints',
-        'icon': Icons.bolt,
-        'color': Colors.orange,
-        'unlocked': false
-      },
-      {
-        'name': 'Test Master',
-        'desc': 'Write 20 unit tests',
-        'icon': Icons.verified,
-        'color': Colors.blue,
-        'unlocked': false
-      },
-      {
-        'name': 'Fast Learner',
-        'desc': 'Complete 3 missions in one day',
-        'icon': Icons.speed,
-        'color': Colors.purple,
-        'unlocked': false
-      },
-      {
-        'name': 'Architect',
-        'desc': 'Design a complex system',
-        'icon': Icons.architecture,
-        'color': Colors.red,
-        'unlocked': false
-      },
-      {
-        'name': 'Clean Coder',
-        'desc': 'Maintain high code quality',
-        'icon': Icons.cleaning_services,
-        'color': Colors.teal,
-        'unlocked': false
-      },
-      {
-        'name': 'Team Player',
-        'desc': 'Review 5 peer solutions',
-        'icon': Icons.groups,
-        'color': Colors.indigo,
-        'unlocked': false
-      },
-      {
-        'name': 'AI Whisperer',
-        'desc': 'Ask 50 insightful questions',
-        'icon': Icons.psychology,
-        'color': Colors.pink,
-        'unlocked': false
-      },
+      'name': 'Bug Hunter',
+      'desc': 'Fix 10 debugging missions',
+      'icon': Icons.bug_report,
+      'color': Colors.green,
+      'unlocked': false
+    },
+    {
+      'name': 'Code Ninja',
+      'desc': 'Complete 10 missions without hints',
+      'icon': Icons.bolt,
+      'color': Colors.orange,
+      'unlocked': false
+    },
+    {
+      'name': 'Test Master',
+      'desc': 'Write 20 unit tests',
+      'icon': Icons.verified,
+      'color': Colors.blue,
+      'unlocked': false
+    },
+    {
+      'name': 'Fast Learner',
+      'desc': 'Complete 5 missions in one day',
+      'icon': Icons.speed,
+      'color': Colors.purple,
+      'unlocked': false
+    },
+    {
+      'name': 'Architect',
+      'desc': 'Complete 10 ordering tasks',
+      'icon': Icons.architecture,
+      'color': Colors.red,
+      'unlocked': false
+    },
+    {
+      'name': 'Clean Coder',
+      'desc': 'complete 10 missions with fewer than 30 failures.',
+      'icon': Icons.cleaning_services,
+      'color': Colors.teal,
+      'unlocked': false
+    },
+    {
+      'name': 'Team Player',
+      'desc': 'Complete at least 10 single-choice and 10 multiple-choice challenges',
+      'icon': Icons.groups,
+      'color': Colors.indigo,
+      'unlocked': false
+    },
+    {
+      'name': 'AI Whisperer',
+      'desc': 'Ask 50 insightful questions',
+      'icon': Icons.psychology,
+      'color': Colors.pink,
+      'unlocked': false
+    },
     ];
     Map<String, dynamic> badge = {};
     for (int i = 0; i < allBadges.length; i++) {
@@ -270,7 +270,7 @@ class DashboardHomeState extends State<DashboardHome> {
 
   @override
   Widget build(BuildContext context) {
-    final dataService = Provider.of<DataProvider>(context , listen: false);
+    final dataService = Provider.of<DataProvider>(context);
     missions = dataService.progress.missions;
     final user = dataService.progress;
     final String userImage = dataService.progress.imageId;
