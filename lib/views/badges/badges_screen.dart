@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pfe_test/services/Data/data_provider.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 
 class BadgesScreen extends StatefulWidget {
@@ -70,18 +72,17 @@ class _BadgesScreenState extends State<BadgesScreen> {
 
   @override
   Widget build(BuildContext context) {
-   
-    List<String> ownBadges =  [];
+    final authService = Provider.of<DataProvider>(context, listen: false);
+    List<String> ownBadges = authService.progress.earnedBadges;
     setState(() {
       for (var bagde in allBadges) {
         if (ownBadges.contains(bagde['name'])) {
           bagde['unlocked'] = true;
         }
       }
-
-    }); return SafeArea(
+    });
+    return SafeArea(
       child: Scaffold(
-        
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(

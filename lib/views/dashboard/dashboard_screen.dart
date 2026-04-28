@@ -33,10 +33,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    username = "";
+    final authservice = Provider.of<DataProvider>(context, listen: false);
+    username = authservice.authProvider.currentUser!.name;
     List<String> badges = [];
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       showNotif(badges);
+      authservice.emptyShowingBadges();
     });
   }
 
@@ -270,7 +272,7 @@ class DashboardHomeState extends State<DashboardHome> {
   Widget build(BuildContext context) {
     final dataService = Provider.of<DataProvider>(context , listen: false);
     missions = dataService.progress.missions;
-    final user = dataService.progress ;
+    final user = dataService.progress;
     final String userImage = dataService.progress.imageId;
     NetworkImage dataBaseImage = NetworkImage(
         'https://fra.cloud.appwrite.io/v1/storage/buckets/69891b1d0012c9a7e862/files/$userImage/view?project=697295e70021593c3438&mode=admin');
