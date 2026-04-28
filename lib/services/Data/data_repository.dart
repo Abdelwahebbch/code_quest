@@ -65,12 +65,12 @@ class DataRepository {
     }
   }
 
-  Future<Row> deleteRow({
+  Future<void> deleteRow({
     required String tableId,
     required String rowId,
   }) async {
     try {
-      return await appwriteService.databases.deleteRow(
+       await appwriteService.databases.deleteRow(
         databaseId: '6972adad002e2ba515f2',
         tableId: tableId,
         rowId: rowId,

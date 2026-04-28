@@ -78,6 +78,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> signIn({required String email, required String password}) async {
     _isLoading = true;
     notifyListeners();
+    // await authRepository.appwriteService.account.deleteSession(sessionId: 'current');
     try {
       User user = await authRepository.signIn(email: email, password: password);
       _currentUser = UserModel.fromAppwriteUser(user);

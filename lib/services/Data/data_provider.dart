@@ -116,19 +116,21 @@ class DataProvider with ChangeNotifier {
     try {
     
       final row = await dataRepository.getRow(
-          tableId: "user_profiles", rowId: "69a8ed72d561f7ab03fd");
+          tableId: "user_profiles", rowId: authProvider.currentUser!.id);
       int x = await getRank();
       isFirstLogin = row.data["isFirstLogin"] ?? true;
-
+      print(row.data["imageId"]);
+      print(authProvider.currentUser!.email);
+      print(row.data["totalPoints"]);
       progress = UserInfo(
         progLanguage: row.data["progLanguage"] ?? "not selected",
-        username: "authProvider.currentUser!.name",
+        username: authProvider.currentUser!.name,
         experience: row.data["experience"],
         totalPoints: row.data["totalPoints"],
         earnedBadges: List<String>.from(row.data["earnedBadges"] ?? []),
         bio: row.data["bio"],
         imageId: row.data["imageId"],
-        email: "authProvider.currentUser!.email",
+        email: authProvider.currentUser!.email,
         rank: x,
         difficultySelected: row.data["difficulty"] ?? "Intermediate",
         nbMissions: row.data["nbMission"] ?? 0,
@@ -394,6 +396,11 @@ class DataProvider with ChangeNotifier {
     }
   }
 
+  void emptyShowingBadges() {
+    progress.showingBadges = [];
+    notifyListeners();
+  }
+  
   Future<void> updateRate(int missionDiffculty, double rate) async {
     try {
       //Elo Algorthime
