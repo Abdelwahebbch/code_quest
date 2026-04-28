@@ -21,6 +21,7 @@ class UserInfo {
   int totalFailures;
   int totalAIQuestions;
   double rate;
+  int elo;
 
   UserInfo({
     required this.username,
@@ -40,7 +41,8 @@ class UserInfo {
     this.nbMissionCompletedWithoutHints=0,
     this.totalFailures=0,
     this.totalAIQuestions=0,
-    this.rate=0.5
+    this.rate=0,
+    this.elo=0
   });
   //TODO : we must discust about it quickly
   double get progressToNextLevel {
