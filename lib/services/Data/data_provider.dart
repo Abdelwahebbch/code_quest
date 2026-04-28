@@ -114,7 +114,6 @@ class DataProvider with ChangeNotifier {
 
   Future<void> getUserInfo() async {
     try {
-    
       final row = await dataRepository.getRow(
           tableId: "user_profiles", rowId: authProvider.currentUser!.id);
       int x = await getRank();
@@ -141,11 +140,11 @@ class DataProvider with ChangeNotifier {
             row.data["nbMissionCompletedWithoutHints"] ?? 0,
         totalFailures: row.data["totalFailures"] ?? 0,
         totalAIQuestions: row.data["totalAIQuestions"] ?? 0,
+        elo: row.data["elo"],
       );
       if (!isFirstLogin) {
         await getuserGoals();
       }
-
       try {
          path = await getLearningPath();
         //print(path.milestones.first.concepts.length);
@@ -156,7 +155,7 @@ class DataProvider with ChangeNotifier {
           rethrow;
         }
       }
- 
+      notifyListeners();
     } catch (e) {
       debugPrint("Error fi getUserInfo $e");
       rethrow;
@@ -381,6 +380,7 @@ class DataProvider with ChangeNotifier {
           data: {'nbMission': progress.nbMissions});
       int? missionNb;
       int missionDiffculty = 0;
+      int missionPoints=0;
       for (int i = 0; i < progress.missions.length; i++) {
         if (progress.missions[i].id == id) {
           progress.missions[i].isCompleted = true;
@@ -388,8 +388,38 @@ class DataProvider with ChangeNotifier {
           missionNb = i;
         }
       }
-      await updateRate(missionDiffculty, rate);
+      await updateRate(missionDiffculty,missionPoints,rate);
       await checkbadges(missionNb!);
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+  
+  Future<void> surrendereMission(String id) async{
+    try {
+      await dataRepository.updateRow(
+        tableId: "missions",
+        rowId: id,
+        data: {'Surrendered': true},
+      );
+      await dataRepository.updateRow(
+        tableId: "missions",
+        rowId: id,
+        data: {"rate": 0.0},
+      );
+      int missionDiffculty = 0;
+      int missionPoints=0;
+      for (int i = 0; i < progress.missions.length; i++) {
+        if (progress.missions[i].id == id) {
+          print(progress.missions[i].isSurrendered);
+          progress.missions[i].isSurrendered = true;
+          print(progress.missions[i].isSurrendered);
+          missionDiffculty = progress.missions[i].difficulty;
+          missionPoints= progress.missions[i].points;
+        }
+      }
+      await updateRate(missionDiffculty, missionPoints,0);
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -400,23 +430,33 @@ class DataProvider with ChangeNotifier {
     progress.showingBadges = [];
     notifyListeners();
   }
-  
-  Future<void> updateRate(int missionDiffculty, double rate) async {
+
+  Future<void> updateRate(int missionDiffculty, int missionPoints, double S) async {
     try {
       //Elo Algorthime
       //s= normalized mission rate
-      double S = rate / 10;
       //E = Expected probability
       //2 = is scale you can change
-      double E = 1 / (1 + pow(10, ((missionDiffculty - progress.rate) / 2)));
+      double E = 1 / (1 + pow(10, ((missionDiffculty - progress.rate) / 4)));
+      double k= 0.3*(1+0.5*(missionDiffculty/10));
+      double s2=S*(1+0.1*(missionPoints/2500));
       // Update
-      double newRate = progress.rate + (S - E);
+      double newRate = progress.rate + k*(s2 - E);
+      print(newRate);
+      progress.elo+=((k*(s2 - E))*100).toInt();
+      if(progress.elo<0) progress.elo=0;
+      if(newRate>10) newRate=10;
+      if(newRate<0.0) newRate=0.0;
       progress.rate = double.parse(newRate.clamp(1, 10).toStringAsFixed(2));
       notifyListeners();
       await dataRepository.updateRow(
           tableId: "user_goals",
           rowId: authProvider.currentUser!.id,
           data: {'rate': progress.rate});
+      await dataRepository.updateRow(
+          tableId: "user_profiles",
+          rowId: authProvider.currentUser!.id,
+          data: {'elo': progress.elo});
     } catch (e) {
       rethrow;
     }
@@ -441,21 +481,21 @@ class DataProvider with ChangeNotifier {
           await updateUserPoints(10);
         }
       }
-      if (progress.nbMissionCompletedWithoutHints >= 5) {
+      if (progress.nbMissionCompletedWithoutHints >= 10) {
         if (!progress.earnedBadges.contains('Code Ninja')) {
           progress.earnedBadges.add('Code Ninja');
           progress.showingBadges.add('Code Ninja');
           await updateUserPoints(10);
         }
       }
-      if (progress.badgesProgress['test']! >= 5) {
+      if (progress.badgesProgress['test']! >= 20) {
         if (!progress.earnedBadges.contains('Test Master')) {
           progress.earnedBadges.add('Test Master');
           progress.showingBadges.add('Test Master');
           await updateUserPoints(10);
         }
       }
-      if (missionsCompletedToday >= 3) {
+      if (missionsCompletedToday >= 5) {
         if (!progress.earnedBadges.contains('Fast Learner')) {
           progress.earnedBadges.add('Fast Learner');
           progress.showingBadges.add('Fast Learner');
