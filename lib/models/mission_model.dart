@@ -24,6 +24,8 @@ class Mission {
   int nbFailed;
   int aiPointsUsed;
   List<String> conversation;
+  bool isSurrendered;
+
 
   Mission({
     required this.id,
@@ -40,6 +42,7 @@ class Mission {
     this.nbFailed = 0,
     this.aiPointsUsed = 0,
     this.conversation = const [],
+    this.isSurrendered=false
   });
 
   factory Mission.completeMission(Row row) {
@@ -54,7 +57,9 @@ class Mission {
         aiPointsUsed: row.data['aiPointsUsed'],
         isCompleted: row.data['isCompleted'],
         conversation: List<String>.from(row.data['conversation'] ?? []),
-        initialCode: row.data["initialCode"]);
+        initialCode: row.data["initialCode"],
+        isSurrendered: row.data["Surrendered"]);
+        
   }
   factory Mission.jsonCompleteMission(Map<String, dynamic> row) {
     return Mission(
@@ -68,7 +73,8 @@ class Mission {
         aiPointsUsed: row['aiPointsUsed'],
         isCompleted: row['isCompleted'],
         conversation: List<String>.from(row['conversation'] ?? []),
-        initialCode: row["initialCode"]);
+        initialCode: row["initialCode"],
+        isSurrendered: row["Surrendered"]);
   }
 
   factory Mission.testMission(Row row) {
@@ -84,7 +90,8 @@ class Mission {
         isCompleted: row.data['isCompleted'],
         conversation: List<String>.from(row.data['conversation'] ?? []),
         initialCode: row.data["initialCode"],
-        solution: row.data["solution"]);
+        solution: row.data["solution"],
+        isSurrendered: row.data["Surrendered"]);
   }
   factory Mission.jsonTestMission(Map<String, dynamic> row) {
     return Mission(
@@ -99,7 +106,8 @@ class Mission {
         isCompleted: row['isCompleted'],
         conversation: List<String>.from(row['conversation'] ?? []),
         initialCode: row["initialCode"],
-        solution: row["solution"]);
+        solution: row["solution"],
+        isSurrendered: row["Surrendered"]);
   }
 
   factory Mission.debugMission(Row row) {
@@ -114,7 +122,8 @@ class Mission {
         aiPointsUsed: row.data['aiPointsUsed'],
         isCompleted: row.data['isCompleted'],
         conversation: List<String>.from(row.data['conversation'] ?? []),
-        initialCode: row.data["initialCode"]);
+        initialCode: row.data["initialCode"],
+        isSurrendered: row.data["Surrendered"]);
   }
   factory Mission.jsonDebugMission(Map<String, dynamic> row) {
     return Mission(
@@ -128,7 +137,8 @@ class Mission {
         aiPointsUsed: row['aiPointsUsed'],
         isCompleted: row['isCompleted'],
         conversation: List<String>.from(row['conversation'] ?? []),
-        initialCode: row["initialCode"]);
+        initialCode: row["initialCode"],
+        isSurrendered: row["Surrendered"]);
   }
 
   factory Mission.singleChoice(Row row) {
@@ -144,7 +154,8 @@ class Mission {
         isCompleted: row.data['isCompleted'],
         conversation: List<String>.from(row.data['conversation'] ?? []),
         options: row.data["options"],
-        solution: row.data["solution"]);
+        solution: row.data["solution"],
+        isSurrendered: row.data["Surrendered"]);
   }
   factory Mission.jsonSingleChoice(Map<String, dynamic> row) {
     return Mission(
@@ -159,7 +170,8 @@ class Mission {
         isCompleted: row['isCompleted'],
         conversation: List<String>.from(row['conversation'] ?? []),
         options: row["options"],
-        solution: row["solution"]);
+        solution: row["solution"],
+        isSurrendered: row["Surrendered"]);
   }
 
   factory Mission.multipleChoice(Row row) {
@@ -175,7 +187,8 @@ class Mission {
         isCompleted: row.data['isCompleted'],
         conversation: List<String>.from(row.data['conversation'] ?? []),
         options: row.data["options"],
-        solution: row.data["solution"]);
+        solution: row.data["solution"],
+        isSurrendered: row.data["Surrendered"]);
   }
   factory Mission.jsonMultipleChoice(Map<String, dynamic> row) {
     return Mission(
@@ -190,7 +203,8 @@ class Mission {
         isCompleted: row['isCompleted'],
         conversation: List<String>.from(row['conversation'] ?? []),
         options: row["options"],
-        solution: row["solution"]);
+        solution: row["solution"],
+        isSurrendered: row["Surrendered"]);
   }
 
   //mrigla
@@ -207,7 +221,8 @@ class Mission {
         isCompleted: row.data['isCompleted'],
         conversation: List<String>.from(row.data['conversation'] ?? []),
         correctOrder: row.data["correctOrder"],
-        options: row.data["options"]);
+        options: row.data["options"],
+        isSurrendered: row.data["Surrendered"]);
   }
   factory Mission.jsonOrdering(Map<String, dynamic> row) {
     return Mission(
@@ -222,6 +237,7 @@ class Mission {
         isCompleted: row['isCompleted'],
         conversation: List<String>.from(row['conversation'] ?? []),
         correctOrder: row["correctOrder"],
-        options: row["options"]);
+        options: row["options"],
+        isSurrendered: row["Surrendered"]);
   }
 }
