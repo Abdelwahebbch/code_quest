@@ -59,12 +59,14 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
           quizs = [];
         } else {
           await authService.partyPlayAgain();
-          ScaffoldMessenger.of(context).showSnackBar(
+          if(_party.hostId == authService.authProvider.currentUser!.id) {
+            ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
                   'Oops! Something went wrong while preparing your quiz. Please try again or later.'),
             ),
           );
+          }
         }
       }
       if (response.payload["isStarted"] == false &&
@@ -72,12 +74,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
         authService.changeIsStartedLocaly();
         lastStats = response.payload["isStarted"];
         if (!mounted) return;
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const PartyLobbyScreen(),
-          ),
-        );
+        Navigator.pop(context);
       }
     });
 
@@ -85,6 +82,7 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
         [Channel.tablesdb("6972adad002e2ba515f2").table("party_member").row()],
         queries: [Query.equal("partyId", _party.partyId)]);
     subscription1?.stream.listen((response) {
+      print(response.payload);
       Map<String, dynamic> row = response.payload;
       if (response.events.first.contains("create")) {
         PartyMember partyMember = PartyMember(
@@ -103,14 +101,14 @@ class _PartyLobbyScreenState extends State<PartyLobbyScreen> {
         });
       }
       if (response.events.first.contains("delete")) {
-        bool isHost = _party.hostId == authService.user!.$id;
+        bool isHost = _party.hostId == authService.authProvider.currentUser!.id;
         if (!mounted) return;
 
         setState(() {
           authService.deleteMemberFromLocal(row["userId"]);
         });
         if (((!isHost && row["userId"] == _party.hostId) ||
-                row["userId"] == authService.user!.$id) &&
+                row["userId"] ==  authService.authProvider.currentUser!.id) &&
             mounted) {
           Navigator.pushAndRemoveUntil(
             context,

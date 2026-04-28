@@ -172,6 +172,8 @@ class PartyDataProvider with ChangeNotifier {
 
   Future<void> quiteLobby(String? row) async {
     try {
+      print(party.hostId);
+      print(party.partyId);
       if (row == null) {
         if (party.hostId.contains(authProvider.currentUser!.id)) {
           await dataRepository.deleteRow(
@@ -186,7 +188,7 @@ class PartyDataProvider with ChangeNotifier {
         await dataRepository.deleteRow(
             tableId: "party_member", rowId: authProvider.currentUser!.id);
       }
-      //notifyListeners();
+      notifyListeners();
     } catch (e) {
       print("Erreur quite lobby $e");
       rethrow;
@@ -370,6 +372,7 @@ class PartyDataProvider with ChangeNotifier {
   Future<void> kickMember(String userId) async {
     try {
       await dataRepository.deleteRow(tableId: "party_member", rowId: userId);
+      deleteMemberFromLocal(userId);
     } catch (e) {
       rethrow;
     }
@@ -455,6 +458,82 @@ class PartyDataProvider with ChangeNotifier {
         tableId: "party",
         rowId: party.partyId,
         data: {'isStarted': false},
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  void addMember(PartyMember partyMember) {
+    party.members.add(partyMember);
+    notifyListeners();
+  }
+
+  void changeIsStartedLocaly() {
+    party.isStarted = !party.isStarted;
+    notifyListeners();
+  }
+
+  void deleteMemberFromLocal(String memberId) {
+    party.members.removeWhere((item) => item.userId == memberId);
+    notifyListeners();
+  }
+
+  Future<void> GotToExisteParty(String partyIdDb) async {
+    try {
+      final partyRow = await dataRepository.getRow(
+           tableId: "party", rowId: partyIdDb);
+      final membersResult = await dataRepository.getRows(
+        tableId: "party_member",
+        queries: [
+          Query.equal("partyId", partyIdDb),
+        ],
+      );
+      final List<PartyMember> members = membersResult.rows
+          .map((m) => PartyMember(
+              userId: m.data["userId"],
+              username: m.data["username"],
+              imageId: m.data["imageId"],
+              joinedAt: DateTime.parse(m.data["joinedAt"]),
+              score: m.data["score"],
+              correctAnswers: m.data["correctAnswers"],
+              totalAnswers: m.data["totalAnswers"],
+              isReady: m.data["isReady"],
+              isSubmit: m.data["isSubmit"]))
+          .toList();
+      partyMember = PartyMember(
+          userId: authProvider.currentUser!.id,
+          username: authProvider.currentUser!.name,
+          imageId: progress.imageId,
+          joinedAt: DateTime.now(),
+          score: 0,
+          correctAnswers: 0,
+          totalAnswers: 0,
+          isReady: false,
+          isSubmit: false);
+      final m = await dataRepository.getRow( tableId: "party_member", rowId: authProvider.currentUser!.id);
+      partyMember = PartyMember(
+          userId: m.data["userId"],
+          username: m.data["username"],
+          imageId: m.data["imageId"],
+          joinedAt: DateTime.parse(m.data["joinedAt"]),
+          score: m.data["score"],
+          correctAnswers: m.data["correctAnswers"],
+          totalAnswers: m.data["totalAnswers"],
+          isReady: m.data["isReady"],
+          isSubmit: m.data["isSubmit"]);
+      party = Party(
+        partyId: partyRow.$id,
+        partyCode: partyRow.data["partyCode"],
+        partyName: partyRow.data["partyName"],
+        hostId: partyRow.data["hostId"],
+        hostName: partyRow.data["hostName"],
+        members: members,
+        maxMembers: partyRow.data["maxMembers"],
+        difficulty: partyRow.data["difficulty"],
+        gameMode: partyRow.data["gameMode"],
+        totalRounds: partyRow.data["totalRounds"],
+        isStarted: partyRow.data["isStarted"],
       );
     } catch (e) {
       rethrow;
