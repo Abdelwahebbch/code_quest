@@ -14,9 +14,9 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> init() async {
+    try {
     _isLoading = true;
     notifyListeners();
-    try {
       User? user = await authRepository.currentUser;
       if (user != null) {
         _currentUser = UserModel.fromAppwriteUser(user);
@@ -33,9 +33,9 @@ class AuthProvider with ChangeNotifier {
       {required String email,
       required String password,
       required String name}) async {
+    try {
     _isLoading = true;
     notifyListeners();
-    try {
       User user = await authRepository.signUp(
           email: email, password: password, name: name);
       _currentUser = UserModel.fromAppwriteUser(user);
@@ -76,10 +76,10 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> signIn({required String email, required String password}) async {
-    _isLoading = true;
-    notifyListeners();
     // await authRepository.appwriteService.account.deleteSession(sessionId: 'current');
     try {
+    _isLoading = true;
+    notifyListeners();
       User user = await authRepository.signIn(email: email, password: password);
       _currentUser = UserModel.fromAppwriteUser(user);
     } catch (e) {
